@@ -2485,5 +2485,12 @@ public class CSG implements IuserAPI{
 	public void setIsWireFrame(boolean b) {
 		getStorage().set("skeleton",b);
 	}
-	
+	public void setPrintBedNumber(int index) {
+		getStorage().set("printBedIndex",index);
+	}
+	public int getPrintBedIndex() {
+		if(! getStorage().getValue("printBedIndex").isPresent())
+			return 0;
+		return (int) getStorage().getValue("printBedIndex").get();
+	}
 }
