@@ -35,11 +35,14 @@ package eu.mihosoft.vrl.v3d.ext.org.poly2tri;
 
 import eu.mihosoft.vrl.v3d.Extrude;
 import eu.mihosoft.vrl.v3d.Plane;
+import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.Vertex;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,110 +54,129 @@ import java.util.Optional;
  */
 public class PolygonUtil {
 
-    /**
-     * Instantiates a new polygon util.
-     */
-    private PolygonUtil() {
-        throw new AssertionError("Don't instantiate me!", null);
-    }
+	/**
+	 * Instantiates a new polygon util.
+	 */
+	private PolygonUtil() {
+		throw new AssertionError("Don't instantiate me!", null);
+	}
 
-    /**
-     * Converts a CSG polygon to a poly2tri polygon (including holes).
-     *
-     * @param polygon the polygon to convert
-     * @return a CSG polygon to a poly2tri polygon (including holes)
-     */
-    public static eu.mihosoft.vrl.v3d.ext.org.poly2tri.Polygon fromCSGPolygon(
-            eu.mihosoft.vrl.v3d.Polygon polygon) {
-        
-        // convert polygon
-        List< PolygonPoint> points = new ArrayList<>();
-        for (Vertex v : polygon.vertices) {
-            PolygonPoint vp = new PolygonPoint(v.pos.x, v.pos.y, v.pos.z);
-            points.add(vp);
-        }
+	/**
+	 * Converts a CSG polygon to a poly2tri polygon (including holes).
+	 *
+	 * @param polygon the polygon to convert
+	 * @return a CSG polygon to a poly2tri polygon (including holes)
+	 */
+	public static eu.mihosoft.vrl.v3d.ext.org.poly2tri.Polygon fromCSGPolygon(eu.mihosoft.vrl.v3d.Polygon polygon) {
 
-        eu.mihosoft.vrl.v3d.ext.org.poly2tri.Polygon result
-                = new eu.mihosoft.vrl.v3d.ext.org.poly2tri.Polygon(points);
+		// convert polygon
+		List<PolygonPoint> points = new ArrayList<>();
+		for (Vertex v : polygon.vertices) {
+			PolygonPoint vp = new PolygonPoint(v.pos.x, v.pos.y, v.pos.z);
+			points.add(vp);
+		}
 
-        // convert holes
-        Optional<List<eu.mihosoft.vrl.v3d.Polygon>> holesOfPresult
-                = polygon.
-                getStorage().getValue(eu.mihosoft.vrl.v3d.Edge.KEY_POLYGON_HOLES);
-        if (holesOfPresult.isPresent()) {
-            List<eu.mihosoft.vrl.v3d.Polygon> holesOfP = holesOfPresult.get();
+		eu.mihosoft.vrl.v3d.ext.org.poly2tri.Polygon result = new eu.mihosoft.vrl.v3d.ext.org.poly2tri.Polygon(points);
 
-            holesOfP.stream().forEach((hP) -> {
-                result.addHole(fromCSGPolygon(hP));
-            });
-        }
+		// convert holes
+		Optional<List<eu.mihosoft.vrl.v3d.Polygon>> holesOfPresult = polygon.getStorage()
+				.getValue(eu.mihosoft.vrl.v3d.Edge.KEY_POLYGON_HOLES);
+		if (holesOfPresult.isPresent()) {
+			List<eu.mihosoft.vrl.v3d.Polygon> holesOfP = holesOfPresult.get();
 
-        return result;
-    }
+			holesOfP.stream().forEach((hP) -> {
+				result.addHole(fromCSGPolygon(hP));
+			});
+		}
 
-    /**
-     * Concave to convex.
-     *
-     * @param concave the concave
-     * @return the list
-     */
-    public static List<eu.mihosoft.vrl.v3d.Polygon> concaveToConvex(
-            eu.mihosoft.vrl.v3d.Polygon incoming) {
-    	eu.mihosoft.vrl.v3d.Polygon concave;
-    	boolean xnorm = Math.abs(incoming.plane.normal.x)>=1.0-Plane.EPSILON;
-    	Transform orentationInv=null;
-    	if(xnorm) {
-	    	Transform orentation = new Transform().roty(incoming.plane.normal.x*90);// th triangulation function needs the polygon on the xy plane
-	    	orentationInv =  orentation.inverse();
-	    	concave = incoming.transformed(orentation);
-    	}else
-    		concave=incoming;
-    	
-        List<eu.mihosoft.vrl.v3d.Polygon> result = new ArrayList<>();
+		return result;
+	}
 
-        Vector3d normal = concave.vertices.get(0).normal.clone();
+	/**
+	 * Concave to convex.
+	 *
+	 * @param concave the concave
+	 * @return the list
+	 */
+	public static List<eu.mihosoft.vrl.v3d.Polygon> concaveToConvex(eu.mihosoft.vrl.v3d.Polygon incoming) {
+		incoming=pruneDuplicatePoints(incoming);
+		if(incoming==null)
+			return new ArrayList<>();
+		if (incoming.vertices.size() < 3)
+			return new ArrayList<>();
+		eu.mihosoft.vrl.v3d.Polygon concave;
+		boolean xnorm = Math.abs(incoming.plane.normal.x) >= 1.0 - Plane.EPSILON;
+		Transform orentationInv = null;
+		if (xnorm) {
+			Transform orentation = new Transform().roty(incoming.plane.normal.x * 90);// th triangulation function needs
+																						// the polygon on the xy plane
+			orentationInv = orentation.inverse();
+			concave = incoming.transformed(orentation);
+		} else
+			concave = incoming;
 
-        boolean cw = !Extrude.isCCW(concave);
-        concave = Extrude.toCCW(concave);
-        
-        eu.mihosoft.vrl.v3d.ext.org.poly2tri.Polygon p
-                = fromCSGPolygon(concave);
-        
-        eu.mihosoft.vrl.v3d.ext.org.poly2tri.Poly2Tri.triangulate(p);
+		List<eu.mihosoft.vrl.v3d.Polygon> result = new ArrayList<>();
 
-        List<DelaunayTriangle> triangles = p.getTriangles();
+		Vector3d normal = concave.vertices.get(0).normal.clone();
 
-        List<Vertex> triPoints = new ArrayList<>();
+		boolean cw = !Extrude.isCCW(concave);
+		concave = Extrude.toCCW(concave);
 
-        for (DelaunayTriangle t : triangles) {
+		eu.mihosoft.vrl.v3d.ext.org.poly2tri.Polygon p = fromCSGPolygon(concave);
 
-            int counter = 0;
-            for (TriangulationPoint tp : t.points) {
+		eu.mihosoft.vrl.v3d.ext.org.poly2tri.Poly2Tri.triangulate(p);
 
-                triPoints.add(new Vertex(
-                        new Vector3d(tp.getX(), tp.getY(), tp.getZ()),
-                        normal));
+		List<DelaunayTriangle> triangles = p.getTriangles();
 
-                if (counter == 2) {
-                    if (!cw) {
-                        Collections.reverse(triPoints);
-                    }
-                    eu.mihosoft.vrl.v3d.Polygon poly = 
-                            new eu.mihosoft.vrl.v3d.Polygon(
-                                    triPoints, concave.getStorage());
-                    if(xnorm)
-                    	result.add(poly.transform(orentationInv));
-                    else
-                    	result.add(poly);
-                    counter = 0;
-                    triPoints = new ArrayList<>();
+		List<Vertex> triPoints = new ArrayList<>();
 
-                } else {
-                    counter++;
-                }
-            }
-        }
+		for (DelaunayTriangle t : triangles) {
 
-        return result;
-    }
+			int counter = 0;
+			for (TriangulationPoint tp : t.points) {
+
+				triPoints.add(new Vertex(new Vector3d(tp.getX(), tp.getY(), tp.getZ()), normal));
+
+				if (counter == 2) {
+					if (!cw) {
+						Collections.reverse(triPoints);
+					}
+					eu.mihosoft.vrl.v3d.Polygon poly = new eu.mihosoft.vrl.v3d.Polygon(triPoints, concave.getStorage());
+					if (xnorm)
+						result.add(poly.transform(orentationInv));
+					else
+						result.add(poly);
+					counter = 0;
+					triPoints = new ArrayList<>();
+
+				} else {
+					counter++;
+				}
+			}
+		}
+
+		return result;
+	}
+
+	private static Polygon pruneDuplicatePoints(Polygon incoming) {
+		ArrayList<Vertex> newPoints = new ArrayList<Vertex>();
+		for(int i=0;i<incoming.vertices.size();i++) {
+			Vertex v=incoming.vertices.get(i);
+			boolean duplicate=false;
+			for(Vertex vx:newPoints) {
+				if(vx.pos.test(v.pos)) {
+					duplicate=true;
+				}
+			}
+			if(!duplicate) {
+				newPoints.add(v);
+			}
+		
+		}
+		try{
+			return new Polygon(newPoints);
+		}catch(java.lang.IndexOutOfBoundsException ex) {
+			return null;
+		}
+	}
 }

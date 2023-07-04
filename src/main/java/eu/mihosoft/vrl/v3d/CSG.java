@@ -1340,6 +1340,8 @@ public class CSG implements IuserAPI {
 	public void triangulate() {
 		ArrayList<Polygon> toAdd = new ArrayList<Polygon>();
 		ArrayList<Polygon> remove = new ArrayList<Polygon>();
+		IDebug3dProvider start = Debug3dProvider.provider;
+		Debug3dProvider.setProvider(null);
 		for (int i = 0; i < polygons.size(); i++) {
 			Polygon p = polygons.get(i);
 			if (p.vertices.size() != 3) {
@@ -1348,6 +1350,7 @@ public class CSG implements IuserAPI {
 					List<Polygon> triangles = PolygonUtil.concaveToConvex(p);
 					toAdd.addAll(triangles);
 				} catch (Throwable ex) {
+					Debug3dProvider.setProvider(start);
 					ex.printStackTrace();
 					if (Debug3dProvider.isProviderAvailible()) {
 						Debug3dProvider.clearScreen();

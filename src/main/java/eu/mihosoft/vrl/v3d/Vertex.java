@@ -210,7 +210,7 @@ public class Vertex {
             return false;
         }
         final Vertex other = (Vertex) obj;
-        if (!Objects.equals(this.pos, other.pos)) {
+        if (!this.pos.test(other.pos)) {
             return false;
         }
         return true;

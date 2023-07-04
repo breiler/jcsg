@@ -399,7 +399,11 @@ public class Vector3d extends javax.vecmath.Vector3d{
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        return test(obj);
+    }
+
+	public boolean test(Object obj) {
+		if (obj == null) {
             return false;
         }
         if (getClass() != obj.getClass()) {
@@ -416,7 +420,7 @@ public class Vector3d extends javax.vecmath.Vector3d{
             return false;
         }
         return true;
-    }
+	}
 
     /**
      * Returns the angle between this and the specified vector.

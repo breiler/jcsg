@@ -96,6 +96,9 @@ class AdvancingFrontNode
      */
     public AdvancingFrontNode( TriangulationPoint point )
     {
+    	if(point==null) {
+    		throw new NullPointerException("Point in triangulation can not be null");
+    	}
         this.point = point;
         value = point.getX();
         key = Double.valueOf( value ); // XXX: BST

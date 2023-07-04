@@ -73,6 +73,7 @@ import eu.mihosoft.vrl.v3d.ext.org.poly2tri.TriangulationMode;
 import eu.mihosoft.vrl.v3d.ext.org.poly2tri.TriangulationPoint;
 import eu.mihosoft.vrl.v3d.ext.org.poly2tri.TriangulationUtil.Orientation;
 import eu.mihosoft.vrl.v3d.Debug3dProvider;
+import eu.mihosoft.vrl.v3d.Plane;
 import eu.mihosoft.vrl.v3d.ext.org.poly2tri.DelaunayTriangle;
 
 // TODO: Auto-generated Javadoc
@@ -138,7 +139,7 @@ class DTSweep {
 		for (int i = 1; i < points.size(); i++) {
 			point = points.get(i);
 			if (Debug3dProvider.isProviderAvailible()) {
-				Debug3dProvider.addObject(new Vector3d(point.getX(),point.getY(),point.getZ()));
+				Debug3dProvider.addObject(new eu.mihosoft.vrl.v3d.Vector3d(point.getX(),point.getY(),point.getZ()));
 			}
 			node = pointEvent(tcx, point);
 
@@ -310,7 +311,7 @@ class DTSweep {
 
 		// Only need to check +epsilon since point never have smaller
 		// x value than node due to how we fetch nodes from the front
-		if (point.getX() <= node.point.getX() + EPSILON) {
+		if (point.getX() <= node.point.getX() + Plane.EPSILON_Point) {
 			fill(tcx, node);
 		}
 		tcx.addNode(newNode);
