@@ -406,13 +406,13 @@ public class Vector3d extends javax.vecmath.Vector3d{
             return false;
         }
         final Vector3d other = (Vector3d) obj;
-        if (abs(this.x - other.x) > Plane.EPSILON) {
+        if (abs(this.x - other.x) > Plane.EPSILON_Point) {
             return false;
         }
-        if (abs(this.y - other.y) > Plane.EPSILON) {
+        if (abs(this.y - other.y) > Plane.EPSILON_Point) {
             return false;
         }
-        if (abs(this.z - other.z) > Plane.EPSILON) {
+        if (abs(this.z - other.z) > Plane.EPSILON_Point) {
             return false;
         }
         return true;

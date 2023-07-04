@@ -49,9 +49,11 @@ public class Plane {
     /**
      * EPSILON is the tolerance used by {@link #splitPolygon(eu.mihosoft.vrl.v3d.Polygon, java.util.List, java.util.List, java.util.List, java.util.List)
      * } to decide if a point is on the plane.
+     * public static final double EPSILON = 0.00000001;
      */
+	
     public static final double EPSILON = 0.00000001;
-
+    public static final double EPSILON_Point = 0.00000001;
     /**
      * XY plane.
      */

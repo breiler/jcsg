@@ -224,7 +224,7 @@ public final class Polygon {
      */
     public StringBuilder toStlString(StringBuilder sb) {
 
-        if (this.vertices.size() >= 3) {
+        if (this.vertices.size() == 3) {
 
             // TODO: improve the triangulation?
             //
@@ -245,6 +245,8 @@ public final class Polygon {
                         append("    endloop\n").
                         append("  endfacet\n");
             }
+        }else {
+        	throw new RuntimeException("Polygon must be a triangle before STL can be made "+vertices.size());
         }
 
         return sb;

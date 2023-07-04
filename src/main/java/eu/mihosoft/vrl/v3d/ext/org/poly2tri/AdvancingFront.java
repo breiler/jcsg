@@ -26,10 +26,11 @@
  * The views and conclusions contained in the software and documentation are those of the
  * authors and should not be interpreted as representing official policies, either expressed
  * or implied, of Michael Hoffer info@michaelhoffer.de.
- */ 
+ */
 
 package eu.mihosoft.vrl.v3d.ext.org.poly2tri;
 // TODO: Auto-generated Javadoc
+
 /* Poly2Tri
  * Copyright (c) 2009-2010, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -68,147 +69,169 @@ package eu.mihosoft.vrl.v3d.ext.org.poly2tri;
  */
 class AdvancingFront {
 
-    /** The head. */
-    public AdvancingFrontNode head;
-    
-    /** The tail. */
-    public AdvancingFrontNode tail;
-    
-    /** The search. */
-    protected AdvancingFrontNode search;
+	/** The head. */
+	public AdvancingFrontNode head;
 
-    /**
-     * Instantiates a new advancing front.
-     *
-     * @param head the head
-     * @param tail the tail
-     */
-    public AdvancingFront(AdvancingFrontNode head, AdvancingFrontNode tail) {
-        this.head = head;
-        this.tail = tail;
-        this.search = head;
-        addNode(head);
-        addNode(tail);
-    }
+	/** The tail. */
+	public AdvancingFrontNode tail;
 
-    /**
-     * Adds the node.
-     *
-     * @param node the node
-     */
-    public void addNode(AdvancingFrontNode node) {
+	/** The search. */
+	private AdvancingFrontNode search;
+
+	/**
+	 * Instantiates a new advancing front.
+	 *
+	 * @param head the head
+	 * @param tail the tail
+	 */
+	public AdvancingFront(AdvancingFrontNode head, AdvancingFrontNode tail) {
+		this.head = head;
+		this.tail = tail;
+		this.setSearch(head);
+		if (head == null || tail == null)
+			throw new NullPointerException("Head and tail must not be null");
+		addNode(head);
+		addNode(tail);
+	}
+
+	/**
+	 * Adds the node.
+	 *
+	 * @param node the node
+	 */
+	public void addNode(AdvancingFrontNode node) {
 //        _searchTree.put( node.key, node );
-    }
+	}
 
-    /**
-     * Removes the node.
-     *
-     * @param node the node
-     */
-    public void removeNode(AdvancingFrontNode node) {
+	/**
+	 * Removes the node.
+	 *
+	 * @param node the node
+	 */
+	public void removeNode(AdvancingFrontNode node) {
 //        _searchTree.delete( node.key );
-    }
+	}
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        AdvancingFrontNode node = head;
-        while (node != tail) {
-            sb.append(node.point.getX()).append("->");
-            node = node.next;
-        }
-        sb.append(tail.point.getX());
-        return sb.toString();
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		AdvancingFrontNode node = head;
+		while (node != tail) {
+			sb.append(node.point.getX()).append("->");
+			node = node.next;
+		}
+		sb.append(tail.point.getX());
+		return sb.toString();
+	}
 
-    /**
-     * Find search node.
-     *
-     * @param x the x
-     * @return the advancing front node
-     */
-    private final AdvancingFrontNode findSearchNode(double x) {
-        // TODO: implement BST index 
-        return search;
-    }
+	/**
+	 * Find search node.
+	 *
+	 * @param x the x
+	 * @return the advancing front node
+	 */
+	private final AdvancingFrontNode findSearchNode(double x) {
+		// TODO: implement BST index
+		return getSearch();
+	}
 
-    /**
-     * We use a balancing tree to locate a node smaller or equal to given key
-     * value.
-     *
-     * @param point the point
-     * @return the advancing front node
-     */
-    public AdvancingFrontNode locateNode(TriangulationPoint point) {
-        return locateNode(point.getX());
-    }
+	/**
+	 * We use a balancing tree to locate a node smaller or equal to given key value.
+	 *
+	 * @param point the point
+	 * @return the advancing front node
+	 */
+	public AdvancingFrontNode locateNode(TriangulationPoint point) {
+		return locateNode(point.getX());
+	}
 
-    /**
-     * Locate node.
-     *
-     * @param x the x
-     * @return the advancing front node
-     */
-    private AdvancingFrontNode locateNode(double x) {
-        AdvancingFrontNode node = findSearchNode(x);
-        if (x < node.value) {
-            while ((node = node.prev) != null) {
-                if (x >= node.value) {
-                    search = node;
-                    return node;
-                }
-            }
-        } else {
-            while ((node = node.next) != null) {
-                if (x < node.value) {
-                    search = node.prev;
-                    return node.prev;
-                }
-            }
-        }
-        return null;
-    }
+	/**
+	 * Locate node.
+	 *
+	 * @param x the x
+	 * @return the advancing front node
+	 */
+	private AdvancingFrontNode locateNode(double x) {
+		AdvancingFrontNode node = findSearchNode(x);
+		if (x < node.value) {
+			while ((node = node.prev) != null) {
+				if (x >= node.value) {
+					setSearch(node);
+					return node;
+				}
+			}
+		} else {
+			while ((node = node.next) != null) {
+				if (x < node.value) {
+					setSearch(node.prev);
+					return node.prev;
+				}
+			}
+		}
+		return null;
+	}
 
-    /**
-     * This implementation will use simple node traversal algorithm to find a
-     * point on the front.
-     *
-     * @param point the point
-     * @return the advancing front node
-     */
-    public AdvancingFrontNode locatePoint(final TriangulationPoint point) {
-        final double px = point.getX();
-        AdvancingFrontNode node = findSearchNode(px);
-        final double nx = node.point.getX();
+	/**
+	 * This implementation will use simple node traversal algorithm to find a point
+	 * on the front.
+	 *
+	 * @param point the point
+	 * @return the advancing front node
+	 */
+	public AdvancingFrontNode locatePoint(final TriangulationPoint point) {
+		final double px = point.getX();
+		AdvancingFrontNode node = findSearchNode(px);
+		final double nx = node.point.getX();
 
-        if (px == nx) {
-            if (point != node.point) {
-                // We might have two nodes with same x value for a short time
-                if (point == node.prev.point) {
-                    node = node.prev;
-                } else if (point == node.next.point) {
-                    node = node.next;
-                } else {
-                    throw new RuntimeException("Failed to find Node for given afront point");
+		if (px == nx) {
+			if (point != node.point) {
+				// We might have two nodes with same x value for a short time
+				if (point == node.prev.point) {
+					node = node.prev;
+				} else if (point == node.next.point) {
+					node = node.next;
+				} else {
+					throw new RuntimeException("Failed to find Node for given afront point");
 //                    node = null;
-                }
-            }
-        } else if (px < nx) {
-            while ((node = node.prev) != null) {
-                if (point == node.point) {
-                    break;
-                }
-            }
-        } else {
-            while ((node = node.next) != null) {
-                if (point == node.point) {
-                    break;
-                }
-            }
-        }
-        search = node;
-        return node;
-    }
+				}
+			}
+		} else if (px < nx) {
+			while ((node = node.prev) != null) {
+				if (point == node.point) {
+					break;
+				}
+			}
+		} else {
+			while ((node = node.next) != null) {
+				if (point == node.point) {
+					break;
+				}
+			}
+			if (node == null) {
+				throw new RuntimeException("The next node can not be found!");
+			}
+		}
+		setSearch(node);
+		return node;
+	}
+
+	/**
+	 * @return the search
+	 */
+	public AdvancingFrontNode getSearch() {
+		return search;
+	}
+
+	/**
+	 * @param search the search to set
+	 */
+	public void setSearch(AdvancingFrontNode search) {
+		if (search == null)
+			throw new NullPointerException();
+		this.search = search;
+	}
 }
