@@ -31,6 +31,10 @@
 package eu.mihosoft.vrl.v3d.ext.org.poly2tri;
 // TODO: Auto-generated Javadoc
 
+import javax.vecmath.Vector3d;
+
+import eu.mihosoft.vrl.v3d.Debug3dProvider;
+
 /* Poly2Tri
  * Copyright (c) 2009-2010, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -231,6 +235,9 @@ class AdvancingFront {
 	public void setSearch(AdvancingFrontNode search) {
 		if (search == null)
 			throw new NullPointerException();
+		if (Debug3dProvider.isProviderAvailible()) {
+			Debug3dProvider.addObject(new Vector3d(search.point.getX(),search.point.getY(),search.point.getZ()));
+		}
 		this.search = search;
 	}
 }
