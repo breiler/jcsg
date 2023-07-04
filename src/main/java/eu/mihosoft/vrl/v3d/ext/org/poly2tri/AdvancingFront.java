@@ -186,7 +186,6 @@ class AdvancingFront {
 		final double px = point.getX();
 		AdvancingFrontNode node = findSearchNode(px);
 		final double nx = node.point.getX();
-
 		if (px == nx) {
 			if (point != node.point) {
 				// We might have two nodes with same x value for a short time
