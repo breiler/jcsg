@@ -1337,17 +1337,17 @@ public class CSG implements IuserAPI {
 		}
 	}
 
-	public void triangulate() {
+	public CSG triangulate() {
 		ArrayList<Polygon> toAdd = new ArrayList<Polygon>();
 		ArrayList<Polygon> remove = new ArrayList<Polygon>();
 		IDebug3dProvider start = Debug3dProvider.provider;
-		Debug3dProvider.setProvider(null);
+		//Debug3dProvider.setProvider(null);
 		for (int i = 0; i < polygons.size(); i++) {
 			Polygon p = polygons.get(i);
 			if (p.vertices.size() != 3) {
 				//System.out.println("Fixing error in STL " + name + " polygon# " + i + " number of vertices " + p.vertices.size());
 				try {
-					List<Polygon> triangles = PolygonUtil.concaveToConvex(p);
+					List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
 					toAdd.addAll(triangles);
 				} catch (Throwable ex) {
 					Debug3dProvider.setProvider(start);
@@ -1357,7 +1357,7 @@ public class CSG implements IuserAPI {
 						Debug3dProvider.addObject(p);
 						
 					}
-					List<Polygon> triangles = PolygonUtil.concaveToConvex(p);
+					List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
 					toAdd.addAll(triangles);
 				}
 
@@ -1372,6 +1372,8 @@ public class CSG implements IuserAPI {
 			System.out.println("CSG triangulated for " + name);
 			setPolygons(updated);
 		}
+		Debug3dProvider.setProvider(start);
+		return this;
 	}
 
 	/**

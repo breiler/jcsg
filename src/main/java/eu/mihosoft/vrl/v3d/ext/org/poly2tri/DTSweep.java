@@ -139,7 +139,7 @@ class DTSweep {
 		for (int i = 1; i < points.size(); i++) {
 			point = points.get(i);
 			if (Debug3dProvider.isProviderAvailible()) {
-				Debug3dProvider.addObject(new eu.mihosoft.vrl.v3d.Vector3d(point.getX(),point.getY(),point.getZ()));
+				//Debug3dProvider.addObject(new eu.mihosoft.vrl.v3d.Vector3d(point.getX(),point.getY(),point.getZ()));
 			}
 			node = pointEvent(tcx, point);
 

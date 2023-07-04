@@ -217,9 +217,9 @@ class AdvancingFront {
 			}
 			if (node == null) {
 				if (Debug3dProvider.isProviderAvailible()) {
-					Debug3dProvider.addObject(new eu.mihosoft.vrl.v3d.Vector3d(point.getX(),point.getY(),point.getZ()));
+					//Debug3dProvider.addObject(new eu.mihosoft.vrl.v3d.Vector3d(point.getX(),point.getY(),point.getZ()));
 				}
-				throw new RuntimeException("The next node can not be found! ");
+				throw new RuntimeException(getClass().getName()+": The next node can not be found! ");
 			}
 		}
 		setSearch(node);
@@ -240,7 +240,7 @@ class AdvancingFront {
 		if (search == null)
 			throw new NullPointerException();
 		if (Debug3dProvider.isProviderAvailible()) {
-			Debug3dProvider.addObject(new eu.mihosoft.vrl.v3d.Vector3d(search.point.getX(),search.point.getY(),search.point.getZ()));
+			//Debug3dProvider.addObject(new eu.mihosoft.vrl.v3d.Vector3d(search.point.getX(),search.point.getY(),search.point.getZ()));
 		}
 		this.search = search;
 	}
