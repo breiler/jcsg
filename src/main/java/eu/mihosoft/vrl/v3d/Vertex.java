@@ -210,7 +210,7 @@ public class Vertex {
             return false;
         }
         final Vertex other = (Vertex) obj;
-        if (!this.pos.test(other.pos)) {
+        if (!this.pos.test(other.pos,Plane.EPSILON_Point)) {
             return false;
         }
         return true;

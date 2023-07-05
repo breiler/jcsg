@@ -399,10 +399,10 @@ public class Vector3d extends javax.vecmath.Vector3d{
      */
     @Override
     public boolean equals(Object obj) {
-        return test(obj);
+        return test(obj,Plane.EPSILON_Point);
     }
 
-	public boolean test(Object obj) {
+	public boolean test(Object obj, double epsilon) {
 		if (obj == null) {
             return false;
         }
@@ -410,13 +410,13 @@ public class Vector3d extends javax.vecmath.Vector3d{
             return false;
         }
         final Vector3d other = (Vector3d) obj;
-        if (abs(this.x - other.x) > Plane.EPSILON_Point) {
+        if (abs(this.x - other.x) > epsilon) {
             return false;
         }
-        if (abs(this.y - other.y) > Plane.EPSILON_Point) {
+        if (abs(this.y - other.y) > epsilon) {
             return false;
         }
-        if (abs(this.z - other.z) > Plane.EPSILON_Point) {
+        if (abs(this.z - other.z) > epsilon) {
             return false;
         }
         return true;
