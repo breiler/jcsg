@@ -619,7 +619,7 @@ public class CSG implements IuserAPI {
 
 		CSG csg = new CSG();
 		csg.setPolygons(polygons);
-
+		csg.triangulate();
 		return csg;
 	}
 
@@ -1246,7 +1246,7 @@ public class CSG implements IuserAPI {
 		b.clipTo(a);
 		a.build(b.allPolygons());
 		a.invert();
-		CSG back = CSG.fromPolygons(a.allPolygons()).optimization(getOptType()).historySync(csg).historySync(this);
+		CSG back = CSG.fromPolygons(a.allPolygons()).triangulate().optimization(getOptType()).historySync(csg).historySync(this);
 		if (getName().length() != 0 && csg.getName().length() != 0) {
 			back.setName(csg.getName() + " intersection with " + name);
 		}
