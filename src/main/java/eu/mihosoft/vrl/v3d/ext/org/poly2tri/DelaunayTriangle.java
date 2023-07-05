@@ -360,18 +360,23 @@ public class DelaunayTriangle
      * @return the delaunay triangle
      */
     // The neighbor across to given point
-    public DelaunayTriangle neighborAcross( TriangulationPoint opoint )
-    {
-        if( opoint == points[0] )
-        {
-            return neighbors[0];
-        }
-        else if( opoint == points[1] )
-        {
-            return neighbors[1];
-        }
-        return neighbors[2];
-    }
+	public DelaunayTriangle neighborAcross(TriangulationPoint opoint) {
+		if (opoint == points[0]) {
+			if (neighbors[0] != null)
+				return neighbors[0];
+			else
+				return neighbors[1];
+		} else if (opoint == points[1]) {
+			return neighbors[1];
+		}
+		if (neighbors[2] == null) {
+			if (opoint == points[2]) {
+				if (neighbors[0] != null)
+					return neighbors[0];
+			}
+		}
+		return neighbors[2];
+	}
 
     /**
      * Point ccw.
