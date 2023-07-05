@@ -47,6 +47,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class PolygonUtil.
@@ -105,44 +106,58 @@ public class PolygonUtil {
 			return new ArrayList<>();
 		if (incoming.vertices.size() < 3)
 			return new ArrayList<>();
-		eu.mihosoft.vrl.v3d.Polygon concave;
+		eu.mihosoft.vrl.v3d.Polygon concave= incoming;;
 		Vector3d normalOfPlane = incoming.plane.normal;
-		boolean reorent = Math.abs(normalOfPlane.z) < Plane.EPSILON;
+		boolean reorent = normalOfPlane.z < 1.0-Plane.EPSILON;
 		Transform orentationInv = null;
 		boolean debug = false;
+		Vector3d normal2;
 		if (reorent) {
-			//debug = true;
-			Transform orentation = new Transform().roty(incoming.plane.normal.x * 90);
+			debug = true;
+			double degreesToRotate = Math.toDegrees(Math.atan2(normalOfPlane.x,normalOfPlane.z));
+			Transform orentation = new Transform().roty(degreesToRotate);
 
 			eu.mihosoft.vrl.v3d.Polygon tmp = incoming.transformed(orentation);
-			orentation = orentation.rotx(tmp.plane.normal.y * -90);// th triangulation function needs
+			
+			Vector3d normal = tmp.plane.normal;
+			double degreesToRotate2 =90+Math.toDegrees(Math.atan2(normal.z,normal.y));
+			Transform orentation2 = orentation.rotx(degreesToRotate2);// th triangulation function needs
 			// the polygon on the xy plane
-			orentationInv = orentation.inverse();
-
 			if (debug) {
-				// Debug3dProvider.clearScreen();
+				Debug3dProvider.clearScreen();
 				Debug3dProvider.addObject(incoming);
 			}
-			concave = incoming.transformed(orentation);
-		} else
-			concave = incoming;
+			concave = incoming.transformed(orentation2);
+			normal2 = concave.plane.normal;
+			orentationInv = orentation2.inverse();
+			if(concave.plane.normal.z <0) {
+				Transform orentation3 = orentation2.rotx(180);
+				concave = incoming.transformed(orentation3);
+				orentationInv = orentation3.inverse();
+			}
+			
+			
+			//System.out.println("New vectors "+normal2+" "+normal);
+		}
+		if(concave.plane.normal.z < 1.0-(Plane.EPSILON*100)) {
+			throw new RuntimeException("Orentaion of plane misaligned for triangulation");
+		}
 
 		List<eu.mihosoft.vrl.v3d.Polygon> result = new ArrayList<>();
 
-		Vector3d normal = normalOfPlane.clone();
+		Vector3d normal = concave.plane.normal.clone();
 
 		boolean cw = !Extrude.isCCW(concave);
 		// concave = Extrude.toCCW(concave);
 		if (debug) {
 			Debug3dProvider.addObject(concave);
 		}
-
 		eu.mihosoft.vrl.v3d.ext.org.poly2tri.Polygon p = fromCSGPolygon(concave);
-
+		//System.out.println("Triangulating "+p);
 		eu.mihosoft.vrl.v3d.ext.org.poly2tri.Poly2Tri.triangulate(p);
 
 		List<DelaunayTriangle> triangles = p.getTriangles();
-
+		
 		List<Vertex> triPoints = new ArrayList<>();
 
 		for (DelaunayTriangle t : triangles) {
@@ -150,14 +165,40 @@ public class PolygonUtil {
 			int counter = 0;
 			for (TriangulationPoint tp : t.points) {
 
-				triPoints.add(new Vertex(new Vector3d(tp.getX(), tp.getY(), tp.getZ()), normal));
+				Vector3d pos = new Vector3d(tp.getX(), tp.getY(), tp.getZ());
+
+//				boolean exists=false;
+//				for(Vertex v:incoming.vertices) {
+//					Vector3d pos2 =pos.clone();
+//					if (reorent) {
+//						pos2 = pos2.transformed(orentationInv);
+//					}
+//					if( v.pos.test(pos)) {
+//						exists=true;
+//						break;
+//					}
+//					
+//				}
+//				if(!exists) {
+//					Debug3dProvider.addObject(incoming);
+//					for(Vertex v:incoming.vertices) {
+//						Vector3d pos2 = v.pos;
+//						if (reorent) {
+//							pos2 = pos2.transformed(orentationInv);
+//						}
+//						Debug3dProvider.addObject(pos2);
+//						
+//					}
+//					//continue;
+//				}
+				triPoints.add(new Vertex(pos, normal));
 
 				if (counter == 2) {
 					// if (!cw) {
 					// Collections.reverse(triPoints);
 					// }
 					eu.mihosoft.vrl.v3d.Polygon poly = new eu.mihosoft.vrl.v3d.Polygon(triPoints, concave.getStorage());
-					// poly = Extrude.toCCW(poly);
+					//poly = Extrude.toCCW(poly);
 					poly.plane.normal = concave.plane.normal;
 					boolean b = !Extrude.isCCW(poly);
 					if (cw != b) {
@@ -206,20 +247,35 @@ public class PolygonUtil {
 			return new ArrayList<>();
 		eu.mihosoft.vrl.v3d.Polygon concave;
 		Vector3d normalOfPlane = incoming.plane.normal;
-		boolean reorent = Math.abs(normalOfPlane.z) < Plane.EPSILON;
+		boolean reorent = Math.abs(normalOfPlane.z) < 1.0-Plane.EPSILON;
 		Transform orentationInv = null;
+		boolean debug = false;
+		Vector3d normal2;
 		if (reorent) {
-			Transform orentation = new Transform().roty(incoming.plane.normal.x * 90)
-					.rotx(incoming.plane.normal.y * 90);// th triangulation function needs
-														// the polygon on the xy plane
-			orentationInv = orentation.inverse();
+			//debug = true;
+			double degreesToRotate = Math.toDegrees(Math.atan2(normalOfPlane.x,normalOfPlane.z));
+			Transform orentation = new Transform().roty(degreesToRotate);
 
-//			if (Debug3dProvider.isProviderAvailible()) {
-//				Debug3dProvider.addObject(incoming);
-//			}
-			concave = incoming.transformed(orentation);
+			eu.mihosoft.vrl.v3d.Polygon tmp = incoming.transformed(orentation);
+			
+			Vector3d normal = tmp.plane.normal;
+			double degreesToRotate2 =90+Math.toDegrees(Math.atan2(normal.z,normal.y));
+			Transform orentation2 = orentation.rotx(degreesToRotate2);// th triangulation function needs
+			// the polygon on the xy plane
+			orentationInv = orentation2.inverse();
+
+			if (debug) {
+				Debug3dProvider.clearScreen();
+				Debug3dProvider.addObject(incoming);
+			}
+			concave = incoming.transformed(orentation2);
+			normal2 = concave.plane.normal;
+			//System.out.println("New vectors "+normal2+" "+normal);
 		} else
 			concave = incoming;
+		if(Math.abs(concave.plane.normal.z) < 1.0-Plane.EPSILON) {
+			throw new RuntimeException("Orentaion of plane misaligned for triangulation");
+		}
 
 		List<eu.mihosoft.vrl.v3d.Polygon> result = new ArrayList<>();
 
@@ -284,7 +340,7 @@ public class PolygonUtil {
 			Vertex v = incoming.vertices.get(i);
 			boolean duplicate = false;
 			for (Vertex vx : newPoints) {
-				if (vx.pos.test(v.pos)) {
+				if (vx.pos.test(v.pos,	1.0e-4)) {
 					duplicate = true;
 				}
 			}
