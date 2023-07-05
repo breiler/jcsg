@@ -733,7 +733,8 @@ public class CSG implements IuserAPI {
 	 * @return union of this csg and the specified csg
 	 */
 	public CSG union(CSG csg) {
-
+		triangulate();
+		csg.triangulate();
 		switch (getOptType()) {
 		case CSG_BOUND:
 			return _unionCSGBoundsOpt(csg).historySync(this).historySync(csg);
@@ -1096,6 +1097,8 @@ public class CSG implements IuserAPI {
 	 * @return difference of this csg and the specified csg
 	 */
 	public CSG difference(CSG csg) {
+		triangulate();
+		csg.triangulate();
 		try {
 			// Check to see if a CSG operation is attempting to difference with
 			// no
@@ -1232,7 +1235,8 @@ public class CSG implements IuserAPI {
 	 * @return intersection of this csg and the specified csg
 	 */
 	public CSG intersect(CSG csg) {
-
+		triangulate();
+		csg.triangulate();
 		Node a = new Node(this.clone().getPolygons());
 		Node b = new Node(csg.clone().getPolygons());
 		a.invert();
@@ -1338,10 +1342,11 @@ public class CSG implements IuserAPI {
 	}
 
 	public CSG triangulate() {
+		//System.out.println("CSG triangulating for " + name+"..");
 		ArrayList<Polygon> toAdd = new ArrayList<Polygon>();
 		ArrayList<Polygon> remove = new ArrayList<Polygon>();
 		IDebug3dProvider start = Debug3dProvider.provider;
-		//Debug3dProvider.setProvider(null);
+		Debug3dProvider.setProvider(null);
 		for (int i = 0; i < polygons.size(); i++) {
 			Polygon p = polygons.get(i);
 			if (p.vertices.size() != 3) {
@@ -1369,8 +1374,8 @@ public class CSG implements IuserAPI {
 			updated.addAll(polygons);
 			updated.addAll(toAdd);
 			updated.removeAll(remove);
-			System.out.println("CSG triangulated for " + name);
 			setPolygons(updated);
+			
 		}
 		Debug3dProvider.setProvider(start);
 		return this;
