@@ -73,6 +73,7 @@ import eu.mihosoft.vrl.v3d.ext.org.poly2tri.TriangulationMode;
 import eu.mihosoft.vrl.v3d.ext.org.poly2tri.TriangulationPoint;
 import eu.mihosoft.vrl.v3d.ext.org.poly2tri.TriangulationUtil.Orientation;
 import eu.mihosoft.vrl.v3d.Debug3dProvider;
+import eu.mihosoft.vrl.v3d.Plane;
 import eu.mihosoft.vrl.v3d.ext.org.poly2tri.DelaunayTriangle;
 
 // TODO: Auto-generated Javadoc
@@ -111,6 +112,18 @@ class DTSweep {
 	 */
 	public static void triangulate(DTSweepContext tcx) {
 		tcx.createAdvancingFront();
+		
+		List<TriangulationPoint> points = tcx.getPoints();
+		if(points.size()==3) {
+			TriangulationPoint p1 = points.get(0);
+			TriangulationPoint p2 = points.get(1);
+			TriangulationPoint p3 = points.get(2);
+			if(orient2d(p1, p2, p3)==Orientation.Collinear) {
+				DelaunayTriangle triangle = new DelaunayTriangle(p1, p2, p3);
+				tcx._triUnit.addTriangle(triangle);				
+				return;
+			}
+		}
 
 		sweep(tcx);
 
@@ -138,7 +151,7 @@ class DTSweep {
 		for (int i = 1; i < points.size(); i++) {
 			point = points.get(i);
 			if (Debug3dProvider.isProviderAvailible()) {
-				Debug3dProvider.addObject(new Vector3d(point.getX(),point.getY(),point.getZ()));
+				Debug3dProvider.addObject(new eu.mihosoft.vrl.v3d.Vector3d(point.getX(),point.getY(),point.getZ()));
 			}
 			node = pointEvent(tcx, point);
 
@@ -147,7 +160,7 @@ class DTSweep {
 					if (tcx.isDebugEnabled()) {
 						tcx.getDebugContext().setActiveConstraint(e);
 					}
-					edgeEvent(tcx, e, node);
+					edgeEvent(tcx, e, node,0);
 				}
 			}
 			tcx.update(null);
@@ -310,7 +323,7 @@ class DTSweep {
 
 		// Only need to check +epsilon since point never have smaller
 		// x value than node due to how we fetch nodes from the front
-		if (point.getX() <= node.point.getX() + EPSILON) {
+		if (point.getX() <= node.point.getX() + Plane.EPSILON_Point) {
 			fill(tcx, node);
 		}
 		tcx.addNode(newNode);
@@ -362,10 +375,15 @@ class DTSweep {
 	 * @param edge the edge
 	 * @param node the node
 	 */
-	private static void edgeEvent(DTSweepContext tcx, DTSweepConstraint edge, AdvancingFrontNode node) {
+	private static void edgeEvent(DTSweepContext tcx, DTSweepConstraint edge, AdvancingFrontNode node,int depth) {
+		if(depth>tcx.getPoints().size()*4) {
+			throw new RuntimeException("Depth gauge Error! "+depth+" for polygon with "+tcx.getPoints().size());
+		}
 		try {
 			tcx.edgeEvent.constrainedEdge = edge;
-			tcx.edgeEvent.right = edge.p.getX() > edge.q.getX();
+			double x = edge.p.getX();
+			double x2 = edge.q.getX();
+			tcx.edgeEvent.right = x > x2;
 
 			if (tcx.isDebugEnabled()) {
 				tcx.getDebugContext().setPrimaryTriangle(node.triangle);
@@ -380,7 +398,7 @@ class DTSweep {
 			// but for now this avoid the issue with cases that needs both flips and fills
 			fillEdgeEvent(tcx, edge, node);
 
-			edgeEvent(tcx, edge.p, edge.q, node.triangle, edge.q);
+			edgeEvent(tcx, edge.p, edge.q, node.triangle, edge.q,depth+1);
 		} catch (PointOnEdgeException e) {
 			// logger.warn("Skipping edge: {}", e.getMessage());
 		}
@@ -423,7 +441,34 @@ class DTSweep {
 			}
 		}
 	}
-
+	/**
+	 * Fill right concave edge event.
+	 *
+	 * @param tcx  the tcx
+	 * @param edge the edge
+	 * @param node the node
+	 */
+	private static void fillRightColinearEdgeEvent(DTSweepContext tcx, DTSweepConstraint edge, AdvancingFrontNode node) {
+		// Next concave or convex?
+		TriangulationPoint point = node.next.point;
+		TriangulationPoint point2 = node.next.next.point;
+		TriangulationPoint point3 = node.next.next.next.point;
+		Orientation orient2d = orient2d(point, point2, point3);
+		if (orient2d == Orientation.CCW) {
+			// Concave
+			fillRightConcaveEdgeEvent(tcx, edge, node.next);
+		} else {
+			// Convex
+			// Next above or below edge?
+			Orientation orient2d2 = orient2d(edge.q, node.next.next.point, edge.p);
+			if (orient2d2 == Orientation.CCW) {
+				// Below
+				fillRightConvexEdgeEvent(tcx, edge, node.next);
+			} else {
+				// Above
+			}
+		}
+	}
 	/**
 	 * Fill right convex edge event.
 	 *
@@ -461,14 +506,28 @@ class DTSweep {
 		}
 		if (node.point.getX() < edge.p.getX()) // needed?
 		{
-			if (orient2d(node.point, node.next.point, node.next.next.point) == Orientation.CCW) {
-				// Concave
+			TriangulationPoint point = node.point;
+			TriangulationPoint point2 = node.next.point;
+			TriangulationPoint point3 = node.next.next.point;
+			Orientation orient2d = orient2d(point, point2, point3);
+			switch(orient2d) {
+			case CCW:
 				fillRightConcaveEdgeEvent(tcx, edge, node);
-			} else {
+				break;
+			case CW:
 				// Convex
 				fillRightConvexEdgeEvent(tcx, edge, node);
 				// Retry this one
 				fillRightBelowEdgeEvent(tcx, edge, node);
+				break;
+			case Collinear:
+				fillRightColinearEdgeEvent(tcx, edge, node);
+				// Retry this one
+				fillRightBelowEdgeEvent(tcx, edge, node);
+				break;
+			default:
+				throw new RuntimeException("Unhandled line type "+orient2d);
+			
 			}
 
 		}
@@ -625,7 +684,7 @@ class DTSweep {
 	 * @param point    the point
 	 */
 	private static void edgeEvent(DTSweepContext tcx, TriangulationPoint ep, TriangulationPoint eq,
-			DelaunayTriangle triangle, TriangulationPoint point) {
+			DelaunayTriangle triangle, TriangulationPoint point, int depth) {
 
 		TriangulationPoint p1, p2;
 
@@ -648,7 +707,7 @@ class DTSweep {
 				// constraint
 				tcx.edgeEvent.constrainedEdge.q = p1;
 				triangle = triangle.neighborAcross(point);
-				edgeEvent(tcx, ep, p1, triangle, p1);
+				edgeEvent(tcx, ep, p1, triangle, p1,depth+1 );
 			} else {
 				throw new PointOnEdgeException("EdgeEvent - Point on constrained edge not supported yet");
 			}
@@ -668,7 +727,7 @@ class DTSweep {
 				// constraint
 				tcx.edgeEvent.constrainedEdge.q = p2;
 				triangle = triangle.neighborAcross(point);
-				edgeEvent(tcx, ep, p2, triangle, p2);
+				edgeEvent(tcx, ep, p2, triangle, p2,depth+1 );
 			} else {
 				throw new PointOnEdgeException("EdgeEvent - Point on constrained edge not supported yet");
 			}
@@ -686,7 +745,7 @@ class DTSweep {
 			} else {
 				triangle = triangle.neighborCW(point);
 			}
-			edgeEvent(tcx, ep, eq, triangle, point);
+			edgeEvent(tcx, ep, eq, triangle, point,depth+1 );
 		} else {
 			// This triangle crosses constraint so lets flippin start!
 			flipEdgeEvent(tcx, ep, eq, triangle, point);
@@ -709,14 +768,15 @@ class DTSweep {
 		boolean inScanArea;
 
 		ot = t.neighborAcross(p);
-		op = ot.oppositePoint(t, p);
-
 		if (ot == null) {
+			
+			
 			// If we want to integrate the fillEdgeEvent do it here
 			// With current implementation we should never get here
-			throw new RuntimeException("[BUG:FIXME] FLIP failed due to missing triangle");
+			if (ot == null)
+				throw new RuntimeException("[BUG:FIXME] FLIP failed due to missing triangle");
 		}
-
+		op = ot.oppositePoint(t, p);
 		if (t.getConstrainedEdgeAcross(p)) {
 			throw new RuntimeException("Intersecting Constraints " + t + " is constrained Edge accross " + p);
 		}
@@ -759,7 +819,7 @@ class DTSweep {
 		} else {
 			newP = nextFlipPoint(ep, eq, ot, op);
 			flipScanEdgeEvent(tcx, ep, eq, t, ot, newP);
-			edgeEvent(tcx, ep, eq, t, p);
+			edgeEvent(tcx, ep, eq, t, p,0 );
 		}
 	}
 
@@ -840,13 +900,17 @@ class DTSweep {
 		boolean inScanArea;
 
 		ot = t.neighborAcross(p);
-		op = ot.oppositePoint(t, p);
-
 		if (ot == null) {
 			// If we want to integrate the fillEdgeEvent do it here
 			// With current implementation we should never get here
-			throw new RuntimeException("[BUG:FIXME] FLIP failed due to missing triangle");
+			if (p == t.points[2]) {
+				ot = t.neighbors[0];
+			}
+			if (ot == null)
+				throw new RuntimeException("[BUG:FIXME] FLIP failed due to missing triangle");
 		}
+		op = ot.oppositePoint(t, p);
+
 
 		if (tcx.isDebugEnabled()) {
 			System.out.println("[FLIP:SCAN] - scan next point"); // TODO: remove

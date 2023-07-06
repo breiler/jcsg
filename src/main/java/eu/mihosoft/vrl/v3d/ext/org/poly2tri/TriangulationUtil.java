@@ -30,6 +30,7 @@
 
 package eu.mihosoft.vrl.v3d.ext.org.poly2tri;
 
+import eu.mihosoft.vrl.v3d.Plane;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -41,7 +42,7 @@ class TriangulationUtil
 {
     
     /** The Constant EPSILON. */
-    public final static double    EPSILON = 1e-12;
+    public final static double    EPSILON = Plane.EPSILON_Point;
 
     // Returns triangle circumcircle point and radius
 //    public static Tuple2<TPoint, Double> circumCircle( TPoint a, TPoint b, TPoint c )

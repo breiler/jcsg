@@ -1,7 +1,7 @@
 package eu.mihosoft.vrl.v3d;
 
 public class Debug3dProvider {
-	private static IDebug3dProvider provider=null;
+	static IDebug3dProvider provider=null;
 	public static void addObject(Object o) {
 		if(isProviderAvailible())provider.addObject(o);
 	}

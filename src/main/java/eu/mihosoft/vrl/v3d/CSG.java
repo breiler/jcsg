@@ -619,7 +619,7 @@ public class CSG implements IuserAPI {
 
 		CSG csg = new CSG();
 		csg.setPolygons(polygons);
-
+		csg.triangulate();
 		return csg;
 	}
 
@@ -733,7 +733,8 @@ public class CSG implements IuserAPI {
 	 * @return union of this csg and the specified csg
 	 */
 	public CSG union(CSG csg) {
-
+		triangulate();
+		csg.triangulate();
 		switch (getOptType()) {
 		case CSG_BOUND:
 			return _unionCSGBoundsOpt(csg).historySync(this).historySync(csg);
@@ -1096,6 +1097,8 @@ public class CSG implements IuserAPI {
 	 * @return difference of this csg and the specified csg
 	 */
 	public CSG difference(CSG csg) {
+		triangulate();
+		csg.triangulate();
 		try {
 			// Check to see if a CSG operation is attempting to difference with
 			// no
@@ -1232,7 +1235,8 @@ public class CSG implements IuserAPI {
 	 * @return intersection of this csg and the specified csg
 	 */
 	public CSG intersect(CSG csg) {
-
+		triangulate();
+		csg.triangulate();
 		Node a = new Node(this.clone().getPolygons());
 		Node b = new Node(csg.clone().getPolygons());
 		a.invert();
@@ -1242,7 +1246,7 @@ public class CSG implements IuserAPI {
 		b.clipTo(a);
 		a.build(b.allPolygons());
 		a.invert();
-		CSG back = CSG.fromPolygons(a.allPolygons()).optimization(getOptType()).historySync(csg).historySync(this);
+		CSG back = CSG.fromPolygons(a.allPolygons()).triangulate().optimization(getOptType()).historySync(csg).historySync(this);
 		if (getName().length() != 0 && csg.getName().length() != 0) {
 			back.setName(csg.getName() + " intersection with " + name);
 		}
@@ -1337,24 +1341,28 @@ public class CSG implements IuserAPI {
 		}
 	}
 
-	public void triangulate() {
+	public CSG triangulate() {
+		//System.out.println("CSG triangulating for " + name+"..");
 		ArrayList<Polygon> toAdd = new ArrayList<Polygon>();
 		ArrayList<Polygon> remove = new ArrayList<Polygon>();
+		IDebug3dProvider start = Debug3dProvider.provider;
+		Debug3dProvider.setProvider(null);
 		for (int i = 0; i < polygons.size(); i++) {
 			Polygon p = polygons.get(i);
 			if (p.vertices.size() != 3) {
 				//System.out.println("Fixing error in STL " + name + " polygon# " + i + " number of vertices " + p.vertices.size());
 				try {
-					List<Polygon> triangles = PolygonUtil.concaveToConvex(p);
+					List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
 					toAdd.addAll(triangles);
 				} catch (Throwable ex) {
+					Debug3dProvider.setProvider(start);
 					ex.printStackTrace();
 					if (Debug3dProvider.isProviderAvailible()) {
 						Debug3dProvider.clearScreen();
 						Debug3dProvider.addObject(p);
 						
 					}
-					List<Polygon> triangles = PolygonUtil.concaveToConvex(p);
+					List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
 					toAdd.addAll(triangles);
 				}
 
@@ -1366,9 +1374,11 @@ public class CSG implements IuserAPI {
 			updated.addAll(polygons);
 			updated.addAll(toAdd);
 			updated.removeAll(remove);
-			System.out.println("CSG triangulated for " + name);
 			setPolygons(updated);
+			
 		}
+		Debug3dProvider.setProvider(start);
+		return this;
 	}
 
 	/**
