@@ -114,15 +114,27 @@ class DTSweep {
 		tcx.createAdvancingFront();
 		
 		List<TriangulationPoint> points = tcx.getPoints();
-		if(points.size()==3) {
-			TriangulationPoint p1 = points.get(0);
-			TriangulationPoint p2 = points.get(1);
-			TriangulationPoint p3 = points.get(2);
-			if(orient2d(p1, p2, p3)==Orientation.Collinear) {
-				DelaunayTriangle triangle = new DelaunayTriangle(p1, p2, p3);
-				tcx._triUnit.addTriangle(triangle);				
-				return;
+		boolean colinear=true;
+		
+		for (int i = 0; i < points.size() - 2; i++) {
+			TriangulationPoint p1 = points.get(i + 0);
+			TriangulationPoint p2 = points.get(i + 1);
+			TriangulationPoint p3 = points.get(i + 2);
+			if (orient2d(p1, p2, p3) != Orientation.Collinear) {
+				colinear = false;
+				break;
 			}
+		}
+		if (colinear) {
+			for (int i = 0; i < points.size() - 2; i++) {
+				TriangulationPoint p1 = points.get(i + 0);
+				TriangulationPoint p2 = points.get(i + 1);
+				TriangulationPoint p3 = points.get(i + 2);
+				DelaunayTriangle triangle = new DelaunayTriangle(p1, p2, p3);
+				tcx._triUnit.addTriangle(triangle);
+
+			}
+			return;
 		}
 
 		sweep(tcx);
@@ -500,7 +512,12 @@ class DTSweep {
 	 * @param edge the edge
 	 * @param node the node
 	 */
-	private static void fillRightBelowEdgeEvent(DTSweepContext tcx, DTSweepConstraint edge, AdvancingFrontNode node) {
+	private static void fillRightBelowEdgeEvent(DTSweepContext tcx, DTSweepConstraint edge, AdvancingFrontNode node, int depth) {
+		List<TriangulationPoint> points = tcx.getPoints();
+		int size = points.size();
+		if(depth>size*3) {
+			throw new RuntimeException("fillRightBelowEdgeEvent depth error! "+depth);
+		}
 		if (tcx.isDebugEnabled()) {
 			tcx.getDebugContext().setActiveNode(node);
 		}
@@ -518,12 +535,12 @@ class DTSweep {
 				// Convex
 				fillRightConvexEdgeEvent(tcx, edge, node);
 				// Retry this one
-				fillRightBelowEdgeEvent(tcx, edge, node);
+				fillRightBelowEdgeEvent(tcx, edge, node,depth+1);
 				break;
 			case Collinear:
 				fillRightColinearEdgeEvent(tcx, edge, node);
 				// Retry this one
-				fillRightBelowEdgeEvent(tcx, edge, node);
+				fillRightBelowEdgeEvent(tcx, edge, node,depth+1);
 				break;
 			default:
 				throw new RuntimeException("Unhandled line type "+orient2d);
@@ -548,7 +565,7 @@ class DTSweep {
 			// Check if next node is below the edge
 			Orientation o1 = orient2d(edge.q, node.next.point, edge.p);
 			if (o1 == Orientation.CCW) {
-				fillRightBelowEdgeEvent(tcx, edge, node);
+				fillRightBelowEdgeEvent(tcx, edge, node,0);
 			} else {
 				node = node.next;
 			}
