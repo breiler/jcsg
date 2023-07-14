@@ -51,7 +51,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-
 import com.neuronrobotics.interaction.CadInteractionEvent;
 
 import javafx.scene.paint.Color;
@@ -106,7 +105,7 @@ import javafx.scene.transform.Affine;
 
 @SuppressWarnings("restriction")
 public class CSG implements IuserAPI {
-
+	private static IDebug3dProvider providerOf3d = null;
 	private static int numFacesInOffset = 15;
 
 	/** The polygons. */
@@ -1246,7 +1245,8 @@ public class CSG implements IuserAPI {
 		b.clipTo(a);
 		a.build(b.allPolygons());
 		a.invert();
-		CSG back = CSG.fromPolygons(a.allPolygons()).triangulate().optimization(getOptType()).historySync(csg).historySync(this);
+		CSG back = CSG.fromPolygons(a.allPolygons()).triangulate().optimization(getOptType()).historySync(csg)
+				.historySync(this);
 		if (getName().length() != 0 && csg.getName().length() != 0) {
 			back.setName(csg.getName() + " intersection with " + name);
 		}
@@ -1342,39 +1342,47 @@ public class CSG implements IuserAPI {
 	}
 
 	public CSG triangulate() {
-		//System.out.println("CSG triangulating for " + name+"..");
+		// System.out.println("CSG triangulating for " + name+"..");
 		ArrayList<Polygon> toAdd = new ArrayList<Polygon>();
 		ArrayList<Polygon> remove = new ArrayList<Polygon>();
+		if (providerOf3d == null && Debug3dProvider.provider != null)
+			providerOf3d = Debug3dProvider.provider;
 		IDebug3dProvider start = Debug3dProvider.provider;
 		Debug3dProvider.setProvider(null);
-		for (int i = 0; i < polygons.size(); i++) {
-			Polygon p = polygons.get(i);
-			if (p.vertices.size() != 3) {
-				//System.out.println("Fixing error in STL " + name + " polygon# " + i + " number of vertices " + p.vertices.size());
-				try {
-					List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
-					toAdd.addAll(triangles);
-				} catch (Throwable ex) {
-					Debug3dProvider.setProvider(start);
-					ex.printStackTrace();
-					if (Debug3dProvider.isProviderAvailible()) {
-						Debug3dProvider.clearScreen();
-						Debug3dProvider.addObject(p);
-						
-					}
-					List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
-					toAdd.addAll(triangles);
-				}
+		try {
+			for (int i = 0; i < polygons.size(); i++) {
+				Polygon p = polygons.get(i);
+				if (p.vertices.size() != 3) {
+					// System.out.println("Fixing error in STL " + name + " polygon# " + i + "
+					// number of vertices " + p.vertices.size());
+					try {
+						List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
+						toAdd.addAll(triangles);
+					} catch (Throwable ex) {
+						Debug3dProvider.setProvider(providerOf3d);
+						ex.printStackTrace();
+						if (Debug3dProvider.isProviderAvailible()) {
+							Debug3dProvider.clearScreen();
+							Debug3dProvider.addObject(p);
 
-				remove.add(p);
+						}
+						List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
+						toAdd.addAll(triangles);
+					}
+
+					remove.add(p);
+				}
 			}
-		}
-		if (remove.size() > 0) {
-			ArrayList<Polygon> updated = new ArrayList<Polygon>();
-			updated.addAll(polygons);
-			updated.addAll(toAdd);
-			updated.removeAll(remove);
-			setPolygons(updated);
+			if (remove.size() > 0) {
+				ArrayList<Polygon> updated = new ArrayList<Polygon>();
+				updated.addAll(polygons);
+				updated.addAll(toAdd);
+				updated.removeAll(remove);
+				setPolygons(updated);
+
+			}
+		} catch (Throwable t) {
+			t.printStackTrace();
 			
 		}
 		Debug3dProvider.setProvider(start);
