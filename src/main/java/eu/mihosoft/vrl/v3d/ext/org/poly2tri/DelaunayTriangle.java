@@ -84,6 +84,8 @@ public class DelaunayTriangle
     
     /**  Has this triangle been marked as an interior triangle?. */
     protected boolean           interior  = false;
+    
+    private boolean isDegenerate=false;
 
     /** The points. */
     public final TriangulationPoint[] points = new TriangulationPoint[3];
@@ -978,4 +980,18 @@ public class DelaunayTriangle
     	eu.mihosoft.vrl.v3d.Vertex v2 = new eu.mihosoft.vrl.v3d.Vertex(p2, normal);
     	return new eu.mihosoft.vrl.v3d.Polygon(v0,v1,v2);
     }
+
+	/**
+	 * @return the isDegenerate
+	 */
+	public boolean isDegenerate() {
+		return isDegenerate;
+	}
+
+	/**
+	 * @param isDegenerate the isDegenerate to set
+	 */
+	public void setDegenerate(boolean isDegenerate) {
+		this.isDegenerate = isDegenerate;
+	}
 }
