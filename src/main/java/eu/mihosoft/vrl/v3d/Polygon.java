@@ -107,16 +107,28 @@ public final class Polygon {
      * @param vertices polygon vertices
      * @param shared shared property
      */
-    public Polygon(List<Vertex> vertices, PropertyStorage shared) {
-        this.vertices = vertices;
+    public Polygon(List<Vertex> vertices, PropertyStorage shared, boolean allowDegenerate) {
+        this.vertices = pruneDuplicatePoints(vertices);
         this.shared = shared;
         this.plane = Plane.createFromPoints(
                 vertices.get(0).pos,
                 vertices.get(1).pos,
                 vertices.get(2).pos);
-        validateAndInit(vertices);
+        validateAndInit(allowDegenerate);
     }
-
+    /**
+     * Constructor. Creates a new polygon that consists of the specified
+     * vertices.
+     *
+     *  Note:  the vertices used to initialize a polygon must be coplanar
+     * and form a convex loop.
+     *
+     * @param vertices polygon vertices
+     * @param shared shared property
+     */
+    public Polygon(List<Vertex> vertices, PropertyStorage shared) {
+        this(vertices,shared,true);
+    }
     /**
      * Constructor. Creates a new polygon that consists of the specified
      * vertices.
@@ -127,32 +139,63 @@ public final class Polygon {
      * @param vertices polygon vertices
      */
     public Polygon(List<Vertex> vertices) {
-        this.vertices = vertices;
+        this.vertices = pruneDuplicatePoints(vertices);
         this.plane = Plane.createFromPoints(
                 vertices.get(0).pos,
                 vertices.get(1).pos,
                 vertices.get(2).pos);
-        validateAndInit(vertices);
+        validateAndInit(true);
     }
-    private void validateAndInit(List<Vertex> vertices1) {
-        for (Vertex v : vertices1) {
-            v.normal = plane.normal;
-        }
-        if (Vector3d.ZERO.equals(plane.normal)) {
-            valid = false;
-            System.err.println(
-                    "Normal is zero! Probably, duplicate points have been specified!\n\n" + toStlString());
-//            throw new RuntimeException(
-//                    "Normal is zero! Probably, duplicate points have been specified!\n\n"+toStlString());
-        }
+    public static List<Vertex> pruneDuplicatePoints(List<Vertex> incoming) {
+    	return incoming;
+//		ArrayList<Vertex> newPoints = new ArrayList<Vertex>();
+//		for (int i = 0; i < incoming.size(); i++) {
+//			Vertex v = incoming.get(i);
+//			boolean duplicate = false;
+//			for (Vertex vx : newPoints) {
+//				if (vx.pos.test(v.pos,	1.0e-4)) {
+//					duplicate = true;
+//				}
+//			}
+//			if (!duplicate) {
+//				newPoints.add(v);
+//			}
+//
+//		}
+//		try {
+//			return newPoints;
+//		} catch (java.lang.IndexOutOfBoundsException ex) {
+//			return null;
+//		}
+	}
+	private void validateAndInit( boolean allowDegenerate) {
+		for (Vertex v : vertices) {
+			v.normal = plane.normal;
+		}
+		setDegenerate(true);
+		if (Vector3d.ZERO.equals(plane.normal)) {
+			valid = false;
+			throw new RuntimeException(
+					"Normal is zero! Probably, duplicate points have been specified!\n\n" + toStlString());
+		}
 
-        if (vertices.size() < 3) {
-            throw new RuntimeException(
-                    "Invalid polygon: at least 3 vertices expected, got: "
-                    + vertices.size());
-        }
-        
-    }
+		if (vertices.size() < 3) {
+			throw new RuntimeException("Invalid polygon: at least 3 vertices expected, got: " + vertices.size());
+		}
+
+		Edge e = new Edge(vertices.get(0), vertices.get(1));
+		for (int i = 2; i < vertices.size(); i++) {
+			if (!e.colinear(vertices.get(i).pos, Plane.EPSILON)) {
+				setDegenerate(false);
+				return;
+			}
+		}
+		if (!allowDegenerate) {
+			// throw runtimeException;
+			new RuntimeException("This polygon is colinear").printStackTrace();
+		}
+		
+	}
     /**
      * Constructor. Creates a new polygon that consists of the specified
      * vertices.
@@ -176,7 +219,7 @@ public final class Polygon {
         this.vertices.forEach((vertex) -> {
             newVertices.add(vertex.clone());
         });
-        return new Polygon(newVertices, getStorage());
+        return new Polygon(newVertices, getStorage(),true);
     }
 
     /**
@@ -342,7 +385,7 @@ public final class Polygon {
      */
     public static Polygon fromPoints(List<Vector3d> points,
             PropertyStorage shared) {
-        return fromPoints(points, shared, null);
+        return fromPoints(points, shared, null,true);
     }
 
     /**
@@ -352,7 +395,7 @@ public final class Polygon {
      * @return a polygon defined by the specified point list
      */
     public static Polygon fromPoints(List<Vector3d> points) {
-        return fromPoints(points, new PropertyStorage(), null);
+        return fromPoints(points, new PropertyStorage(), null,true);
     }
 
     /**
@@ -362,9 +405,11 @@ public final class Polygon {
      * @return a polygon defined by the specified point list
      */
     public static Polygon fromPoints(Vector3d... points) {
-        return fromPoints(Arrays.asList(points), new PropertyStorage(), null);
+        return fromPoints(Arrays.asList(points), new PropertyStorage(), null,true);
     }
-
+	public static Polygon fromPointsAllowDegenerate(List<Vector3d> vertices2) {
+		return fromPoints(vertices2, new PropertyStorage(), null, true);
+	}
     /**
      * Creates a polygon from the specified point list.
      *
@@ -374,7 +419,7 @@ public final class Polygon {
      * @return a polygon defined by the specified point list
      */
     private static Polygon fromPoints(
-            List<Vector3d> points, PropertyStorage shared, Plane plane) {
+            List<Vector3d> points, PropertyStorage shared, Plane plane, boolean allowDegenerate) {
 
         Vector3d normal
                 = (plane != null) ? plane.normal.clone() : new Vector3d(0, 0, 0);
@@ -387,7 +432,7 @@ public final class Polygon {
             vertices.add(vertex);
         }
 
-        return new Polygon(vertices, shared);
+        return new Polygon(vertices, shared,allowDegenerate);
     }
 
     /**
@@ -629,4 +674,59 @@ public final class Polygon {
     }
 
     private boolean valid = true;
+	private boolean degenerate=false;
+
+
+	public void setDegenerate(boolean degenerate) {
+		this.degenerate = degenerate;
+	}
+	public boolean isDegenerate() {
+		
+		return degenerate;
+	}
+	
+	public ArrayList<Vertex> getDegeneratePoints() {
+		ArrayList<Vertex> back = new ArrayList<Vertex>();
+		if(!isDegenerate())
+			return back;
+		Edge longEdge = getLongEdge();
+		for(int i=0;i<vertices.size();i++) {
+			Vertex vertex = vertices.get(i);
+			if(vertex!= longEdge.getP1()&& vertex!=longEdge.getP2() ) {
+				back.add(vertex);
+			}
+		}
+		if(back.size()==0)
+			throw new RuntimeException("Failed to find the degenerate point in the polygon");
+		return back;
+	}
+
+	public Edge getLongEdge() {
+		if(!isDegenerate())
+			return null;
+		ArrayList<Edge> e =edges();
+		Edge longEdge =e.get(0);
+		for(int i=1;i<e.size();i++) {
+			Edge edge = e.get(i);
+			if(edge.length()>longEdge.length()) {
+				longEdge=edge;
+			}
+		}
+		return longEdge;
+	}
+
+	public ArrayList<Edge> edges() {
+		ArrayList<Edge> e=new  ArrayList<Edge>();
+		for(int i=0;i<vertices.size();i++) {
+			int i1 = i;
+			int i2=i+1;
+			if(i2==vertices.size()) {
+				i2=0;
+			}
+			e.add(new Edge(vertices.get(i1),vertices.get(i2)));
+		}
+		return e;
+	}
+
+
 }
