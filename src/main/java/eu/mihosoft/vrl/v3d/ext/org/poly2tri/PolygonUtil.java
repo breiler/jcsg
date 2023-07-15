@@ -166,45 +166,20 @@ public class PolygonUtil {
 			for (TriangulationPoint tp : t.points) {
 
 				Vector3d pos = new Vector3d(tp.getX(), tp.getY(), tp.getZ());
-
-//				boolean exists=false;
-//				for(Vertex v:incoming.vertices) {
-//					Vector3d pos2 =pos.clone();
-//					if (reorent) {
-//						pos2 = pos2.transformed(orentationInv);
-//					}
-//					if( v.pos.test(pos)) {
-//						exists=true;
-//						break;
-//					}
-//					
-//				}
-//				if(!exists) {
-//					Debug3dProvider.addObject(incoming);
-//					for(Vertex v:incoming.vertices) {
-//						Vector3d pos2 = v.pos;
-//						if (reorent) {
-//							pos2 = pos2.transformed(orentationInv);
-//						}
-//						Debug3dProvider.addObject(pos2);
-//						
-//					}
-//					//continue;
-//				}
 				triPoints.add(new Vertex(pos, normal));
 
 				if (counter == 2) {
 					// if (!cw) {
 					// Collections.reverse(triPoints);
 					// }
-					eu.mihosoft.vrl.v3d.Polygon poly = new eu.mihosoft.vrl.v3d.Polygon(triPoints, concave.getStorage());
+					eu.mihosoft.vrl.v3d.Polygon poly = new eu.mihosoft.vrl.v3d.Polygon(triPoints, concave.getStorage(),true);
 					//poly = Extrude.toCCW(poly);
 					poly.plane.normal = concave.plane.normal;
 					boolean b = !Extrude.isCCW(poly);
 					if (cw != b) {
 						// System.out.println("Triangle not matching incoming");
 						Collections.reverse(triPoints);
-						poly = new eu.mihosoft.vrl.v3d.Polygon(triPoints, concave.getStorage());
+						poly = new eu.mihosoft.vrl.v3d.Polygon(triPoints, concave.getStorage(),true);
 						b = !Extrude.isCCW(poly);
 						if (cw != b) {
 							System.out.println("Error, polygon is reversed!");
@@ -216,7 +191,7 @@ public class PolygonUtil {
 						poly = poly.transform(orentationInv);
 					}
 					poly.plane.normal = normalOfPlane;
-
+					poly.setDegenerate(t.isDegenerate());
 					// System.out.println("Updating the normal to " + clone);
 					if (debug)
 						Debug3dProvider.addObject(poly);
@@ -240,7 +215,7 @@ public class PolygonUtil {
 	 * @return the list
 	 */
 	public static List<eu.mihosoft.vrl.v3d.Polygon> concaveToConvex(eu.mihosoft.vrl.v3d.Polygon incoming) {
-		incoming = pruneDuplicatePoints(incoming);
+		//incoming = pruneDuplicatePoints(incoming);
 		if (incoming == null)
 			return new ArrayList<>();
 		if (incoming.vertices.size() < 3)
@@ -306,7 +281,7 @@ public class PolygonUtil {
 					if (!cw) {
 						Collections.reverse(triPoints);
 					}
-					eu.mihosoft.vrl.v3d.Polygon poly = new eu.mihosoft.vrl.v3d.Polygon(triPoints, concave.getStorage());
+					eu.mihosoft.vrl.v3d.Polygon poly = new eu.mihosoft.vrl.v3d.Polygon(triPoints, concave.getStorage(),true);
 
 					poly.plane.normal = concave.plane.normal;
 					// Debug3dProvider.addObject(poly);
@@ -334,7 +309,7 @@ public class PolygonUtil {
 		return result;
 	}
 
-	private static Polygon pruneDuplicatePoints(Polygon incoming) {
+	public static Polygon pruneDuplicatePoints(Polygon incoming) {
 		ArrayList<Vertex> newPoints = new ArrayList<Vertex>();
 		for (int i = 0; i < incoming.vertices.size(); i++) {
 			Vertex v = incoming.vertices.get(i);
@@ -349,10 +324,10 @@ public class PolygonUtil {
 			}
 
 		}
-		try {
-			return new Polygon(newPoints);
-		} catch (java.lang.IndexOutOfBoundsException ex) {
+		if(newPoints.size()<3)
 			return null;
-		}
+	
+		return new Polygon(newPoints);
+
 	}
 }
