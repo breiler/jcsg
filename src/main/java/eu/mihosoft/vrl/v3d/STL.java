@@ -72,25 +72,31 @@ public class STL {
     	Path myFolderPath = Paths.get(uri);
         return file(myFolderPath);
     }
-    /**
-     * Loads a CSG from stl.
-     * @param path file path
-     * @return CSG
-     * @throws IOException if loading failed
-     */
-    public static CSG file(Path path) throws IOException {
-        STLLoader loader = new STLLoader();
-        
-        List<Polygon> polygons = new ArrayList<>();
-        List<Vector3d> vertices = new ArrayList<>();
-        for(Point3f p :loader.parse(path.toFile())) {
-            vertices.add(new Vector3d(p.x, p.y, p.z));
-            if (vertices.size()==3) {
-                polygons.add(Polygon.fromPoints(vertices));
-                vertices = new ArrayList<>();
-            }
-        }
-        
-        return CSG.fromPolygons(new PropertyStorage(),polygons);
-    }
+
+	/**
+	 * Loads a CSG from stl.
+	 * 
+	 * @param path file path
+	 * @return CSG
+	 * @throws IOException if loading failed
+	 */
+	public static CSG file(Path path) throws IOException {
+		STLLoader loader = new STLLoader();
+
+		List<Polygon> polygons = new ArrayList<>();
+		List<Vector3d> vertices = new ArrayList<>();
+		for (Point3f p : loader.parse(path.toFile())) {
+			vertices.add(new Vector3d(p.x, p.y, p.z));
+			if (vertices.size() == 3) {
+				try {
+					polygons.add(Polygon.fromPointsAllowDegenerate(vertices));
+				} catch (RuntimeException ex) {
+					ex.printStackTrace();
+				}
+				vertices = new ArrayList<>();
+			}
+		}
+
+		return CSG.fromPolygons(new PropertyStorage(), polygons).triangulate();
+	}
 }

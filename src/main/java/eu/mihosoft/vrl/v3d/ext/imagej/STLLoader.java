@@ -89,11 +89,12 @@ public ArrayList<Point3f> parse(File f) throws IOException {
         String line = br.readLine();
         String[] words = line.trim().split("\\s+");
         if (line.indexOf('\0') < 0 && words[0].equalsIgnoreCase("solid")) {
-            System.out.println("Looks like an ASCII STL");
+            //System.out.println("Looks like an ASCII STL");
             parseAscii(f);
+            br.close();
             return vertices;
         }
-
+        br.close();
         // Hypothesis 2: this is a binary STL
         FileInputStream fs = new FileInputStream(f);
 
@@ -101,10 +102,11 @@ public ArrayList<Point3f> parse(File f) throws IOException {
         // that contains the number of triangles
         byte[] buffer = new byte[84];
         fs.read(buffer, 0, 84);
+        fs.close();
         triangles = (int) (((buffer[83] & 0xff) << 24)
                 | ((buffer[82] & 0xff) << 16) | ((buffer[81] & 0xff) << 8) | (buffer[80] & 0xff));
         if (((f.length() - 84) / 50) == triangles) {
-            System.out.println("Looks like a binary STL");
+            //System.out.println("Looks like a binary STL");
             parseBinary(f);
             return vertices;
         }
