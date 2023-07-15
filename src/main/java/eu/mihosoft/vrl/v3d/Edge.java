@@ -522,7 +522,42 @@ public class Edge {
 
         return result;
     }
+    /**
+     * Determines whether the specified point is colinear
+     *
+     * @param p point to check
+     * @param TOL tolerance
+     * @return <code>true</code> if the specified point lies on this line
+     * segment; <code>false</code> otherwise
+     */
+    public boolean colinear(Vector3d p, double TOL) {
 
+        double x = p.x;
+        double x1 = this.p1.pos.x;
+        double x2 = this.p2.pos.x;
+
+        double y = p.y;
+        double y1 = this.p1.pos.y;
+        double y2 = this.p2.pos.y;
+
+        double z = p.z;
+        double z1 = this.p1.pos.z;
+        double z2 = this.p2.pos.z;
+
+        double slopeSelfxy = (x1-x2)/(y1-y2);
+        double slopeSelfxz = (x1-x2)/(z1-z2);
+        double slopeSelfyz = (y1-y2)/(z1-z2);
+        
+        
+        double slopeTestxy = (x-x2)/(y-y2);
+        double slopeTestxz = (x-x2)/(z-z2);
+        double slopeTestyz = (y-y2)/(z-z2);
+        
+        
+        return Math.abs(slopeSelfxy - slopeTestxy) < TOL &&
+        		Math.abs(slopeSelfxz - slopeTestxz) < TOL&&
+        		Math.abs(slopeSelfyz - slopeTestyz) < TOL;
+    }
     /**
      * Determines whether the specified point lies on tthis edge.
      *
@@ -586,6 +621,12 @@ public class Edge {
             return false;
         }
         final Edge other = (Edge) obj;
+        if(this.p1.pos.test( other.p1.pos,Plane.EPSILON) && this.p2.pos.test( other.p2.pos,Plane.EPSILON)) {
+        	return true;
+        }
+        if(this.p1.pos.test( other.p2.pos,Plane.EPSILON) && this.p2.pos.test( other.p1.pos,Plane.EPSILON)) {
+        	return true;
+        }
         if (!(Objects.equals(this.p1, other.p1) || Objects.equals(this.p2, other.p1))) {
             return false;
         }
@@ -870,5 +911,10 @@ public class Edge {
         }
         return planeGroups;
     }
+
+	public double length() {
+		// TODO Auto-generated method stub
+		return p1.pos.minus(p2.pos).length();
+	}
 
 }
