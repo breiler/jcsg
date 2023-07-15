@@ -114,31 +114,34 @@ class DTSweep {
 		tcx.createAdvancingFront();
 		
 		List<TriangulationPoint> points = tcx.getPoints();
-		boolean colinear=true;
-		
-		for (int i = 0; i < points.size() - 2; i++) {
-			TriangulationPoint p1 = points.get(i + 0);
-			TriangulationPoint p2 = points.get(i + 1);
-			TriangulationPoint p3 = points.get(i + 2);
-			if (orient2d(p1, p2, p3) != Orientation.Collinear) {
-				colinear = false;
-				break;
-			}
-		}
-		if (colinear) {
+
+		try {
+			sweep(tcx);
+		}catch(RuntimeException ex ) {
+			boolean colinear=true;
+			
 			for (int i = 0; i < points.size() - 2; i++) {
 				TriangulationPoint p1 = points.get(i + 0);
 				TriangulationPoint p2 = points.get(i + 1);
 				TriangulationPoint p3 = points.get(i + 2);
-				DelaunayTriangle triangle = new DelaunayTriangle(p1, p2, p3);
-				tcx._triUnit.addTriangle(triangle);
-
+				if (orient2d(p1, p2, p3) != Orientation.Collinear) {
+					colinear = false;
+					break;
+				}
 			}
-			return;
+			if (colinear) {
+				for (int i = 0; i < points.size() - 2; i++) {
+					TriangulationPoint p1 = points.get(i + 0);
+					TriangulationPoint p2 = points.get(i + 1);
+					TriangulationPoint p3 = points.get(i + 2);
+					DelaunayTriangle triangle = new DelaunayTriangle(p1, p2, p3);
+					triangle.setDegenerate(true);
+					tcx._triUnit.addTriangle(triangle);
+				}
+				return;
+			}
+			throw ex;
 		}
-
-		sweep(tcx);
-
 		if (tcx.getTriangulationMode() == TriangulationMode.POLYGON) {
 			finalizationPolygon(tcx);
 		} else {
