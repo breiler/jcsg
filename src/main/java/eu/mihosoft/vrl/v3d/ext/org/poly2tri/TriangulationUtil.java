@@ -26,7 +26,7 @@
  * The views and conclusions contained in the software and documentation are those of the
  * authors and should not be interpreted as representing official policies, either expressed
  * or implied, of Michael Hoffer info@michaelhoffer.de.
- */ 
+ */
 
 package eu.mihosoft.vrl.v3d.ext.org.poly2tri;
 
@@ -38,13 +38,12 @@ import eu.mihosoft.vrl.v3d.Plane;
  *
  * @author Thomas ???, thahlen@gmail.com
  */
-class TriangulationUtil
-{
-    
-    /** The Constant EPSILON. */
-    public final static double    EPSILON = Plane.EPSILON_Point;
+class TriangulationUtil {
 
-    // Returns triangle circumcircle point and radius
+	/** The Constant EPSILON. */
+	public final static double EPSILON = Plane.EPSILON_Point;
+
+	// Returns triangle circumcircle point and radius
 //    public static Tuple2<TPoint, Double> circumCircle( TPoint a, TPoint b, TPoint c )
 //    {
 //        double A = det( a, b, c );
@@ -73,165 +72,145 @@ class TriangulationUtil
 //        return new Tuple2<TPoint, Double>( center, radius );
 //    }
 
-    /**
-     *  Requirement :<br>
-     * 1. a,b and c form a triangle.<br>
-     * 2. a and d is know to be on opposite side of bc<br>
-     *  
-     *                a
-     *                +
-     *               / \
-     *              /   \
-     *            b/     \c
-     *            +-------+ 
-     *           /    B    \  
-     *          /           \ 
-     *  
-     *  Fact : d has to be in area B to have a chance to be inside the circle formed by
-     *  a,b and c<br>
-     *  d is outside B if orient2d(a,b,d) or orient2d(c,a,d) is CW<br>
-     *  This preknowledge gives us a way to optimize the incircle test
-     *
-     * @param pa the pa
-     * @param pb the pb
-     * @param pc the pc
-     * @param pd the pd
-     * @return true if d is inside circle, false if on circle edge
-     */
-    public static boolean smartIncircle( final TriangulationPoint pa, 
-                                         final TriangulationPoint pb, 
-                                         final TriangulationPoint pc, 
-                                         final TriangulationPoint pd )
-    {
-        final double pdx = pd.getX();
-        final double pdy = pd.getY();
-        final double adx = pa.getX() - pdx;
-        final double ady = pa.getY() - pdy;        
-        final double bdx = pb.getX() - pdx;
-        final double bdy = pb.getY() - pdy;
+	/**
+	 * Requirement :<br>
+	 * 1. a,b and c form a triangle.<br>
+	 * 2. a and d is know to be on opposite side of bc<br>
+	 * 
+	 * a + / \ / \ b/ \c +-------+ / B \ / \
+	 * 
+	 * Fact : d has to be in area B to have a chance to be inside the circle formed
+	 * by a,b and c<br>
+	 * d is outside B if orient2d(a,b,d) or orient2d(c,a,d) is CW<br>
+	 * This preknowledge gives us a way to optimize the incircle test
+	 *
+	 * @param pa the pa
+	 * @param pb the pb
+	 * @param pc the pc
+	 * @param pd the pd
+	 * @return true if d is inside circle, false if on circle edge
+	 */
+	public static boolean smartIncircle(final TriangulationPoint pa, final TriangulationPoint pb,
+			final TriangulationPoint pc, final TriangulationPoint pd) {
+		final double pdx = pd.getX();
+		final double pdy = pd.getY();
+		final double adx = pa.getX() - pdx;
+		final double ady = pa.getY() - pdy;
+		final double bdx = pb.getX() - pdx;
+		final double bdy = pb.getY() - pdy;
 
-        final double adxbdy = adx * bdy;
-        final double bdxady = bdx * ady;
-        final double oabd = adxbdy - bdxady;
+		final double adxbdy = adx * bdy;
+		final double bdxady = bdx * ady;
+		final double oabd = adxbdy - bdxady;
 //        oabd = orient2d(pa,pb,pd);
-        if( oabd <= 0 )
-        {
-            return false;
-        }
+		if (oabd <= 0) {
+			return false;
+		}
 
-        final double cdx = pc.getX() - pdx;
-        final double cdy = pc.getY() - pdy;
+		final double cdx = pc.getX() - pdx;
+		final double cdy = pc.getY() - pdy;
 
-        final double cdxady = cdx * ady;
-        final double adxcdy = adx * cdy;
-        final double ocad = cdxady - adxcdy;
+		final double cdxady = cdx * ady;
+		final double adxcdy = adx * cdy;
+		final double ocad = cdxady - adxcdy;
 //      ocad = orient2d(pc,pa,pd);
-        if( ocad <= 0 )
-        {
-            return false;
-        }
-        
-        final double bdxcdy = bdx * cdy;
-        final double cdxbdy = cdx * bdy;
-        
-        final double alift = adx * adx + ady * ady;
-        final double blift = bdx * bdx + bdy * bdy;
-        final double clift = cdx * cdx + cdy * cdy;
+		if (ocad <= 0) {
+			return false;
+		}
 
-        final double det = alift * ( bdxcdy - cdxbdy ) + blift * ocad + clift * oabd;
+		final double bdxcdy = bdx * cdy;
+		final double cdxbdy = cdx * bdy;
 
-        return det > 0;
-    }
-    
-    /**
-     * In scan area.
-     *
-     * @param pa the pa
-     * @param pb the pb
-     * @param pc the pc
-     * @param pd the pd
-     * @return true, if successful
-     * @see smartIncircle
-     */
-    public static boolean inScanArea( final TriangulationPoint pa, 
-                                      final TriangulationPoint pb, 
-                                      final TriangulationPoint pc, 
-                                      final TriangulationPoint pd )
-    {
-        final double pdx = pd.getX();
-        final double pdy = pd.getY();
-        final double adx = pa.getX() - pdx;
-        final double ady = pa.getY() - pdy;        
-        final double bdx = pb.getX() - pdx;
-        final double bdy = pb.getY() - pdy;
+		final double alift = adx * adx + ady * ady;
+		final double blift = bdx * bdx + bdy * bdy;
+		final double clift = cdx * cdx + cdy * cdy;
 
-        final double adxbdy = adx * bdy;
-        final double bdxady = bdx * ady;
-        final double oabd = adxbdy - bdxady;
+		final double det = alift * (bdxcdy - cdxbdy) + blift * ocad + clift * oabd;
+
+		return det > 0;
+	}
+
+	/**
+	 * In scan area.
+	 *
+	 * @param pa the pa
+	 * @param pb the pb
+	 * @param pc the pc
+	 * @param pd the pd
+	 * @return true, if successful
+	 * @see smartIncircle
+	 */
+	public static boolean inScanArea(final TriangulationPoint pa, final TriangulationPoint pb,
+			final TriangulationPoint pc, final TriangulationPoint pd) {
+		final double pdx = pd.getX();
+		final double pdy = pd.getY();
+		final double adx = pa.getX() - pdx;
+		final double ady = pa.getY() - pdy;
+		final double bdx = pb.getX() - pdx;
+		final double bdy = pb.getY() - pdy;
+
+		final double adxbdy = adx * bdy;
+		final double bdxady = bdx * ady;
+		final double oabd = adxbdy - bdxady;
 //        oabd = orient2d(pa,pb,pd);
-        if( oabd <= 0 )
-        {
-            return false;
-        }
+		if (oabd <= 0) {
+			return false;
+		}
 
-        final double cdx = pc.getX() - pdx;
-        final double cdy = pc.getY() - pdy;
+		final double cdx = pc.getX() - pdx;
+		final double cdy = pc.getY() - pdy;
 
-        final double cdxady = cdx * ady;
-        final double adxcdy = adx * cdy;
-        final double ocad = cdxady - adxcdy;
+		final double cdxady = cdx * ady;
+		final double adxcdy = adx * cdy;
+		final double ocad = cdxady - adxcdy;
 //      ocad = orient2d(pc,pa,pd);
-        if( ocad <= 0 )
-        {
-            return false;
-        } 
-        return true;
-    }
-    
-    /**
-     * Forumla to calculate signed area<br>
-     * Positive if CCW<br>
-     * Negative if CW<br>
-     * 0 if collinear<br>
-     *  
-     * A[P1,P2,P3]  =  (x1*y2 - y1*x2) + (x2*y3 - y2*x3) + (x3*y1 - y3*x1)
-     *              =  (x1-x3)*(y2-y3) - (y1-y3)*(x2-x3)
-     *  .
-     *
-     * @param pa the pa
-     * @param pb the pb
-     * @param pc the pc
-     * @return the orientation
-     */
-    public static Orientation orient2d( TriangulationPoint pa, 
-                                        TriangulationPoint pb, 
-                                        TriangulationPoint pc )
-    {
-        double detleft = ( pa.getX() - pc.getX() ) * ( pb.getY() - pc.getY() );
-        double detright = ( pa.getY() - pc.getY() ) * ( pb.getX() - pc.getX() );
-        double val = detleft - detright;
-        if( val > -EPSILON && val < EPSILON )
-        {
-            return Orientation.Collinear;                    
-        }
-        else if( val > 0 )
-        {
-            return Orientation.CCW;
-        }
-        return Orientation.CW;
-    }
+		if (ocad <= 0) {
+			return false;
+		}
+		return true;
+	}
 
-    /**
-     * The Enum Orientation.
-     */
-    public enum Orientation
-    {
-        
-        /** The cw. */
-        CW,
-/** The ccw. */
-CCW,
-/** The Collinear. */
-Collinear;
-    }
+	/**
+	 * Forumla to calculate signed area<br>
+	 * Positive if CCW<br>
+	 * Negative if CW<br>
+	 * 0 if collinear<br>
+	 * 
+	 * A[P1,P2,P3] = (x1*y2 - y1*x2) + (x2*y3 - y2*x3) + (x3*y1 - y3*x1) =
+	 * (x1-x3)*(y2-y3) - (y1-y3)*(x2-x3) .
+	 *
+	 * @param pa the pa
+	 * @param pb the pb
+	 * @param pc the pc
+	 * @return the orientation
+	 */
+	public static Orientation orient2d(TriangulationPoint pa, TriangulationPoint pb, TriangulationPoint pc,
+			double epsilon) {
+		double detleft = (pa.getX() - pc.getX()) * (pb.getY() - pc.getY());
+		double detright = (pa.getY() - pc.getY()) * (pb.getX() - pc.getX());
+		double val = detleft - detright;
+		if (val > -epsilon && val < epsilon) {
+			return Orientation.Collinear;
+		} else if (val > 0) {
+			return Orientation.CCW;
+		}
+		return Orientation.CW;
+	}
+
+	public static Orientation orient2d(TriangulationPoint pa, TriangulationPoint pb, TriangulationPoint pc) {
+		return orient2d(pa, pb, pc, EPSILON);
+	}
+
+	/**
+	 * The Enum Orientation.
+	 */
+	public enum Orientation {
+
+		/** The cw. */
+		CW,
+		/** The ccw. */
+		CCW,
+		/** The Collinear. */
+		Collinear;
+	}
 }
