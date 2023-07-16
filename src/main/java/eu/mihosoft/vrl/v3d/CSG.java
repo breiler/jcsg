@@ -1372,10 +1372,8 @@ public class CSG implements IuserAPI {
 					} catch (Throwable ex) {
 						Debug3dProvider.setProvider(providerOf3d);
 						ex.printStackTrace();
-						if (Debug3dProvider.isProviderAvailible()) {
-							Debug3dProvider.clearScreen();
-							Debug3dProvider.addObject(p);
-						}
+						Debug3dProvider.clearScreen();
+						Debug3dProvider.addObject(p);
 						List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
 						toAdd.addAll(triangles);
 					}
@@ -1384,9 +1382,10 @@ public class CSG implements IuserAPI {
 			}
 			if(degenerates.size()>0) {
 				System.out.println("Found "+degenerates.size()+" degenerate triangles");
-				Debug3dProvider.setProvider(providerOf3d);
+				//Debug3dProvider.setProvider(providerOf3d);
 				Debug3dProvider.clearScreen();
 				for(Polygon p:degenerates) {
+					Debug3dProvider.clearScreen();
 					Debug3dProvider.addObject(p);
 					ArrayList<Vertex> degen =p.getDegeneratePoints();
 					Edge longEdge = p.getLongEdge();
@@ -1395,7 +1394,7 @@ public class CSG implements IuserAPI {
 						ArrayList<Edge> edges = ptoA.edges(); 
 						for(Edge e :edges) {
 							if(e.equals(longEdge)) {
-								System.out.println("Degenerate Mate Found!");
+								//System.out.println("Degenerate Mate Found!");
 								polygonsSharing.add(ptoA);
 								Debug3dProvider.addObject(ptoA);
 								// TODO inject the points into the found edge
@@ -1408,7 +1407,7 @@ public class CSG implements IuserAPI {
 						}
 					}
 					if(polygonsSharing.size()==0) {
-						System.out.println("Error! Degenerate triangle does not share edge with any triangle");
+						//System.out.println("Error! Degenerate triangle does not share edge with any triangle");
 					}
 					// after the matching edges are found, insert the points and triangulate those polygons again. 
 				}
