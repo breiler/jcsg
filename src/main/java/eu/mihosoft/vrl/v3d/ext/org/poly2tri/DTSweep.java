@@ -124,7 +124,7 @@ class DTSweep {
 				TriangulationPoint p1 = points.get(i + 0);
 				TriangulationPoint p2 = points.get(i + 1);
 				TriangulationPoint p3 = points.get(i + 2);
-				if (orient2d(p1, p2, p3) != Orientation.Collinear) {
+				if (orient2d(p1, p2, p3,Plane.EPSILON_duplicate) != Orientation.Collinear) {
 					colinear = false;
 					break;
 				}
@@ -629,7 +629,10 @@ class DTSweep {
 	 * @param edge the edge
 	 * @param node the node
 	 */
-	private static void fillLeftBelowEdgeEvent(DTSweepContext tcx, DTSweepConstraint edge, AdvancingFrontNode node) {
+	private static void fillLeftBelowEdgeEvent(DTSweepContext tcx, DTSweepConstraint edge, AdvancingFrontNode node, int depth) {
+		if(depth>tcx.getPoints().size()*3) {
+			throw new RuntimeException("Recursive depth faailure in fillLeftBelowEdgeEvent");
+		}
 		if (tcx.isDebugEnabled()) {
 			tcx.getDebugContext().setActiveNode(node);
 		}
@@ -641,7 +644,7 @@ class DTSweep {
 				// Convex
 				fillLeftConvexEdgeEvent(tcx, edge, node);
 				// Retry this one
-				fillLeftBelowEdgeEvent(tcx, edge, node);
+				fillLeftBelowEdgeEvent(tcx, edge, node,depth+1);
 			}
 
 		}
@@ -662,7 +665,7 @@ class DTSweep {
 			// Check if next node is below the edge
 			Orientation o1 = orient2d(edge.q, node.prev.point, edge.p);
 			if (o1 == Orientation.CW) {
-				fillLeftBelowEdgeEvent(tcx, edge, node);
+				fillLeftBelowEdgeEvent(tcx, edge, node,0);
 			} else {
 				node = node.prev;
 			}
@@ -707,6 +710,9 @@ class DTSweep {
 			DelaunayTriangle triangle, TriangulationPoint point, int depth) {
 
 		TriangulationPoint p1, p2;
+		if(depth>tcx.getPoints().size()*3) {
+			throw new RuntimeException("edgeEvent stack overflow test failed");
+		}
 
 		if (tcx.isDebugEnabled()) {
 			tcx.getDebugContext().setPrimaryTriangle(triangle);
