@@ -97,6 +97,6 @@ public class STL {
 			}
 		}
 
-		return CSG.fromPolygons(new PropertyStorage(), polygons).triangulate();
+		return CSG.fromPolygons(new PropertyStorage(), polygons);
 	}
 }
