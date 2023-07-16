@@ -621,10 +621,10 @@ public class Edge {
             return false;
         }
         final Edge other = (Edge) obj;
-        if(this.p1.pos.test( other.p1.pos,Plane.EPSILON) && this.p2.pos.test( other.p2.pos,Plane.EPSILON)) {
+        if(this.p1.pos.test( other.p1.pos,Plane.EPSILON_Point) && this.p2.pos.test( other.p2.pos,Plane.EPSILON_Point)) {
         	return true;
         }
-        if(this.p1.pos.test( other.p2.pos,Plane.EPSILON) && this.p2.pos.test( other.p1.pos,Plane.EPSILON)) {
+        if(this.p1.pos.test( other.p2.pos,Plane.EPSILON_Point) && this.p2.pos.test( other.p1.pos,Plane.EPSILON_Point)) {
         	return true;
         }
         if (!(Objects.equals(this.p1, other.p1) || Objects.equals(this.p2, other.p1))) {
@@ -634,6 +634,10 @@ public class Edge {
             return false;
         }
         return true;
+    }
+    
+    public boolean isThisPointOneOfMine(Vertex test) {
+    	return p1.pos.test(test.pos, Plane.EPSILON_Point)||p2.pos.test(test.pos, Plane.EPSILON_Point);
     }
 
     @Override
