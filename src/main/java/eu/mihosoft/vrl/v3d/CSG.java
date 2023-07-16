@@ -144,6 +144,8 @@ public class CSG implements IuserAPI {
 	private ArrayList<Transform> slicePlanes = null;
 	private ArrayList<String> exportFormats = null;
 	private ArrayList<Transform> datumReferences = null;
+	private boolean triangulated;
+	private static boolean fixMeshMode=false;
 	private static boolean useStackTraces = true;
 
 	private static ICSGProgress progressMoniter = new ICSGProgress() {
@@ -618,7 +620,6 @@ public class CSG implements IuserAPI {
 
 		CSG csg = new CSG();
 		csg.setPolygons(polygons);
-		csg.triangulate();
 		return csg;
 	}
 
@@ -649,7 +650,7 @@ public class CSG implements IuserAPI {
 		for (Polygon polygon : polygons) {
 			polygon.setStorage(storage);
 		}
-		return csg.triangulate();
+		return csg;
 	}
 
 	/**
@@ -674,17 +675,15 @@ public class CSG implements IuserAPI {
 
 		csg.setOptType(this.getOptType());
 
-		// sequential code
-		// csg.polygons = new ArrayList<>();
-		// polygons.forEach((polygon) -> {
-		// csg.polygons.add(polygon.clone());
-		// });
-		Stream<Polygon> polygonStream =getPolygons().stream();
+		Stream<Polygon> polygonStream;
 
 //		if (getPolygons().size() > 200) {
 //			polygonStream = getPolygons().parallelStream();
-//		} 
-		csg.setPolygons(polygonStream.map((Polygon p) -> p.clone()).collect(Collectors.toList()));
+//		} else {
+//			polygonStream =getPolygons().stream();
+//		}
+		polygonStream=getPolygons().stream();
+		csg.setPolygons(polygonStream.map((Polygon p) -> p!=null?p.clone():null).filter(p-> p!=null).collect(Collectors.toList()));
 
 		return csg.historySync(this);
 	}
@@ -755,12 +754,13 @@ public class CSG implements IuserAPI {
 	 * @return a csg consisting of the polygons of this csg and the specified csg
 	 */
 	public CSG dumbUnion(CSG csg) {
-
+		boolean tri = triangulated&&csg.triangulated;
 		CSG result = this.clone();
 		CSG other = csg.clone();
 
 		result.getPolygons().addAll(other.getPolygons());
 		bounds = null;
+		result.triangulated = tri;
 		return result.historySync(other);
 	}
 
@@ -1338,6 +1338,9 @@ public class CSG implements IuserAPI {
 	}
 
 	public CSG triangulate() {
+		if(triangulated)
+			return this;
+
 		//System.out.println("CSG triangulating for " + name+"..");
 		ArrayList<Polygon> toAdd = new ArrayList<Polygon>();
 		ArrayList<Polygon> degenerates = new ArrayList<Polygon>();
@@ -1346,82 +1349,129 @@ public class CSG implements IuserAPI {
 		IDebug3dProvider start = Debug3dProvider.provider;
 		Debug3dProvider.setProvider(null);
 		try {
-			for (int i = 0; i < polygons.size(); i++) {
-				Polygon p = polygons.get(i);
-				p=PolygonUtil.pruneDuplicatePoints(p);
-				if(p==null)
-					continue;
-				if(p.isDegenerate()) {
-					degenerates.add(p);
-					continue;
-				}
-					
-				if (p.vertices.size() == 3) {
-					toAdd.add(p);
-				}else{
-					// System.out.println("Fixing error in STL " + name + " polygon# " + i + "
-					// number of vertices " + p.vertices.size());
-					try {
-						List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
-						for(Polygon poly :triangles) {
-							if(poly.isDegenerate()) {
-								degenerates.add(poly);
-							}else
-								toAdd.add(poly);
-						}
-					} catch (Throwable ex) {
-						Debug3dProvider.setProvider(providerOf3d);
-						ex.printStackTrace();
-						Debug3dProvider.clearScreen();
-						Debug3dProvider.addObject(p);
-						List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
-						toAdd.addAll(triangles);
-					}
-
-				}
-			}
+			Stream<Polygon> polygonStream;
+ 			polygonStream =polygons.stream();
+ 			// TODO this should work in paralell but throws immpossible NPE's instead.
+//			if (getPolygons().size() > 200) {
+//				polygonStream = polygons.parallelStream();
+//			}
+			polygonStream.forEach(p -> updatePolygons(toAdd, degenerates, p));
+//			for (int i = 0; i < polygons.size(); i++) {
+//				Polygon p = polygons.get(i);
+//				updatePolygons(toAdd, degenerates, p);
+//			}
+			
+			
 			if(degenerates.size()>0) {
-				System.out.println("Found "+degenerates.size()+" degenerate triangles");
+				//System.out.println("Found "+degenerates.size()+" degenerate triangles");
 				//Debug3dProvider.setProvider(providerOf3d);
 				Debug3dProvider.clearScreen();
-				for(Polygon p:degenerates) {
-					Debug3dProvider.clearScreen();
-					Debug3dProvider.addObject(p);
-					ArrayList<Vertex> degen =p.getDegeneratePoints();
-					Edge longEdge = p.getLongEdge();
-					ArrayList<Polygon> polygonsSharing = new ArrayList<Polygon>();
-					for(Polygon ptoA:toAdd) {
-						ArrayList<Edge> edges = ptoA.edges(); 
-						for(Edge e :edges) {
-							if(e.equals(longEdge)) {
-								//System.out.println("Degenerate Mate Found!");
-								polygonsSharing.add(ptoA);
-								Debug3dProvider.addObject(ptoA);
-								// TODO inject the points into the found edge
-								// upstream reparirs to mesh generation made this code effectivly unreachable
-								// in  case that turns out to be false, pick up here
-								// the points in degen need to be inserted into the matching polygons
-								// both list of points should be right hand, but since they are other polygons, 
-								// that may not be the case, so sorting needs to take place
-							}
-						}
-					}
-					if(polygonsSharing.size()==0) {
-						//System.out.println("Error! Degenerate triangle does not share edge with any triangle");
-					}
-					// after the matching edges are found, insert the points and triangulate those polygons again. 
-				}
+				Stream<Polygon> degenStreeam;
+				degenStreeam =polygons.stream(); // this operation is read-modify-write and can not be done in parallel
+				//
+				//if(isFixMeshMode())
+					degenStreeam.forEach(p -> fixDegenerates(toAdd, p));
 			}
 			if (toAdd.size() > 0) {
 				//toAdd.addAll(degenerates);
 				setPolygons(toAdd);
 			}
+			// now all polygons are definantly triangles
+			triangulated=true;
 		} catch (Throwable t) {
 			t.printStackTrace();
 			
 		}
 		Debug3dProvider.setProvider(start);
 		return this;
+	}
+
+	private void fixDegenerates(ArrayList<Polygon> toAdd, Polygon p) {
+		Debug3dProvider.clearScreen();
+		Debug3dProvider.addObject(p);
+		ArrayList<Vertex> degen =p.getDegeneratePoints();
+		Edge longEdge = p.getLongEdge();
+		ArrayList<Polygon> polygonsSharing = new ArrayList<Polygon>();
+		ArrayList<Polygon> polygonsSharingFixed = new ArrayList<Polygon>();
+
+		for(Polygon ptoA:toAdd) {
+			ArrayList<Edge> edges = ptoA.edges(); 
+			for(Edge e :edges) {
+				if(e.equals(longEdge)) {
+					//System.out.println("Degenerate Mate Found!");
+					polygonsSharing.add(ptoA);
+					Debug3dProvider.addObject(ptoA);
+					// TODO inject the points into the found edge
+					// upstream reparirs to mesh generation made this code effectivly unreachable
+					// in  case that turns out to be false, pick up here
+					// the points in degen need to be inserted into the matching polygons
+					// both list of points should be right hand, but since they are other polygons, 
+					// that may not be the case, so sorting needs to take place
+					ArrayList<Vertex> newpoints = new ArrayList<Vertex>();
+					for(Vertex v:ptoA.vertices) {
+						newpoints.add(v);
+						if(e.isThisPointOneOfMine(v)) {
+							for(Vertex v2:degen)
+								newpoints.add(v2);
+						}
+					}
+					Polygon e2 = new Polygon(newpoints, ptoA.getStorage());
+					try {
+						List<Polygon> t = PolygonUtil.toSTLTriangles(e2);
+						for(Polygon poly :t) {
+							if(!poly.isDegenerate()) {
+								polygonsSharingFixed.add(poly);
+							}
+						
+						}
+					}catch(Exception ex) {
+						ex.printStackTrace();
+						// retriangulation failed, ok, whatever man, moving on...
+					}
+				}
+			}
+		}
+		if(polygonsSharing.size()==0) {
+			//System.out.println("Error! Degenerate triangle does not share edge with any triangle");
+		}
+		if(polygonsSharingFixed.size()>0) {
+			toAdd.removeAll(polygonsSharing);
+			toAdd.addAll(polygonsSharingFixed);
+		}
+	}
+
+	private void updatePolygons(ArrayList<Polygon> toAdd, ArrayList<Polygon> degenerates, Polygon p) {
+		p=PolygonUtil.pruneDuplicatePoints(p);
+		if(p==null)
+			return;
+		if(p.isDegenerate()) {
+			degenerates.add(p);
+			return;
+		}
+			
+		if (p.vertices.size() == 3) {
+			toAdd.add(p);
+		}else{
+			// System.out.println("Fixing error in STL " + name + " polygon# " + i + "
+			// number of vertices " + p.vertices.size());
+			try {
+				List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
+				for(Polygon poly :triangles) {
+					if(poly.isDegenerate()) {
+						degenerates.add(poly);
+					}else
+						toAdd.add(poly);
+				}
+			} catch (Throwable ex) {
+				Debug3dProvider.setProvider(providerOf3d);
+				ex.printStackTrace();
+				Debug3dProvider.clearScreen();
+				Debug3dProvider.addObject(p);
+				List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
+				toAdd.addAll(triangles);
+			}
+
+		}
 	}
 
 	/**
@@ -1809,6 +1859,7 @@ public class CSG implements IuserAPI {
 	 */
 	public void setPolygons(List<Polygon> polygons) {
 		bounds = null;
+		triangulated=false;
 		this.polygons = polygons;
 	}
 
@@ -2562,5 +2613,19 @@ public class CSG implements IuserAPI {
 		if (!getStorage().getValue("printBedIndex").isPresent())
 			return 0;
 		return (int) getStorage().getValue("printBedIndex").get();
+	}
+
+	/**
+	 * @return the fixMeshMode
+	 */
+	public static boolean isFixMeshMode() {
+		return fixMeshMode;
+	}
+
+	/**
+	 * @param fixMeshMode the fixMeshMode to set
+	 */
+	public static void setFixMeshMode(boolean fixMeshMode) {
+		CSG.fixMeshMode = fixMeshMode;
 	}
 }
