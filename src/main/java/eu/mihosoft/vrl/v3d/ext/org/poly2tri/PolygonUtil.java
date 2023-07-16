@@ -315,7 +315,7 @@ public class PolygonUtil {
 			Vertex v = incoming.vertices.get(i);
 			boolean duplicate = false;
 			for (Vertex vx : newPoints) {
-				if (vx.pos.test(v.pos,	1.0e-4)) {
+				if (vx.pos.test(v.pos,	Plane.EPSILON_duplicate)) {
 					duplicate = true;
 				}
 			}
