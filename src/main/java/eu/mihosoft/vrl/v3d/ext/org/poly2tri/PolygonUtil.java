@@ -139,8 +139,8 @@ public class PolygonUtil {
 			
 			//System.out.println("New vectors "+normal2+" "+normal);
 		}
-		if(concave.plane.normal.z < 1.0-(Plane.EPSILON*100)) {
-			throw new RuntimeException("Orentaion of plane misaligned for triangulation");
+		if(concave.plane.normal.z < 1.0-Plane.EPSILON_duplicate) {
+			throw new RuntimeException("Orentaion of plane misaligned for triangulation "+concave.plane.normal.z);
 		}
 
 		List<eu.mihosoft.vrl.v3d.Polygon> result = new ArrayList<>();
