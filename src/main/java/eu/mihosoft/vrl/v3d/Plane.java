@@ -53,7 +53,8 @@ public class Plane {
      */
 	
     public static final double EPSILON = 	1.0e-9;
-    public static final double EPSILON_Point = 	EPSILON;
+    public static final double EPSILON_Point = 	1.0e-9;
+    public static final double EPSILON_duplicate = 	1.0e-4;
     /**
      * XY plane.
      */
