@@ -530,6 +530,9 @@ public class Edge {
      * @return <code>true</code> if the specified point lies on this line
      * segment; <code>false</code> otherwise
      */
+    public boolean colinear(Vector3d p) {
+    	return colinear(p,Plane.EPSILON_Point);
+    }
     public boolean colinear(Vector3d p, double TOL) {
 
         double x = p.x;

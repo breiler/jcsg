@@ -185,7 +185,7 @@ public final class Polygon {
 
 		Edge e = new Edge(vertices.get(0), vertices.get(1));
 		for (int i = 2; i < vertices.size(); i++) {
-			if (!e.colinear(vertices.get(i).pos, Plane.EPSILON)) {
+			if (!e.colinear(vertices.get(i).pos)) {
 				setDegenerate(false);
 				return;
 			}

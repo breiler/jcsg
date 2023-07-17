@@ -1425,7 +1425,7 @@ public class CSG implements IuserAPI {
 					}
 					Polygon e2 = new Polygon(newpoints, ptoA.getStorage());
 					try {
-						List<Polygon> t = PolygonUtil.toSTLTriangles(e2);
+						List<Polygon> t = PolygonUtil.concaveToConvex(e2);
 						for(Polygon poly :t) {
 							if(!poly.isDegenerate()) {
 								polygonsSharingFixed.add(poly);
@@ -1449,7 +1449,7 @@ public class CSG implements IuserAPI {
 	}
 
 	private void updatePolygons(ArrayList<Polygon> toAdd, ArrayList<Polygon> degenerates, Polygon p) {
-		p=PolygonUtil.pruneDuplicatePoints(p);
+		//p=PolygonUtil.pruneDuplicatePoints(p);
 		if(p==null)
 			return;
 		if(p.isDegenerate()) {
@@ -1463,7 +1463,7 @@ public class CSG implements IuserAPI {
 			// System.out.println("Fixing error in STL " + name + " polygon# " + i + "
 			// number of vertices " + p.vertices.size());
 			try {
-				List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
+				List<Polygon> triangles = PolygonUtil.concaveToConvex(p);
 				for(Polygon poly :triangles) {
 					if(poly.isDegenerate()) {
 						degenerates.add(poly);
