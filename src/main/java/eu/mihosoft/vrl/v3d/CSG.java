@@ -145,7 +145,7 @@ public class CSG implements IuserAPI {
 	private ArrayList<String> exportFormats = null;
 	private ArrayList<Transform> datumReferences = null;
 	private boolean triangulated;
-	private static boolean fixMeshMode=false;
+	private static boolean needsDegeneratesPruned=false;
 	private static boolean useStackTraces = true;
 
 	private static ICSGProgress progressMoniter = new ICSGProgress() {
@@ -1322,7 +1322,7 @@ public class CSG implements IuserAPI {
 	 * @return the specified string builder
 	 */
 	public StringBuilder toStlString(StringBuilder sb) {
-		triangulate();
+		triangulate(true);
 		try {
 			sb.append("solid v3d.csg\n");
 			this.getPolygons().stream().forEach((Polygon p) -> {
@@ -1336,11 +1336,15 @@ public class CSG implements IuserAPI {
 			throw new RuntimeException("STL failed to build for " + name);
 		}
 	}
-
 	public CSG triangulate() {
+		return triangulate(false);
+	}
+	public CSG triangulate(boolean fix) {
+		if(fix && needsDegeneratesPruned)
+			triangulated=false;
 		if(triangulated)
 			return this;
-
+		
 		//System.out.println("CSG triangulating for " + name+"..");
 		ArrayList<Polygon> toAdd = new ArrayList<Polygon>();
 		ArrayList<Polygon> degenerates = new ArrayList<Polygon>();
@@ -1365,17 +1369,19 @@ public class CSG implements IuserAPI {
 			if(degenerates.size()>0) {
 				//
 				//Debug3dProvider.setProvider(providerOf3d);
-				Debug3dProvider.clearScreen();
-				Stream<Polygon> degenStreeam;
-				degenStreeam =polygons.stream(); // this operation is read-modify-write and can not be done in parallel
-				//
-				if(isFixMeshMode()) {
+	
+				if(fix) {
+					Debug3dProvider.clearScreen();
+					Stream<Polygon> degenStreeam;
+					degenStreeam =polygons.stream(); // this operation is read-modify-write and can not be done in parallel
 					System.out.println("Found "+degenerates.size()+" degenerate triangles, Attempting to fix");
 					degenStreeam.forEach(p -> fixDegenerates(toAdd, p));
+				}else {
+					needsDegeneratesPruned=true;
+					toAdd.addAll(degenerates);
 				}
 			}
 			if (toAdd.size() > 0) {
-				//toAdd.addAll(degenerates);
 				setPolygons(toAdd);
 			}
 			// now all polygons are definantly triangles
@@ -2618,17 +2624,5 @@ public class CSG implements IuserAPI {
 		return (int) getStorage().getValue("printBedIndex").get();
 	}
 
-	/**
-	 * @return the fixMeshMode
-	 */
-	public static boolean isFixMeshMode() {
-		return fixMeshMode;
-	}
 
-	/**
-	 * @param fixMeshMode the fixMeshMode to set
-	 */
-	public static void setFixMeshMode(boolean fixMeshMode) {
-		CSG.fixMeshMode = fixMeshMode;
-	}
 }
