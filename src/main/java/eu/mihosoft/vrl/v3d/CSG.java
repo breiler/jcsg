@@ -1363,14 +1363,16 @@ public class CSG implements IuserAPI {
 			
 			
 			if(degenerates.size()>0) {
-				//System.out.println("Found "+degenerates.size()+" degenerate triangles");
+				//
 				//Debug3dProvider.setProvider(providerOf3d);
 				Debug3dProvider.clearScreen();
 				Stream<Polygon> degenStreeam;
 				degenStreeam =polygons.stream(); // this operation is read-modify-write and can not be done in parallel
 				//
-				//if(isFixMeshMode())
+				if(isFixMeshMode()) {
+					System.out.println("Found "+degenerates.size()+" degenerate triangles, Attempting to fix");
 					degenStreeam.forEach(p -> fixDegenerates(toAdd, p));
+				}
 			}
 			if (toAdd.size() > 0) {
 				//toAdd.addAll(degenerates);
@@ -1463,12 +1465,13 @@ public class CSG implements IuserAPI {
 						toAdd.add(poly);
 				}
 			} catch (Throwable ex) {
-				Debug3dProvider.setProvider(providerOf3d);
+//				Debug3dProvider.setProvider(providerOf3d);
 				ex.printStackTrace();
-				Debug3dProvider.clearScreen();
-				Debug3dProvider.addObject(p);
-				List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
-				toAdd.addAll(triangles);
+//				Debug3dProvider.clearScreen();
+//				Debug3dProvider.addObject(p);
+//				List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
+//				toAdd.addAll(triangles);
+//				Debug3dProvider.setProvider(null);
 			}
 
 		}
