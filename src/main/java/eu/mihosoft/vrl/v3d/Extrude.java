@@ -85,8 +85,8 @@ public class Extrude {
 		private CSG monotoneExtrude(Vector3d dir, Polygon polygon1) {
 			List<Polygon> newPolygons = new ArrayList<>();
 			CSG extrude;
-
-			newPolygons.addAll(PolygonUtil.concaveToConvex(polygon1));
+			//polygon1=polygon1.flipped();
+			newPolygons.addAll(PolygonUtil.concaveToConvex(polygon1.flipped()));
 			Polygon polygon2 = polygon1.translated(dir);
 
 			int numvertices = polygon1.vertices.size();
@@ -106,7 +106,7 @@ public class Extrude {
 			}
 
 			polygon2 = polygon2.flipped();
-			List<Polygon> topPolygons = PolygonUtil.concaveToConvex(polygon2);
+			List<Polygon> topPolygons = PolygonUtil.concaveToConvex(polygon2.flipped());
 
 			newPolygons.addAll(topPolygons);
 			extrude = CSG.fromPolygons(newPolygons);
@@ -141,7 +141,7 @@ public class Extrude {
 
 		List<Polygon> newPolygons = new ArrayList<>();
 		CSG extrude;
-		newPolygons.addAll(PolygonUtil.concaveToConvex(polygon1));
+		newPolygons.addAll(PolygonUtil.concaveToConvex(polygon1.flipped()));
 		if (polygon1.vertices.size() != polygon2.vertices.size()) {
 			throw new RuntimeException("These polygons do not match");
 		}
@@ -163,7 +163,7 @@ public class Extrude {
 		}
 
 		polygon2 = polygon2.flipped();
-		List<Polygon> topPolygons = PolygonUtil.concaveToConvex(polygon2);
+		List<Polygon> topPolygons = PolygonUtil.concaveToConvex(polygon2.flipped());
 
 		newPolygons.addAll(topPolygons);
 		extrude = CSG.fromPolygons(newPolygons);
