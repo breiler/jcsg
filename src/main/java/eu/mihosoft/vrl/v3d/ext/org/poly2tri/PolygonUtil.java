@@ -52,6 +52,7 @@ import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.triangulate.polygon.ConstrainedDelaunayTriangulator;
 import org.locationtech.jts.triangulate.polygon.PolygonTriangulator;
 
 // TODO: Auto-generated Javadoc
@@ -179,7 +180,7 @@ public class PolygonUtil {
 		Geometry triangles;
 		try {
 			Geometry geom = new GeometryFactory().createPolygon(coordinates);
-			triangles= PolygonTriangulator.triangulate(geom);
+			triangles= ConstrainedDelaunayTriangulator.triangulate(geom);
 			//System.out.println("Triangulation result\n"+triangles.toText());
 		}catch(Exception ex) {
 			ex.printStackTrace();

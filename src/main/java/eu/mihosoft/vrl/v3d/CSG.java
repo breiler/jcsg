@@ -727,8 +727,8 @@ public class CSG implements IuserAPI {
 	 * @return union of this csg and the specified csg
 	 */
 	public CSG union(CSG csg) {
-		triangulate();
-		csg.triangulate();
+//		triangulate();
+//		csg.triangulate();
 		switch (getOptType()) {
 		case CSG_BOUND:
 			return _unionCSGBoundsOpt(csg).historySync(this).historySync(csg);
@@ -1092,8 +1092,8 @@ public class CSG implements IuserAPI {
 	 * @return difference of this csg and the specified csg
 	 */
 	public CSG difference(CSG csg) {
-		triangulate();
-		csg.triangulate();
+//		triangulate();
+//		csg.triangulate();
 		try {
 			// Check to see if a CSG operation is attempting to difference with
 			// no
@@ -1230,8 +1230,8 @@ public class CSG implements IuserAPI {
 	 * @return intersection of this csg and the specified csg
 	 */
 	public CSG intersect(CSG csg) {
-		triangulate();
-		csg.triangulate();
+//		triangulate();
+//		csg.triangulate();
 		Node a = new Node(this.clone().getPolygons());
 		Node b = new Node(csg.clone().getPolygons());
 		a.invert();
@@ -1241,7 +1241,7 @@ public class CSG implements IuserAPI {
 		b.clipTo(a);
 		a.build(b.allPolygons());
 		a.invert();
-		CSG back = CSG.fromPolygons(a.allPolygons()).triangulate().optimization(getOptType()).historySync(csg)
+		CSG back = CSG.fromPolygons(a.allPolygons()).optimization(getOptType()).historySync(csg)
 				.historySync(this);
 		if (getName().length() != 0 && csg.getName().length() != 0) {
 			back.setName(csg.getName() + " intersection with " + name);
@@ -1322,7 +1322,7 @@ public class CSG implements IuserAPI {
 	 * @return the specified string builder
 	 */
 	public StringBuilder toStlString(StringBuilder sb) {
-		triangulate(true);
+		triangulate(false);
 		try {
 			sb.append("solid v3d.csg\n");
 			this.getPolygons().stream().forEach((Polygon p) -> {
@@ -1452,10 +1452,10 @@ public class CSG implements IuserAPI {
 		//p=PolygonUtil.pruneDuplicatePoints(p);
 		if(p==null)
 			return;
-		if(p.isDegenerate()) {
-			degenerates.add(p);
-			return;
-		}
+//		if(p.isDegenerate()) {
+//			degenerates.add(p);
+//			return;
+//		}
 			
 		if (p.vertices.size() == 3) {
 			toAdd.add(p);
@@ -1463,7 +1463,7 @@ public class CSG implements IuserAPI {
 			// System.out.println("Fixing error in STL " + name + " polygon# " + i + "
 			// number of vertices " + p.vertices.size());
 			try {
-				List<Polygon> triangles = PolygonUtil.concaveToConvex(p);
+				List<Polygon> triangles = PolygonUtil.concaveToConvex(p,true);
 				for(Polygon poly :triangles) {
 					if(poly.isDegenerate()) {
 						degenerates.add(poly);
@@ -1471,13 +1471,13 @@ public class CSG implements IuserAPI {
 						toAdd.add(poly);
 				}
 			} catch (Throwable ex) {
-//				Debug3dProvider.setProvider(providerOf3d);
+				Debug3dProvider.setProvider(providerOf3d);
 				ex.printStackTrace();
-//				Debug3dProvider.clearScreen();
-//				Debug3dProvider.addObject(p);
-//				List<Polygon> triangles = PolygonUtil.toSTLTriangles(p);
-//				toAdd.addAll(triangles);
-//				Debug3dProvider.setProvider(null);
+				Debug3dProvider.clearScreen();
+				Debug3dProvider.addObject(p);
+				List<Polygon> triangles = PolygonUtil.concaveToConvex(p,true);
+				toAdd.addAll(triangles);
+				Debug3dProvider.setProvider(null);
 			}
 
 		}
@@ -1502,7 +1502,7 @@ public class CSG implements IuserAPI {
 	 * @return the specified string builder
 	 */
 	public StringBuilder toObjString(StringBuilder sb) {
-		triangulate();
+		triangulate(true);
 		sb.append("# Group").append("\n");
 		sb.append("g v3d.csg\n");
 		sb.append("o " + (name == null || name.length() == 0 ? "CSG Export" : getName()) + "\n");
