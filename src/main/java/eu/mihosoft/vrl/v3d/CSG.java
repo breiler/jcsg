@@ -2623,6 +2623,24 @@ public class CSG implements IuserAPI {
 			return 0;
 		return (int) getStorage().getValue("printBedIndex").get();
 	}
-
-
+	public static CSG text(String text, double height, double fontSize) {
+		return text( text,  height,  fontSize, "Arial");
+	}
+	public static CSG text(String text, double height) {
+		return text( text,  height,  30);
+	}
+	public static CSG text(String text, double height, double fontSize, String fontType) {
+		javafx.scene.text.Font font = new javafx.scene.text.Font("Arial",  30);
+		ArrayList<CSG> stuff = TextExtrude.text(height,text,font);
+		CSG back =null;
+		for(int i=0;i<stuff.size();i++) {
+			if(back==null)
+				back=stuff.get(i);
+			else {
+				back=back.dumbUnion(stuff.get(i));
+			}
+		}
+		
+		return back;
+	}
 }
