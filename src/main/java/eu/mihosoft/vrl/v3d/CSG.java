@@ -2640,7 +2640,8 @@ public class CSG implements IuserAPI {
 				back=back.dumbUnion(stuff.get(i));
 			}
 		}
-		
+		back=back.rotx(180)
+			    .toZMin();
 		return back;
 	}
 }
