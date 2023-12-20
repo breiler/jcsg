@@ -24,7 +24,6 @@ import org.apache.batik.dom.svg.SVGOMPathElement;
 import org.apache.batik.dom.svg.SVGOMPolylineElement;
 import org.apache.batik.util.XMLResourceDescriptor;
 import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.svg.SVGImageElement;
@@ -206,7 +205,7 @@ public class SVGLoad {
 	/**
 	 * Creates an SVG Document given a URI.
 	 *
-	 * @param uri
+	 * @param f
 	 *            Path to the file.
 	 * @throws Exception
 	 *             Something went wrong parsing the SVG file.

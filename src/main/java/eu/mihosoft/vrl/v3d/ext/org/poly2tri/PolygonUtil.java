@@ -1,4 +1,4 @@
-/**
+/*
  * PolygonUtil.java
  *
  * Copyright 2014-2014 Michael Hoffer info@michaelhoffer.de. All rights
@@ -42,18 +42,12 @@ import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.Vertex;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.triangulate.polygon.ConstrainedDelaunayTriangulator;
-import org.locationtech.jts.triangulate.polygon.PolygonTriangulator;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -104,7 +98,7 @@ public class PolygonUtil {
 	/**
 	 * Concave to convex.
 	 *
-	 * @param concave the concave
+	 * @param incoming the concave
 	 * @return the list
 	 */
 	public static List<eu.mihosoft.vrl.v3d.Polygon> concaveToConvex(eu.mihosoft.vrl.v3d.Polygon incoming) {

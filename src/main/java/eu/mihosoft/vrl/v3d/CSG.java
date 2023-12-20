@@ -1,4 +1,4 @@
-/**
+/*
  * CSG.java
  *
  * Copyright 2014-2014 Michael Hoffer info@michaelhoffer.de. All rights
@@ -45,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -58,22 +57,19 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.CullFace;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
-import javafx.scene.shape.TriangleMesh;
 import javafx.scene.transform.Affine;
 
-// TODO: Auto-generated Javadoc
 /**
  * Constructive Solid Geometry (CSG).
- *
+ * <p>
  * This implementation is a Java port of
- * 
- * href="https://github.com/evanw/csg.js/" https://github.com/evanw/csg.js/ with
- * some additional features like polygon extrude, transformations etc. Thanks to
+ * <p>
+ * <a href="https://github.com/evanw/csg.js/">https://github.com/evanw/csg.js/</a>
+ * with some additional features like polygon extrude, transformations etc. Thanks to
  * the author for creating the CSG.js library.<br>
- * <br>
- *
- * Implementation Details
- *
+ * <p>
+ * <b>Implementation Details</b>
+ * <p>
  * All CSG operations are implemented in terms of two functions,
  * {@link Node#clipTo(eu.mihosoft.vrl.v3d.Node)} and {@link Node#invert()},
  * which remove parts of a BSP tree inside another BSP tree and swap solid and
@@ -81,22 +77,28 @@ import javafx.scene.transform.Affine;
  * want to remove everything in {@code a} inside {@code b} and everything in
  * {@code b} inside {@code a}, then combine polygons from {@code a} and
  * {@code b} into one solid:
- *
- * 
- * a.clipTo(b); b.clipTo(a); a.build(b.allPolygons());
- * 
- *
+ * <p>
+ * <blockquote><pre>
+ *     a.clipTo(b);
+ *     b.clipTo(a);
+ *     a.build(b.allPolygons());
+ * </pre></blockquote>
+ * <p>
  * The only tricky part is handling overlapping coplanar polygons in both trees.
  * The code above keeps both copies, but we need to keep them in one tree and
  * remove them in the other tree. To remove them from {@code b} we can clip the
  * inverse of {@code b} against {@code a}. The code for union now looks like
  * this:
- *
- * 
- * a.clipTo(b); b.clipTo(a); b.invert(); b.clipTo(a); b.invert();
- * a.build(b.allPolygons());
- * 
- *
+ * <p>
+ * <blockquote><pre>
+ *     a.clipTo(b);
+ *     b.clipTo(a);
+ *     b.invert();
+ *     b.clipTo(a);
+ *     b.invert();
+ *     a.build(b.allPolygons());
+ * </pre></blockquote>
+ * <p>
  * Subtraction and intersection naturally follow from set operations. If union
  * is {@code A | B}, differenceion is {@code A - B = ~(~A | B)} and intersection
  * is {@code A & B =
@@ -214,7 +216,7 @@ public class CSG implements IuserAPI {
 	/**
 	 * Sets the Temporary color.
 	 *
-	 * @param Temporary color the new Temporary color
+	 * @param color the new Temporary color
 	 */
 	public CSG setTemporaryColor(Color color) {
 		if (current != null) {
@@ -711,16 +713,21 @@ public class CSG implements IuserAPI {
 	/**
 	 * Return a new CSG solid representing the union of this csg and the specified
 	 * csg.
+	 * <p>
+	 * <b>Note:</b> Neither this csg nor the specified csg are weighted.
+	 * <p>
+	 * <blockquote><pre>
+	 *    A.union(B)
 	 *
-	 * Note: Neither this csg nor the specified csg are weighted.
-	 *
-	 * 
-	 * A.union(B)
-	 *
-	 * +-------+ +-------+ | | | | | A | | | | +--+----+ = | +----+ +----+--+ |
-	 * +----+ | | B | | | | | | | +-------+ +-------+
-	 * 
-	 *
+	 *    +-------+            +-------+
+	 *    |       |            |       |
+	 *    |   A   |            |       |
+	 *    |    +--+----+   =   |       +----+
+	 *    +----+--+    |       +----+       |
+	 *         |   B   |            |       |
+	 *         |       |            |       |
+	 *         +-------+            +-------+
+	 * </pre></blockquote>
 	 *
 	 * @param csg other csg
 	 *
@@ -742,11 +749,11 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Returns a csg consisting of the polygons of this csg and the specified csg.
-	 * 
+	 * <p>
 	 * The purpose of this method is to allow fast union operations for objects that
 	 * do not intersect.
-	 * 
-	 * WARNING: this method does not apply the csg algorithms. Therefore, please
+	 * <p>
+	 * <b>WARNING:</b> this method does not apply the csg algorithms. Therefore, please
 	 * ensure that this csg and the specified csg do not intersect.
 	 * 
 	 * @param csg csg
@@ -767,16 +774,21 @@ public class CSG implements IuserAPI {
 	/**
 	 * Return a new CSG solid representing the union of this csg and the specified
 	 * csgs.
+	 * <p>
+	 * <b>Note:</b> Neither this csg nor the specified csg are weighted.
+	 * <p>
+	 * <blockquote><pre>
+	 *    A.union(B)
 	 *
-	 * Note: Neither this csg nor the specified csg are weighted.
-	 *
-	 * 
-	 * A.union(B)
-	 *
-	 * +-------+ +-------+ | | | | | A | | | | +--+----+ = | +----+ +----+--+ |
-	 * +----+ | | B | | | | | | | +-------+ +-------+
-	 * 
-	 *
+	 *    +-------+            +-------+
+	 *    |       |            |       |
+	 *    |   A   |            |       |
+	 *    |    +--+----+   =   |       +----+
+	 *    +----+--+    |       +----+       |
+	 *         |   B   |            |       |
+	 *         |       |            |       |
+	 *         +-------+            +-------+
+	 * </pre></blockquote>
 	 *
 	 * @param csgs other csgs
 	 *
@@ -822,16 +834,21 @@ public class CSG implements IuserAPI {
 	/**
 	 * Return a new CSG solid representing the union of this csg and the specified
 	 * csgs.
+	 * <p>
+	 * <b>Note:</b> Neither this csg nor the specified csg are weighted.
+	 * <p>
+	 * <blockquote><pre>
+	 *    A.union(B)
 	 *
-	 * Note: Neither this csg nor the specified csg are weighted.
-	 *
-	 * 
-	 * A.union(B)
-	 *
-	 * +-------+ +-------+ | | | | | A | | | | +--+----+ = | +----+ +----+--+ |
-	 * +----+ | | B | | | | | | | +-------+ +-------+
-	 * 
-	 *
+	 *    +-------+            +-------+
+	 *    |       |            |       |
+	 *    |   A   |            |       |
+	 *    |    +--+----+   =   |       +----+
+	 *    +----+--+    |       +----+       |
+	 *         |   B   |            |       |
+	 *         |       |            |       |
+	 *         +-------+            +-------+
+	 * </pre></blockquote>
 	 *
 	 * @param csgs other csgs
 	 *
@@ -1022,15 +1039,21 @@ public class CSG implements IuserAPI {
 	/**
 	 * Return a new CSG solid representing the difference of this csg and the
 	 * specified csgs.
-	 *
-	 * Note: Neither this csg nor the specified csgs are weighted.
-	 *
-	 * 
+	 * <p>
+	 * <b>Note:</b> Neither this csg nor the specified csgs are weighted.
+	 * <p>
+	 * <blockquote><pre>
 	 * A.difference(B)
 	 *
-	 * +-------+ +-------+ | | | | | A | | | | +--+----+ = | +--+ +----+--+ | +----+
-	 * | B | | | +-------+
-	 * 
+	 * +-------+            +-------+
+	 * |       |            |       |
+	 * |   A   |            |       |
+	 * |    +--+----+   =   |    +--+
+	 * +----+--+    |       +----+
+	 *      |   B   |
+	 *      |       |
+	 *      +-------+
+	 * </pre></blockquote>
 	 *
 	 * @param csgs other csgs
 	 * @return difference of this csg and the specified csgs
@@ -1057,15 +1080,21 @@ public class CSG implements IuserAPI {
 	/**
 	 * Return a new CSG solid representing the difference of this csg and the
 	 * specified csgs.
-	 *
-	 * Note: Neither this csg nor the specified csgs are weighted.
-	 *
-	 * 
+	 * <p>
+	 * <b>Note:</b> Neither this csg nor the specified csgs are weighted.
+	 * <p>
+	 * <blockquote><pre>
 	 * A.difference(B)
 	 *
-	 * +-------+ +-------+ | | | | | A | | | | +--+----+ = | +--+ +----+--+ | +----+
-	 * | B | | | +-------+
-	 * 
+	 * +-------+            +-------+
+	 * |       |            |       |
+	 * |   A   |            |       |
+	 * |    +--+----+   =   |    +--+
+	 * +----+--+    |       +----+
+	 *      |   B   |
+	 *      |       |
+	 *      +-------+
+	 * </pre></blockquote>
 	 *
 	 * @param csgs other csgs
 	 * @return difference of this csg and the specified csgs
@@ -1078,15 +1107,21 @@ public class CSG implements IuserAPI {
 	/**
 	 * Return a new CSG solid representing the difference of this csg and the
 	 * specified csg.
-	 *
-	 * Note: Neither this csg nor the specified csg are weighted.
-	 *
-	 * 
+	 * <p>
+	 * <b>Note:</b> Neither this csg nor the specified csg are weighted.
+	 * <p>
+	 * <blockquote><pre>
 	 * A.difference(B)
 	 *
-	 * +-------+ +-------+ | | | | | A | | | | +--+----+ = | +--+ +----+--+ | +----+
-	 * | B | | | +-------+
-	 * 
+	 * +-------+            +-------+
+	 * |       |            |       |
+	 * |   A   |            |       |
+	 * |    +--+----+   =   |    +--+
+	 * +----+--+    |       +----+
+	 *      |   B   |
+	 *      |       |
+	 *      +-------+
+	 * </pre></blockquote>
 	 *
 	 * @param csg other csg
 	 * @return difference of this csg and the specified csg
@@ -1217,14 +1252,22 @@ public class CSG implements IuserAPI {
 	/**
 	 * Return a new CSG solid representing the intersection of this csg and the
 	 * specified csg.
+	 * <p>
+	 * <b>Note:</b> Neither this csg nor the specified csg are weighted.
+	 * <p>
+	 * <blockquote><pre>
+	 *     A.intersect(B)
 	 *
-	 * Note: Neither this csg nor the specified csg are weighted.
-	 *
-	 * 
-	 * A.intersect(B)
-	 *
-	 * +-------+ | | | A | | +--+----+ = +--+ +----+--+ | +--+ | B | | | +-------+ }
-	 * 
+	 *     +-------+
+	 *     |       |
+	 *     |   A   |
+	 *     |    +--+----+   =   +--+
+	 *     +----+--+    |       +--+
+	 *          |   B   |
+	 *          |       |
+	 *          +-------+
+	 * }
+	 * </pre></blockquote>
 	 *
 	 * @param csg other csg
 	 * @return intersection of this csg and the specified csg
@@ -1252,14 +1295,22 @@ public class CSG implements IuserAPI {
 	/**
 	 * Return a new CSG solid representing the intersection of this csg and the
 	 * specified csgs.
+	 * <p>
+	 * <b>Note:</b> Neither this csg nor the specified csgs are weighted.
+	 * <p>
+	 * <blockquote><pre>
+	 *     A.intersect(B)
 	 *
-	 * Note: Neither this csg nor the specified csgs are weighted.
-	 *
-	 * 
-	 * A.intersect(B)
-	 *
-	 * +-------+ | | | A | | +--+----+ = +--+ +----+--+ | +--+ | B | | | +-------+ }
-	 * 
+	 *     +-------+
+	 *     |       |
+	 *     |   A   |
+	 *     |    +--+----+   =   +--+
+	 *     +----+--+    |       +--+
+	 *          |   B   |
+	 *          |       |
+	 *          +-------+
+	 * }
+	 * </pre></blockquote>
 	 *
 	 * @param csgs other csgs
 	 * @return intersection of this csg and the specified csgs
@@ -1286,14 +1337,22 @@ public class CSG implements IuserAPI {
 	/**
 	 * Return a new CSG solid representing the intersection of this csg and the
 	 * specified csgs.
+	 * <p>
+	 * <b>Note:</b> Neither this csg nor the specified csgs are weighted.
+	 * <p>
+	 * <blockquote><pre>
+	 *     A.intersect(B)
 	 *
-	 * Note: Neither this csg nor the specified csgs are weighted.
-	 *
-	 * 
-	 * A.intersect(B)
-	 *
-	 * +-------+ | | | A | | +--+----+ = +--+ +----+--+ | +--+ | B | | | +-------+ }
-	 * 
+	 *     +-------+
+	 *     |       |
+	 *     |   A   |
+	 *     |    +--+----+   =   +--+
+	 *     +----+--+    |       +--+
+	 *          |   B   |
+	 *          |       |
+	 *          +-------+
+	 * }
+	 * </pre></blockquote>
 	 *
 	 * @param csgs other csgs
 	 * @return intersection of this csg and the specified csgs
@@ -2346,9 +2405,6 @@ public class CSG implements IuserAPI {
 		return exportFormats;
 	}
 
-	/**
-	 * @return the exportFormats
-	 */
 	public void clearExportFormats() {
 		if (exportFormats != null)
 			exportFormats.clear();
@@ -2411,36 +2467,35 @@ public class CSG implements IuserAPI {
 	 * is the thinnest dimension. Assumes board thickness can be arbitrary but
 	 * uniform height. Assumes the edge having tabs added extends fully between Min
 	 * and Max in that dimension.
-	 * 
+	 * <p>
 	 * TODO: Find the polygon defined by the XY plane slice that is perhaps 0.5mm
 	 * into the normalized +Y. Add tabs to THAT polygon's minX/maxX instead of
 	 * part's global minX/maxX.
-	 * 
+	 * <p>
 	 * Example usage: // Create a temporary copy of the target object, without any
 	 * tabs CSG boardTemp = board
-	 * 
+	 * <p>
 	 * // Instantiate a bucket to hold fastener CSG objects in ArrayList<CSG>
 	 * fasteners = []
-	 * 
+	 * <p>
 	 * // Define the direction of the edge to be tabbed using a Vector3d object, in
 	 * this case the edge facing in the negative Y direction Vector3d edgeDirection
 	 * = new Vector3d(0, -1, 0);
-	 * 
+	 * <p>
 	 * // Define the diameter of the fastener holes to be added using a
 	 * LengthParameter object LengthParameter screwDiameter = new
 	 * LengthParameter("Screw Hole Diameter (mm)", 3, [0, 20])
-	 * 
+	 * <p>
 	 * // Add tabs to the temporary object using the edgeDirection and screwDiameter
 	 * parameters ArrayList<CSG> returned = boardTemp.addTabs(edgeDirection,
 	 * screwDiameter);
-	 * 
+	 * <p>
 	 * // Combine the modified temporary object with the original object, to add the
 	 * new tabs board = boardTemp.union(returned.get(0));
-	 * 
+	 * <p>
 	 * // Add the separate fastener hole objects to the list fasteners =
 	 * returned.subList(1, returned.size());
 	 *
-	 * @param boardInput    the original CSG object to add tabs to
 	 * @param edgeDirection a Vector3d object representing the direction of the edge
 	 *                      of the board to which tabs and fastener holes will be
 	 *                      added

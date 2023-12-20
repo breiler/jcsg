@@ -12,7 +12,6 @@ import eu.mihosoft.vrl.v3d.PropertyStorage;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class HullUtil.
  *
@@ -107,10 +106,8 @@ public class HullUtil {
 	/**
 	 * Hull.
 	 *
-	 * @param csg
-	 *            the csg
-	 * @param storage
-	 *            the storage
+	 * @param csgList
+	 *            a list of csg
 	 * @return the csg
 	 */
 	public static CSG hull(CSG... csgList) {

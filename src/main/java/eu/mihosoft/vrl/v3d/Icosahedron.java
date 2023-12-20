@@ -1,4 +1,4 @@
-/**
+/*
  * Icosahedron.java
  */
 package eu.mihosoft.vrl.v3d;
@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.mihosoft.vrl.v3d.ext.quickhull3d.HullUtil;
-import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
-import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 
 public class Icosahedron extends Primitive {
 
@@ -51,7 +49,7 @@ public class Icosahedron extends Primitive {
      * radius.
      *
      * @param center center of the icosahedron
-     * @param circumradius of the icosahedron
+     * @param size of the icosahedron
      */
     public Icosahedron(Vector3d center, double size) {
         this.center = center;

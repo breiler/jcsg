@@ -1,4 +1,4 @@
-/**
+/*
  * Tetrahedron.java
  */
 package eu.mihosoft.vrl.v3d;
@@ -51,7 +51,7 @@ public class Tetrahedron extends Primitive {
      * radius.
      *
      * @param center center of the tetrahedron
-     * @param circumradius of the tetrahedron
+     * @param size of the tetrahedron
      */
     public Tetrahedron(Vector3d center, double size) {
         this.center = center;

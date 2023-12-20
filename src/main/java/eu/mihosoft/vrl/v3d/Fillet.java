@@ -20,7 +20,6 @@ public class Fillet extends Primitive {
    *
    * @param w width
    * @param h height
-   * @param d depth
    */
   public Fillet(double w, double h) {
     this.w = w;
