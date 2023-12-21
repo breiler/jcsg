@@ -98,7 +98,7 @@ ext {
 
 
 group = "com.neuronrobotics"
-archivesBaseName = props."app.name"
+archivesBaseName = "JavaCad"
 version = props."app.version"
 nexusStaging {
 	packageGroup = 'com.neuronrobotics'
