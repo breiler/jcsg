@@ -26,12 +26,6 @@ task sourcesJar(type: Jar) {
 }
 
 
-if (!hasProperty('mainClass')) {
-    ext.mainClass = 'eu.mihosoft.vrl.v3d.Main'
-}
-
-mainClassName = mainClass
-
 repositories {
     mavenCentral()
     jcenter()
@@ -105,7 +99,7 @@ ext {
 
 group = "com.neuronrobotics"
 archivesBaseName = props."app.name"
-version = System.getenv("VERSION_SEMVER").length()>0?System.getenv("VERSION_SEMVER"): props."app.version"
+version = props."app.version"
 nexusStaging {
 	packageGroup = 'com.neuronrobotics'
 	serverUrl='https://oss.sonatype.org/service/local/'
