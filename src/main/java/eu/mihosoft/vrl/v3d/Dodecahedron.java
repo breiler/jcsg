@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.mihosoft.vrl.v3d.ext.quickhull3d.HullUtil;
-import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
-import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 
 public class Dodecahedron extends Primitive {
 
@@ -51,7 +49,7 @@ public class Dodecahedron extends Primitive {
      * radius.
      *
      * @param center center of the dodecahedron
-     * @param circumradius of the dodecahedron
+     * @param size of the dodecahedron
      */
     public Dodecahedron(Vector3d center, double size) {
         this.center = center;

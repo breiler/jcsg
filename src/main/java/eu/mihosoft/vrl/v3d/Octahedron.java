@@ -1,4 +1,4 @@
-/**
+/*
  * Octahedron.java
  */
 package eu.mihosoft.vrl.v3d;
@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.mihosoft.vrl.v3d.ext.quickhull3d.HullUtil;
-import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
-import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 
 public class Octahedron extends Primitive {
 
@@ -51,7 +49,7 @@ public class Octahedron extends Primitive {
      * radius.
      *
      * @param center center of the octahedron
-     * @param circumradius of the octahedron
+     * @param size of the octahedron
      */
     public Octahedron(Vector3d center, double size) {
         this.center = center;

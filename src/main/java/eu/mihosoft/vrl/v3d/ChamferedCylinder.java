@@ -16,9 +16,9 @@ public class ChamferedCylinder extends Primitive {
    * Constructor. Creates a new cuboid with center {@code [0,0,0]} and with the specified
    * dimensions.
    *
-   * @param w width
+   * @param r radius
    * @param h height
-   * @param d depth
+   * @param chamferHeight the chamfer height
    */
   public ChamferedCylinder(double r, double h, double chamferHeight) {
     this.r = r;

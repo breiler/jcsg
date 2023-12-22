@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import eu.mihosoft.vrl.v3d.ext.org.poly2tri.PolygonUtil;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Edge.
  *
@@ -526,7 +525,6 @@ public class Edge {
      * Determines whether the specified point is colinear
      *
      * @param p point to check
-     * @param TOL tolerance
      * @return <code>true</code> if the specified point lies on this line
      * segment; <code>false</code> otherwise
      */

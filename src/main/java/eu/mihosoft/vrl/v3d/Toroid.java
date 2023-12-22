@@ -1,4 +1,4 @@
-/**
+/*
  * Cylinder.java
  *
  * Copyright 2014-2014 Michael Hoffer info@michaelhoffer.de. All rights
@@ -37,14 +37,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import eu.mihosoft.vrl.v3d.ext.org.poly2tri.PolygonUtil;
-import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
-
-// TODO: Auto-generated Javadoc
 /**
  * A solid cylinder.
- *
- * The tessellation can be controlled via the {@link #numSlices} parameter.
+ * <p>
+ * The tessellation can be controlled via the numSlices parameter.
  *
  * @author Michael Hoffer &lt;info@michaelhoffer.de&gt;
  */
