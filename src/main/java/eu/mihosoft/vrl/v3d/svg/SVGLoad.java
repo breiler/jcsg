@@ -1,5 +1,13 @@
 package eu.mihosoft.vrl.v3d.svg;
 
+
+
+import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
+import org.apache.batik.anim.dom.SVGOMGElement;
+import org.apache.batik.anim.dom.SVGOMImageElement;
+import org.apache.batik.anim.dom.SVGOMPathElement;
+import org.apache.batik.anim.dom.SVGOMPolylineElement;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
