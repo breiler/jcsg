@@ -1,9 +1,11 @@
 
-apply plugin: 'java'
-apply plugin: 'signing'
-apply plugin: 'maven'
-apply plugin: 'application'
-
+plugins {
+	id 'eclipse'
+	id 'java'
+	id 'maven-publish'
+	id 'signing'
+	id 'io.codearte.nexus-staging' version '0.30.0'
+}
 
 
 sourceCompatibility = '1.8'
@@ -17,17 +19,12 @@ Properties props = new Properties()
 props.load(new FileInputStream(buildDir.getAbsolutePath()+"/src/main/resources/com/neuronrobotics/javacad/build.properties"))
 
 
+
 task sourcesJar(type: Jar) {
 	classifier = 'sources'
 	from sourceSets.main.allSource
 }
 
-
-if (!hasProperty('mainClass')) {
-    ext.mainClass = 'eu.mihosoft.vrl.v3d.Main'
-}
-
-mainClassName = mainClass
 
 repositories {
     mavenCentral()
@@ -101,60 +98,72 @@ ext {
 
 
 group = "com.neuronrobotics"
-archivesBaseName = props."app.name"
+archivesBaseName = "JavaCad"
 version = props."app.version"
-
-/*
-artifacts {
-	archives javadocJar, sourcesJar, jar
+nexusStaging {
+	packageGroup = 'com.neuronrobotics'
+	serverUrl='https://oss.sonatype.org/service/local/'
+	username = System.getenv("MAVEN_USERNAME")
+	password = System.getenv("MAVEN_PASSWORD")
 }
-
-signing {
-	sign configurations.archives
-}
-uploadArchives {
-	repositories {
-	  mavenDeployer {
-		beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-  
-		repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-		  authentication(userName: ossrhUsername, password: ossrhPassword)
-		}
-  
-		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-		  authentication(userName: ossrhUsername, password: ossrhPassword)
-		}
-  
-		pom.project {
-		  name 'JCSG JavaCad'
-		  packaging 'jar'
-		  // optionally artifactId can be defined here
-		  description 'A Java based CSG Cad library'
-		  url 'http://neuronrobotics.com'
-  
-		  scm {
-			connection 			'scm:git:https://github.com/NeuronRobotics/JCSG'
-			developerConnection 'scm:git:git@github.com:NeuronRobotics/JCSG.git'
-			url 'https://github.com/NeuronRoboticsG/JCSG'
-		  }
-  
-		  licenses {
-			license {
-			  name 'The Apache License, Version 2.0'
-			  url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+publishing {
+	
+		repositories {
+			maven {
+				name = "OSSRH"
+				url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+				credentials {
+					username = System.getenv("MAVEN_USERNAME")
+					password = System.getenv("MAVEN_PASSWORD")
+				}
 			}
-		  }
-  
-		  developers {
-			developer {
-			  id 'madhephaestus'
-			  name 'Kevin Harrington'
-			  email 'kharrington@neuronrobotics.com'
-			}
-		  }
 		}
-	  }
+		publications {
+			mavenJava(MavenPublication) {
+				from components.java
+				pom {
+					name= 'JCSG'
+					packaging ='jar'
+					// optionally artifactId can be defined here
+					description ='A Java based CSG Cad library'
+					url= 'https://github.com/NeuronRobotics/JCSG'
+	
+					scm {
+						connection 			='scm:git:https://github.com/NeuronRobotics/JCSG'
+						developerConnection ='scm:git:https://github.com/NeuronRobotics/JCSG'
+						url ='https://github.com/NeuronRobotics/JCSG'
+					}
+	
+					licenses {
+						license {
+							name= 'The Apache License, Version 2.0'
+							url ='http://www.apache.org/licenses/LICENSE-2.0.txt'
+						}
+					}
+	
+					developers {
+						developer {
+							id ='madhephaestus'
+							name= 'Kevin Harrington'
+							email= 'kharrington@neuronrobotics.com'
+						}
+					}
+				}
+			}
+		}
 	}
-  }
-  */
- 
+	java {
+		withJavadocJar()
+		withSourcesJar()
+	}
+	
+	signing {
+		sign publishing.publications.mavenJava
+	}
+	
+	
+	javadoc {
+		if(JavaVersion.current().isJava9Compatible()) {
+			options.addBooleanOption('html5', true)
+		}
+	}
