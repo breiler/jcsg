@@ -2703,4 +2703,24 @@ public class CSG implements IuserAPI {
 			    .toZMin();
 		return back;
 	}
+	/**
+	 * Extrude text to a specific bounding box size
+	 * @param text the text to be extruded
+	 * @param x the total final X 
+	 * @param y the total final Y 
+	 * @param z the total final Z
+	 * @return The given input text, scaled to the exact sizes provided, with Y=0 line as the bottom line of the text
+	 */
+	public static CSG textToSize(String text, double x, double y, double z) {
+		CSG startText = CSG.text( text, z) ;
+		double scalex = x/startText.getTotalX();
+		double scaley = y/startText.getTotalY();
+		return startText
+				.scalex(scalex)
+				.scaley(scaley)
+				.toXMin();
+	}
+	
+	
+	
 }
