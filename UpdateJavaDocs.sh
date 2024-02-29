@@ -4,9 +4,15 @@ GITURL=$(git config --get remote.origin.url)
 
 echo $GITURL
 
-rm -rf html
-git clone $GITURL html
-cd html
+if test -d /path/to/directory; then
+  echo "html Directory exists."
+  cd html
+  git pull
+else
+	git clone $GITURL html
+	cd html
+fi
+
 if ( git checkout origin/gh-pages -b gh-pages) then
 	echo "Checked out $GITURL gh-pages"
 else
@@ -28,5 +34,5 @@ git add search/*
 git commit -a -m"updating the doxygen"
 git push
 cd ..
-rm -rf html
+
 git checkout development
