@@ -2732,7 +2732,9 @@ public class CSG implements IuserAPI {
 				.scaley(scaley)
 				.toXMin();
 	}
-	
+	public boolean hasMassSet() {
+		return getStorage().getValue("massKg").isPresent();
+	}
 	public CSG setMassKG(double mass) {
 		getStorage().set("massKg", mass);
 		return this;
