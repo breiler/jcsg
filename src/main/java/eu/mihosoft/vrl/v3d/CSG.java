@@ -1453,7 +1453,7 @@ public class CSG implements IuserAPI {
 		return this;
 	}
 
-	private void fixDegenerates(ArrayList<Polygon> toAdd, Polygon p) {
+	private CSG fixDegenerates(ArrayList<Polygon> toAdd, Polygon p) {
 		Debug3dProvider.clearScreen();
 		Debug3dProvider.addObject(p);
 		ArrayList<Vertex> degen =p.getDegeneratePoints();
@@ -1505,12 +1505,13 @@ public class CSG implements IuserAPI {
 			toAdd.removeAll(polygonsSharing);
 			toAdd.addAll(polygonsSharingFixed);
 		}
+		return this;
 	}
 
-	private void updatePolygons(ArrayList<Polygon> toAdd, ArrayList<Polygon> degenerates, Polygon p) {
+	private CSG updatePolygons(ArrayList<Polygon> toAdd, ArrayList<Polygon> degenerates, Polygon p) {
 		//p=PolygonUtil.pruneDuplicatePoints(p);
 		if(p==null)
-			return;
+			return this;
 //		if(p.isDegenerate()) {
 //			degenerates.add(p);
 //			return;
@@ -1544,6 +1545,7 @@ public class CSG implements IuserAPI {
 			}
 
 		}
+		return this;
 	}
 
 	/**
@@ -1920,8 +1922,9 @@ public class CSG implements IuserAPI {
 	 *
 	 * @param optType the optType to set
 	 */
-	public void setOptType(OptType optType) {
+	public CSG setOptType(OptType optType) {
 		this.optType = optType;
+		return this;
 	}
 
 	/**
@@ -1929,10 +1932,11 @@ public class CSG implements IuserAPI {
 	 *
 	 * @param polygons the new polygons
 	 */
-	public void setPolygons(List<Polygon> polygons) {
+	public CSG setPolygons(List<Polygon> polygons) {
 		bounds = null;
 		triangulated=false;
 		this.polygons = polygons;
+		return this;
 	}
 
 	/**
@@ -2125,7 +2129,7 @@ public class CSG implements IuserAPI {
 		return this;
 	}
 
-	private void addStackTrace(Exception creationEventStackTrace2) {
+	private CSG addStackTrace(Exception creationEventStackTrace2) {
 		for (StackTraceElement el : creationEventStackTrace2.getStackTrace()) {
 			try {
 				if (!el.getFileName().endsWith(".java") && el.getLineNumber() > 0) {
@@ -2151,6 +2155,7 @@ public class CSG implements IuserAPI {
 
 			}
 		}
+		return this;
 	}
 
 	public CSG historySync(CSG dyingCSG) {
@@ -2320,8 +2325,9 @@ public class CSG implements IuserAPI {
 		return markForRegeneration;
 	}
 
-	public void markForRegeneration() {
+	public CSG markForRegeneration() {
 		this.markForRegeneration = true;
+		return this;
 	}
 
 	/**
@@ -2395,11 +2401,11 @@ public class CSG implements IuserAPI {
 		return slicePlanes;
 	}
 
-	public void addSlicePlane(Transform slicePlane) {
+	public CSG addSlicePlane(Transform slicePlane) {
 		if (slicePlanes == null)
 			slicePlanes = new ArrayList<>();
 		this.slicePlanes.add(slicePlane);
-
+		return this;
 	}
 
 	/**
@@ -2409,23 +2415,25 @@ public class CSG implements IuserAPI {
 		return exportFormats;
 	}
 
-	public void clearExportFormats() {
+	public CSG clearExportFormats() {
 		if (exportFormats != null)
 			exportFormats.clear();
+		return this;
 	}
 
 	/**
 	 * @param exportFormat the exportFormat to add
 	 */
-	public void addExportFormat(String exportFormat) {
+	public CSG addExportFormat(String exportFormat) {
 		if (this.exportFormats == null)
 			this.exportFormats = new ArrayList<>();
 		for (String f : exportFormats) {
 			if (f.toLowerCase().contains(exportFormat.toLowerCase())) {
-				return;
+				return this;
 			}
 		}
 		this.exportFormats.add(exportFormat.toLowerCase());
+		return this;
 	}
 
 	public static int getNumfacesinoffset() {
@@ -2452,16 +2460,18 @@ public class CSG implements IuserAPI {
 		return datumReferences;
 	}
 
-	private void setDatumReferences(ArrayList<Transform> datumReferences) {
+	private CSG setDatumReferences(ArrayList<Transform> datumReferences) {
 		this.datumReferences = datumReferences;
+		return this;
 	}
 
 	public PropertyStorage getStorage() {
 		return str;
 	}
 
-	public void setStorage(PropertyStorage storage) {
+	public CSG setStorage(PropertyStorage storage) {
 		this.str = storage;
+		return this;
 	}
 
 	/**
@@ -2636,7 +2646,7 @@ public class CSG implements IuserAPI {
 		return result;
 	}
 
-	CSG addAssemblyStep(int stepNumber, Transform explodedPose) {
+	public CSG addAssemblyStep(int stepNumber, Transform explodedPose) {
 		String key = "AssemblySteps";
 		PropertyStorage incomingGetStorage = getAssemblyStorage();
 		if (incomingGetStorage.getValue(key) == Optional.empty()) {
@@ -2669,12 +2679,14 @@ public class CSG implements IuserAPI {
 		return (boolean) getStorage().getValue("skeleton").get();
 	}
 
-	public void setIsWireFrame(boolean b) {
+	public CSG setIsWireFrame(boolean b) {
 		getStorage().set("skeleton", b);
+		return this;
 	}
 
-	public void setPrintBedNumber(int index) {
+	public CSG setPrintBedNumber(int index) {
 		getStorage().set("printBedIndex", index);
+		return this;
 	}
 
 	public int getPrintBedIndex() {
@@ -2721,6 +2733,31 @@ public class CSG implements IuserAPI {
 				.toXMin();
 	}
 	
-	
-	
+	public CSG setMassKG(double mass) {
+		getStorage().set("massKg", mass);
+		return this;
+	}
+	public double getMassKG(double mass) {
+		Optional o =getStorage().getValue("massKg");
+		if(o.isPresent())
+			return (double) o.get();
+		return 0.001;
+	}
+	public CSG setCenterOfMass(Transform com) {
+		getStorage().set("massCentroid", com);
+		return this;
+	}
+	public CSG setCenterOfMass(double x, double y, double z) {
+		Transform com = new Transform()
+				.movex(x)
+				.movey(y)
+				.movez(z);
+		return setCenterOfMass(com);
+	}
+	public Transform getCenterOfMass() {
+		Optional o =getStorage().getValue("massCentroid");
+		if(o.isPresent())
+			return (Transform) o.get();
+		return new Transform();
+	}
 }
