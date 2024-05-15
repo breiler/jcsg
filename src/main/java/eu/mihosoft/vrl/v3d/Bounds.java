@@ -210,4 +210,8 @@ public class Bounds {
         return "[center: " + center + ", bounds: " + bounds + "]";
     }
 
+	public boolean contains(Transform com) {
+		return contains(new Vector3d(com.getX(), com.getY(), com.getZ()));
+	}
+
 }

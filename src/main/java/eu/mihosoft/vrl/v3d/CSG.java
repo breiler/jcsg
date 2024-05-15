@@ -2744,7 +2744,9 @@ public class CSG implements IuserAPI {
 		return 0.001;
 	}
 	public CSG setCenterOfMass(Transform com) {
-		getStorage().set("massCentroid", com);
+		Bounds b = getBounds();
+		if(b.contains(com))	
+			getStorage().set("massCentroid", com);
 		return this;
 	}
 	public CSG setCenterOfMass(double x, double y, double z) {
@@ -2758,6 +2760,6 @@ public class CSG implements IuserAPI {
 		Optional o =getStorage().getValue("massCentroid");
 		if(o.isPresent())
 			return (Transform) o.get();
-		return new Transform();
+		return new Transform().move(getCenter());
 	}
 }
