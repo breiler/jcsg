@@ -2741,7 +2741,7 @@ public class CSG implements IuserAPI {
 		Optional o =getStorage().getValue("massKg");
 		if(o.isPresent())
 			return (double) o.get();
-		return 0.001;
+		return mass;
 	}
 	public CSG setCenterOfMass(Transform com) {
 		Bounds b = getBounds();
