@@ -2764,4 +2764,9 @@ public class CSG implements IuserAPI {
 			return (Transform) o.get();
 		return new Transform().move(getCenter());
 	}
+	
+	public CSG syncProperties(CSG dying) {
+		getStorage().syncProperties(dying.getStorage());
+		return this;
+	}
 }

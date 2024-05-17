@@ -36,6 +36,8 @@ package eu.mihosoft.vrl.v3d;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+
 import javafx.scene.paint.Color;
 
 // TODO: Auto-generated Javadoc
@@ -122,5 +124,13 @@ public class PropertyStorage {
                 "" + c.getRed()
                 + " " + c.getGreen()
                 + " " + c.getBlue());
+    }
+    public Set<String> getKeys(){
+    	return map.keySet();
+    }
+    public void syncProperties(PropertyStorage dying) {
+    	for(String o:dying.map.keySet()) {
+    		set(o,dying.map.get(o));
+    	}
     }
 }
