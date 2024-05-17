@@ -974,7 +974,7 @@ public class CSG implements IuserAPI {
 		bounds = null;
 		CSG back = CSG.fromPolygons(allPolygons).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			back.setName(name + " unioned to " + csg.getName());
+			back.setName(name );
 		}
 		return back;
 	}
@@ -1009,7 +1009,7 @@ public class CSG implements IuserAPI {
 		}
 		CSG back = CSG.fromPolygons(allPolygons).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			back.setName(name + " unioned to " + csg.getName());
+			back.setName(name );
 		}
 		return back;
 	}
@@ -1031,7 +1031,7 @@ public class CSG implements IuserAPI {
 		a.build(b.allPolygons());
 		CSG back = CSG.fromPolygons(a.allPolygons()).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			back.setName(name + " unioned to " + csg.getName());
+			back.setName(name );
 		}
 		return back;
 	}
@@ -1185,7 +1185,7 @@ public class CSG implements IuserAPI {
 		CSG a2 = this.intersect(csg.getBounds().toCSG());
 		CSG BACK = a2._differenceNoOpt(b)._unionIntersectOpt(a1).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			BACK.setName(csg.getName() + " differenced from " + name);
+			BACK.setName( name);
 		}
 		return BACK;
 	}
@@ -1217,7 +1217,7 @@ public class CSG implements IuserAPI {
 		allPolygons.addAll(innerCSG._differenceNoOpt(csg).getPolygons());
 		CSG BACK = CSG.fromPolygons(allPolygons).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			BACK.setName(csg.getName() + " differenced from " + name);
+			BACK.setName( name);
 		}
 		return BACK;
 	}
@@ -1244,7 +1244,7 @@ public class CSG implements IuserAPI {
 
 		CSG csgA = CSG.fromPolygons(a.allPolygons()).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			csgA.setName(csg.getName() + " differenced from " + name);
+			csgA.setName( name);
 		}
 		return csgA;
 	}
@@ -1287,7 +1287,7 @@ public class CSG implements IuserAPI {
 		CSG back = CSG.fromPolygons(a.allPolygons()).optimization(getOptType()).historySync(csg)
 				.historySync(this);
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			back.setName(csg.getName() + " intersection with " + name);
+			back.setName( name);
 		}
 		return back;
 	}
@@ -1689,7 +1689,7 @@ public class CSG implements IuserAPI {
 		// csg.setStorage(storage);
 
 		if (getName().length() != 0) {
-			csg.setName(name + " transformed by[" + transform + "]");
+			csg.setName(name );
 		}
 
 		return csg.historySync(this);
