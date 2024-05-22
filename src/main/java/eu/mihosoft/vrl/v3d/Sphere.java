@@ -252,7 +252,7 @@ public class Sphere extends Primitive {
      */
     public Sphere setNumSlices(int numSlices) {
     	if(numSlices>(NUM_SLICES*4))
-    		numSlices=(NUM_SLICES*4);
+    		System.err.println("Very large sphere! this may crash!");
         this.numSlices = numSlices;return this;
     }
 
@@ -272,7 +272,7 @@ public class Sphere extends Primitive {
      */
     public Sphere setNumStacks(int numStacks) {
     	if(numStacks>(NUM_STACKS*4))
-    		numStacks=(NUM_STACKS*4);
+    		System.err.println("Very large sphere! this may crash!");
         this.numStacks = numStacks;return this;
     }
 
