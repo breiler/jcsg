@@ -94,9 +94,9 @@ class Face
 	public void computeNormal (Vector3d normal, double minArea)
 	 {
 	   computeNormal(normal);
-	   if(Math.abs(area)<Double.MIN_VALUE) {
-		   throw new NumberFormatException("The computed area of this triangle is too small: "+area);
-	   }
+//	   if(Math.abs(area)<Double.MIN_VALUE) {
+//		   throw new NumberFormatException("The computed area of this triangle is too small: "+area);
+//	   }
 
 	   if (area < minArea)
 	    { 

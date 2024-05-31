@@ -592,21 +592,29 @@ class QuickHull3D
 	 * than four or greater then the length of <code>points</code>, or the
 	 * points appear to be coincident, colinear, or coplanar.
 	 */
-	public void build (Point3d[] points, int nump)
-	   throws IllegalArgumentException
-	 {
-	   if (nump < 4)
-	    { throw new IllegalArgumentException (
-		 "Less than four input points specified");
-	    }
-	   if (points.length < nump)
-	    { throw new IllegalArgumentException (
-		 "Point array too small for specified number of points"); 
-	    }
-	   initBuffers (nump);
-	   setPoints (points, nump);
-	   buildHull ();
-	 }
+	public void build(Point3d[] points, int nump) throws IllegalArgumentException {
+		if (nump < 4) {
+			throw new IllegalArgumentException("Less than four input points specified");
+		}
+		if (points.length < nump) {
+			throw new IllegalArgumentException("Point array too small for specified number of points");
+		}
+		HashSet<Point3d> set = new HashSet<Point3d>();
+		for(int i=0;i<points.length;i++) {
+			set.add(points[i]);
+		}
+		if(set.size()!=nump) {
+			nump=set.size();
+			points=new Point3d[nump];
+			Object[] array = set.toArray();
+			for(int i=0;i<points.length;i++) {
+				points[i]=(Point3d)array[i];
+			}
+		}
+		initBuffers(nump);
+		setPoints(points, nump);
+		buildHull();
+	}
 
 	/**
 	 * Triangulates any non-triangular hull faces. In some cases, due to
@@ -1353,24 +1361,26 @@ protected void initBuffers (int nump)
 	   HalfEdge hedgeSidePrev = null;
 	   HalfEdge hedgeSideBegin = null;
 
-	   for (Iterator it=horizon.iterator(); it.hasNext(); ) 
-	    { HalfEdge horizonHe = (HalfEdge)it.next();
-	      HalfEdge hedgeSide = addAdjoiningFace (eyeVtx, horizonHe);
-	      if (debug)
-	       { System.out.println (
-		    "new face: " + hedgeSide.face.getVertexString());
-	       }
-	      if (hedgeSidePrev != null)
-	       { hedgeSide.next.setOpposite (hedgeSidePrev);		 
-	       }
-	      else
-	       { hedgeSideBegin = hedgeSide; 
-	       }
-	      newFaces.add (hedgeSide.getFace());
-	      hedgeSidePrev = hedgeSide;
-	    }
-	   hedgeSideBegin.next.setOpposite (hedgeSidePrev);
-	 }
+		for (Iterator it = horizon.iterator(); it.hasNext();) {
+			try {
+				HalfEdge horizonHe = (HalfEdge) it.next();
+				HalfEdge hedgeSide = addAdjoiningFace(eyeVtx, horizonHe);
+				if (debug) {
+					System.out.println("new face: " + hedgeSide.face.getVertexString());
+				}
+				if (hedgeSidePrev != null) {
+					hedgeSide.next.setOpposite(hedgeSidePrev);
+				} else {
+					hedgeSideBegin = hedgeSide;
+				}
+				newFaces.add(hedgeSide.getFace());
+				hedgeSidePrev = hedgeSide;
+			}catch(Throwable t) {
+				t.printStackTrace();
+			}
+		}
+		hedgeSideBegin.next.setOpposite(hedgeSidePrev);
+	}
 
 	/**
 	 * Next point to add.

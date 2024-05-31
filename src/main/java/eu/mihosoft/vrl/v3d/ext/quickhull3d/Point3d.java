@@ -55,4 +55,13 @@ public class Point3d extends Vector3d
 	 {
 	   set (x, y, z);
 	 }
+	@Override
+	public int hashCode() {
+		int offset = 1000;
+		long xHash = Math.round(x*offset);
+		long yHash = Math.round(y*offset);
+		long zHash = Math.round(z*offset);
+		long combined = xHash +yHash+zHash;
+		return (int)combined;
+	}
 }
