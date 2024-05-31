@@ -94,6 +94,9 @@ class Face
 	public void computeNormal (Vector3d normal, double minArea)
 	 {
 	   computeNormal(normal);
+	   if(Math.abs(area)<Double.MIN_VALUE) {
+		   throw new NumberFormatException("The computed area of this triangle is too small: "+area);
+	   }
 
 	   if (area < minArea)
 	    { 
@@ -120,6 +123,9 @@ class Face
 	      double uy = (p2.y - p1.y)/lenMax;
 	      double uz = (p2.z - p1.z)/lenMax;	   
 	      double dot = normal.x*ux + normal.y*uy + normal.z*uz;
+	      if(Double.isNaN(dot))
+			   throw new NumberFormatException("Normal is NaN"+dot);
+
 	      normal.x -= dot*ux;
 	      normal.y -= dot*uy;
 	      normal.z -= dot*uz;
@@ -651,17 +657,21 @@ class Face
 	   HalfEdge oppPrev = hedge.opposite;
 	   Face face0 = null;
 
-	   for (hedge=hedge.next; hedge!=he0.prev; hedge=hedge.next)	   
-	    { Face face =
-		 createTriangle (v0, hedge.prev.head(), hedge.head(), minArea);
-	      face.he0.next.setOpposite (oppPrev);
-	      face.he0.prev.setOpposite (hedge.opposite);
-	      oppPrev = face.he0;
-	      newFaces.add (face);
-	      if (face0 == null)
-	       { face0 = face; 
-	       }
-	    }
+		for (hedge = hedge.next; hedge != he0.prev; hedge = hedge.next) {
+			try {
+				Face face = createTriangle(v0, hedge.prev.head(), hedge.head(), minArea);
+				face.he0.next.setOpposite(oppPrev);
+				face.he0.prev.setOpposite(hedge.opposite);
+				oppPrev = face.he0;
+				newFaces.add(face);
+				if (face0 == null) {
+					face0 = face;
+				}
+			}catch(Throwable t) {
+				System.err.println("Face processing threw exception");
+				t.printStackTrace();
+			}
+		}
 	   hedge = new HalfEdge (he0.prev.prev.head(), this);
 	   hedge.setOpposite (oppPrev);
 

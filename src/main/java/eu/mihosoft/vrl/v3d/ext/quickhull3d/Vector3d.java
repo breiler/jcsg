@@ -103,26 +103,27 @@ class Vector3d
 	 * @param value element value
 	 * if i is not in the range 0 to 2.
 	 */
-	public void set (int i, double value)
-	 {
-	   switch (i)
-	    { case 0:
-	       { x = value;
-		 break;
-	       }
-	      case 1:
-	       { y = value;
-		 break;
-	       }
-	      case 2:
-	       { z = value;
-		 break;
-	       }
-	      default:
-	       { throw new ArrayIndexOutOfBoundsException (i);
-	       }
-	    }
-	 }
+	public void set(int i, double value) {
+		if (Double.isNaN(value))
+			throw new NumberFormatException("value is NaN");
+		switch (i) {
+			case 0: {
+				x = value;
+				break;
+			}
+			case 1: {
+				y = value;
+				break;
+			}
+			case 2: {
+				z = value;
+				break;
+			}
+			default: {
+				throw new ArrayIndexOutOfBoundsException(i);
+			}
+		}
+	}
 
 	/**
 	 * Sets the values of this vector to those of v1.
@@ -131,9 +132,7 @@ class Vector3d
 	 */
 	public void set (Vector3d v1)
 	 {
-	   x = v1.x;
-	   y = v1.y;
-	   z = v1.z;
+	   set(v1.x,v1.y,v1.z);
 	 }
 
 	/**
@@ -279,18 +278,18 @@ class Vector3d
 	/**
 	 * Normalizes this vector in place.
 	 */
-	public void normalize()
-	 {	
-	   double lenSqr = x*x + y*y + z*z;
-	   double err = lenSqr - 1;
-	   if (err > (2*DOUBLE_PREC) ||
-	       err < -(2*DOUBLE_PREC))
-	    { double len = Math.sqrt(lenSqr);
-	      x /= len;
-	      y /= len;
-	      z /= len;
-	    }
-	 }
+	public void normalize() {
+		double lenSqr = x * x + y * y + z * z;
+		if (Double.isNaN(lenSqr))
+			throw new NumberFormatException("Normal is NaN" + lenSqr);
+		double err = lenSqr - 1;
+		if (err > (2 * DOUBLE_PREC) || err < -(2 * DOUBLE_PREC)) {
+			double len = Math.sqrt(lenSqr);
+			x /= len;
+			y /= len;
+			z /= len;
+		}
+	}
 
 	/**
 	 * Sets the elements of this vector to zero.
@@ -309,12 +308,17 @@ class Vector3d
 	 * @param y value for second element
 	 * @param z value for third element
 	 */
-	public void set (double x, double y, double z)
-	 {
-	   this.x = x;
-	   this.y = y;
-	   this.z = z;
-	 }
+	public void set(double x, double y, double z) {
+		if (Double.isNaN(x))
+			throw new NumberFormatException("X is NaN");
+		if (Double.isNaN(y))
+			throw new NumberFormatException("Y is NaN");
+		if (Double.isNaN(z))
+			throw new NumberFormatException("Z is NaN");
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
 
 	/**
 	 * Computes the cross product of v1 and v2 and places the result
