@@ -164,12 +164,19 @@ public class Slice {
 			List<Polygon> rawPolygons = new ArrayList<>();
 			CSG finalPart = incoming.transformed(slicePlane.inverse()
 					).toolOffset(normalInsetDistance);
+			double sliceThick= 0.00001;
+			if(finalPart.getMaxZ()<sliceThick) {
+				finalPart=finalPart.toZMax().movez(sliceThick);
+			}
+			if(finalPart.getMinZ()>sliceThick) {
+				finalPart=finalPart.toZMin();
+			}
 			// Actual slice plane
 			CSG planeCSG = finalPart.getBoundingBox().toZMin();
 			planeCSG = planeCSG
 					.intersect(planeCSG
 							.toZMax()
-							.movez(0.00001)
+							.movez(sliceThick)
 							);
 			// Loop over each polygon in the slice of the incoming CSG
 			// Add the polygon to the final slice if it lies entirely in the z plane
