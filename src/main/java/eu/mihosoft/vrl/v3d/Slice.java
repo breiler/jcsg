@@ -165,6 +165,8 @@ public class Slice {
 			CSG finalPart = incoming.transformed(slicePlane.inverse()
 					).toolOffset(normalInsetDistance);
 			double sliceThick= 0.00001;
+			if(finalPart.getTotalZ()<sliceThick)
+				throw new RuntimeException("Too thin to slice! "+sliceThick+" mm minimum");
 			if(finalPart.getMaxZ()<sliceThick) {
 				finalPart=finalPart.toZMax().movez(sliceThick);
 			}
