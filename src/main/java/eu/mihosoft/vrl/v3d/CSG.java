@@ -601,7 +601,35 @@ public class CSG implements IuserAPI {
 	public CSG scalex(Number scaleValue) {
 		return this.transformed(new Transform().scaleX(scaleValue.doubleValue()));
 	}
+	// Scale function, scales the object
+	public CSG scaleToMeasurmentZ(Number measurment) {
+		Number scaleValue = measurment.doubleValue()/ getTotalZ();
+		
+		return this.transformed(new Transform().scaleZ(scaleValue.doubleValue()));
+	}
 
+	/**
+	 * Scaley.
+	 *
+	 * @param scaleValue the scale value
+	 * @return the csg
+	 */
+	public CSG scaleToMeasurmentY(Number measurment) {
+		Number scaleValue = measurment.doubleValue()/ getTotalY();
+
+		return this.transformed(new Transform().scaleY(scaleValue.doubleValue()));
+	}
+
+	/**
+	 * Scalex.
+	 *
+	 * @param scaleValue the scale value
+	 * @return the csg
+	 */
+	public CSG scaleToMeasurmentX(Number measurment) {
+		Number scaleValue = measurment.doubleValue()/ getTotalX();
+		return this.transformed(new Transform().scaleX(scaleValue.doubleValue()));
+	}
 	/**
 	 * Scale.
 	 *
@@ -2763,6 +2791,47 @@ public class CSG implements IuserAPI {
 		if(o.isPresent())
 			return (Transform) o.get();
 		return new Transform().move(getCenter());
+	}
+	
+	public CSG setGroupMembership(String groupID) {
+		getStorage().set("groupMembership", groupID);
+		return this;
+	}
+
+	public boolean isInGroup() {
+		return getStorage().getValue("groupMembership").isPresent();
+	}
+
+	public String getGroupMembership() {
+		Optional<String> o = getStorage().getValue("groupMembership");
+		if (o.isPresent())
+			return o.get();
+		return null;
+	}
+
+	public CSG setIsGroupResult(boolean res) {
+		getStorage().set("GroupResult", res);
+		return this;
+	}
+
+	public boolean isGroupResult() {
+		Optional<Boolean> o = getStorage().getValue("GroupResult");
+		if (o.isPresent())
+			return o.get();
+		return false;
+	}
+
+	// Hole
+	public CSG setIsHole(boolean hole) {
+		getStorage().set("isHole", hole);
+		return this;
+	}
+
+	public boolean isHole() {
+		Optional<Boolean> o = getStorage().getValue("isHole");
+		if (o.isPresent())
+			return o.get();
+		return false;
 	}
 	
 	public CSG syncProperties(CSG dying) {
