@@ -96,6 +96,20 @@ nexusStaging {
     numberOfRetries = 100  // Increase number of retries
     delayBetweenRetriesInMillis = 10000  // 10 seconds
 }
+tasks.publish.doLast {
+	def stagingPlugin = project.plugins.findPlugin(NexusStagingPlugin)
+	def stagingManager = stagingPlugin.getStagingManager()
+	def stagingRepositories = stagingManager.getOpenRepositories()
+	if (stagingRepositories.size() == 1) {
+		project.ext.stagingRepositoryId = stagingRepositories[0].repositoryId
+	} else {
+		throw new GradleException("Expected exactly one open staging repository, but found ${stagingRepositories.size()}")
+	}
+}
+
+closeAndReleaseRepository {
+	stagingRepositoryId = project.ext.stagingRepositoryId
+}
 publishing {
 	
 		repositories {
