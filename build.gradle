@@ -93,9 +93,8 @@ nexusStaging {
 	serverUrl='https://oss.sonatype.org/service/local/'
 	username = System.getenv("MAVEN_USERNAME")
 	password = System.getenv("MAVEN_PASSWORD")
-	stagingProgressTimeoutMinutes = 30  // Increase timeout
-	delayBetweenRetriesInMillis = 10000  // Add delay between retries
-	numberOfRetries = 50  // Increase number of retries
+    numberOfRetries = 100  // Increase number of retries
+    delayBetweenRetriesInMillis = 10000  // 10 seconds
 }
 publishing {
 	
