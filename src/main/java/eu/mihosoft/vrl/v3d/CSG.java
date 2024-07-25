@@ -2827,6 +2827,30 @@ public class CSG implements IuserAPI {
 	}
 
 	// Hole
+	public CSG setIsLock(boolean Lock) {
+		getStorage().set("isLock", Lock);
+		return this;
+	}
+
+	public boolean isLock() {
+		Optional<Boolean> o = getStorage().getValue("isLock");
+		if (o.isPresent())
+			return o.get();
+		return false;
+	}
+	// Hole
+	public CSG setIsHide(boolean Hide) {
+		getStorage().set("isHide", Hide);
+		return this;
+	}
+
+	public boolean isHide() {
+		Optional<Boolean> o = getStorage().getValue("isHide");
+		if (o.isPresent())
+			return o.get();
+		return false;
+	}
+	// Hole
 	public CSG setIsHole(boolean hole) {
 		getStorage().set("isHole", hole);
 		return this;
