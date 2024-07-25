@@ -2792,9 +2792,14 @@ public class CSG implements IuserAPI {
 			return (Transform) o.get();
 		return new Transform().move(getCenter());
 	}
-	
+	public CSG clearGroupMembership() {
+		return setGroupMembership(null);
+	}
 	public CSG setGroupMembership(String groupID) {
-		getStorage().set("groupMembership", groupID);
+		if(groupID==null) {
+			getStorage().delete("groupMembership");
+		}else
+			getStorage().set("groupMembership", groupID);
 		return this;
 	}
 
