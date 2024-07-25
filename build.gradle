@@ -96,7 +96,6 @@ nexusStaging {
 	stagingProgressTimeoutMinutes = 30  // Increase timeout
 	delayBetweenRetriesInMillis = 10000  // Add delay between retries
 	numberOfRetries = 50  // Increase number of retries
-	debug = true  // Enable debug logging
 }
 publishing {
 	
