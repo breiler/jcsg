@@ -85,16 +85,16 @@ public ArrayList<Point3f> parse(File f) throws IOException {
                 // determine if this is a binary or ASCII STL
         // and send to the appropriate parsing method
         // Hypothesis 1: this is an ASCII STL
-        BufferedReader br = new BufferedReader(new FileReader(f));
-        String line = br.readLine();
-        String[] words = line.trim().split("\\s+");
-        if (line.indexOf('\0') < 0 && words[0].equalsIgnoreCase("solid")) {
-            //System.out.println("Looks like an ASCII STL");
-            parseAscii(f);
-            br.close();
-            return vertices;
-        }
-        br.close();
+        try { BufferedReader br = new BufferedReader(new FileReader(f));
+	        String line = br.readLine();
+	        String[] words = line.trim().split("\\s+");
+	        if (line.indexOf('\0') < 0 && words[0].equalsIgnoreCase("solid")) {
+	            //System.out.println("Looks like an ASCII STL");
+	            parseAscii(f);
+	            br.close();
+	            return vertices;
+	        }
+	        br.close();}catch(java.lang.NullPointerException ex) {}// the split cna fail on binary stls
         // Hypothesis 2: this is a binary STL
         FileInputStream fs = new FileInputStream(f);
 
