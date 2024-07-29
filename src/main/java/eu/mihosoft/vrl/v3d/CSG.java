@@ -1412,15 +1412,14 @@ public class CSG implements IuserAPI {
 		triangulate(false);
 		try {
 			sb.append("solid v3d.csg\n");
-			this.getPolygons().stream().forEach((Polygon p) -> {
+			for(Polygon p:getPolygons()) {
 				p.toStlString(sb);
-			});
+			}
 			sb.append("endsolid v3d.csg\n");
 			return sb;
 		} catch (Throwable t) {
-
 			t.printStackTrace();
-			throw new RuntimeException("STL failed to build for " + name);
+			throw new RuntimeException(t);
 		}
 	}
 	public CSG triangulate() {
