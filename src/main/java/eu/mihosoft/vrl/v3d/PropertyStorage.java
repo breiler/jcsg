@@ -39,8 +39,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
-
 import javafx.scene.paint.Color;
 
 // TODO: Auto-generated Javadoc
