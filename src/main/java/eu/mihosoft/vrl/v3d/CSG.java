@@ -44,6 +44,7 @@ import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -2791,37 +2792,63 @@ public class CSG implements IuserAPI {
 			return (Transform) o.get();
 		return new Transform().move(getCenter());
 	}
-	public CSG clearGroupMembership() {
-		return setGroupMembership(null);
-	}
-	public CSG setGroupMembership(String groupID) {
-		if(groupID==null) {
-			getStorage().delete("groupMembership");
-		}else
-			getStorage().set("groupMembership", groupID);
+
+	public CSG addGroupMembership(String groupID) {
+		if( !getStorage().getValue("groupMembership").isPresent()) {
+			getStorage().set("groupMembership", new HashSet<String>());
+		}
+		((HashSet<String>)getStorage().getValue("groupMembership").get()).add(groupID);
 		return this;
 	}
-
+	public CSG removeGroupMembership(String groupID) {
+		if( !getStorage().getValue("groupMembership").isPresent()) {
+			getStorage().set("groupMembership", new HashSet<String>());
+		}
+		((HashSet<String>)getStorage().getValue("groupMembership").get()).remove(groupID);
+		return this;
+	}
 	public boolean isInGroup() {
-		return getStorage().getValue("groupMembership").isPresent();
+		Optional<HashSet<String>> value = getStorage().getValue("groupMembership");
+		if( value.isPresent()) {
+			if(value.get().size()>0) {
+				return true;
+			}
+		}
+		return false;
 	}
-
-	public String getGroupMembership() {
-		Optional<String> o = getStorage().getValue("groupMembership");
+	
+	public boolean checkGroupMembership(String groupName) {
+		Optional<HashSet<String>> o = getStorage().getValue("groupMembership");
 		if (o.isPresent())
-			return o.get();
-		return null;
+			for(String s:o.get()) {
+				if(s.contentEquals(groupName))
+					return true;
+			}
+		return false;
 	}
 
-	public CSG setIsGroupResult(boolean res) {
-		getStorage().set("GroupResult", res);
+//	public CSG setIsGroupResult(boolean res) {
+//		getStorage().set("GroupResult", res);
+//		return this;
+//	}
+	public CSG addIsGroupResult(String res) {
+		if( !getStorage().getValue("GroupResult").isPresent()) {
+			getStorage().set("GroupResult", new HashSet<String>());
+		}
+		((HashSet<String>)getStorage().getValue("GroupResult").get()).add(res);
 		return this;
 	}
-
+	public CSG removeIsGroupResult(String res) {
+		if( !getStorage().getValue("GroupResult").isPresent()) {
+			getStorage().set("GroupResult", new HashSet<String>());
+		}
+		((HashSet<String>)getStorage().getValue("GroupResult").get()).remove(res);
+		return this;
+	}
 	public boolean isGroupResult() {
-		Optional<Boolean> o = getStorage().getValue("GroupResult");
+		Optional<HashSet<String>> o = getStorage().getValue("GroupResult");
 		if (o.isPresent())
-			return o.get();
+			return o.get().size()>0;
 		return false;
 	}
 
