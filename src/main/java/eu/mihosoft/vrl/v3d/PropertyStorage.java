@@ -34,9 +34,12 @@
 package eu.mihosoft.vrl.v3d;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 
 import javafx.scene.paint.Color;
 
@@ -130,7 +133,13 @@ public class PropertyStorage {
     }
     public void syncProperties(PropertyStorage dying) {
     	for(String o:dying.map.keySet()) {
-    		set(o,dying.map.get(o));
+    		Object property = dying.map.get(o);
+    		if(HashSet.class.isInstance(property)) {
+    			HashSet<String> clonedSet =  new HashSet<String>();
+    			clonedSet.addAll((HashSet<String>)property);
+    			property=clonedSet;	
+    		}
+			set(o,property);
     	}
     }
 }
