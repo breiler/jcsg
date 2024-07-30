@@ -2893,7 +2893,7 @@ public class CSG implements IuserAPI {
 		getStorage().syncProperties(dying.getStorage());
 		return this;
 	}
-	public static List<CSG> tesselate(CSG incoming,int xSteps, int ySteps, double xGrid, double yGrid, double oddRowYOffset){
+	public static List<CSG> tessellate(CSG incoming,int xSteps, int ySteps, double xGrid, double yGrid, double oddRowYOffset){
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		for(int i=0;i<xSteps;i++) {
 			for(int j=0;j<ySteps;j++) {
@@ -2903,14 +2903,14 @@ public class CSG implements IuserAPI {
 		}
 		return back;
 	}
-	public static List<CSG> tesselate(CSG incoming,int xSteps, int ySteps, double oddRowYOffset){
-		return tesselate(incoming,xSteps,ySteps,incoming.getTotalX(),incoming.getTotalY(),oddRowYOffset);
+	public static List<CSG> tessellate(CSG incoming,int xSteps, int ySteps, double oddRowYOffset){
+		return tessellate(incoming,xSteps,ySteps,incoming.getTotalX(),incoming.getTotalY(),oddRowYOffset);
 	}
-	public static List<CSG> tesselate(CSG incoming,int xSteps, int ySteps){
-		return tesselate(incoming,xSteps,ySteps,incoming.getTotalX(),incoming.getTotalY(),0);
+	public static List<CSG> tessellate(CSG incoming,int xSteps, int ySteps){
+		return tessellate(incoming,xSteps,ySteps,incoming.getTotalX(),incoming.getTotalY(),0);
 	}
-	public static List<CSG> tesselate(CSG incoming,int steps){
-		return tesselate(incoming,steps,steps,incoming.getTotalX(),incoming.getTotalY(),0);
+	public static List<CSG> tessellate(CSG incoming,int steps){
+		return tessellate(incoming,steps,steps,incoming.getTotalX(),incoming.getTotalY(),0);
 	}
 	/**
 	 * 
@@ -2920,10 +2920,10 @@ public class CSG implements IuserAPI {
 	 * @param spacing the amount of space between each hexagon
 	 * @return a list of spaced hexagons
 	 */
-	List<CSG> tesselateHex(CSG incoming,int xSteps, int ySteps, double spacing){
+	List<CSG> tessellateHex(CSG incoming,int xSteps, int ySteps, double spacing){
 		double y= incoming.getTotalY()+spacing;
 		double x =(((y/Math.sqrt(3))))*(3/2);
-		return tesselate(incoming,xSteps,ySteps,x,y,y/2);
+		return tessellate(incoming,xSteps,ySteps,x,y,y/2);
 	}
 	/**
 	 * 
@@ -2932,7 +2932,7 @@ public class CSG implements IuserAPI {
 	 * @param ySteps number of steps in Y
 	 * @return a list of spaced hexagons
 	 */
-	List<CSG> tesselateHex(CSG incoming,int xSteps, int ySteps){
-		return tesselateHex(incoming, xSteps, ySteps, 0);
+	List<CSG> tessellateHex(CSG incoming,int xSteps, int ySteps){
+		return tessellateHex(incoming, xSteps, ySteps, 0);
 	}
 }
