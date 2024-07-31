@@ -2893,6 +2893,7 @@ public class CSG implements IuserAPI {
 		getStorage().syncProperties(dying.getStorage());
 		return this;
 	}
+	
 	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double xGrid, double yGrid, double zGrid, double oddRowXOffset, double oddRowYOffset, double oddRowZOffset, double oddColXOffset, double oddColYOffset, double oddColZOffset, double oddLayXOffset, double oddLayYOffset, double oddLayZOffset) {
 	    ArrayList<CSG> back = new ArrayList<CSG>();
 	    for (int i = 0; i < xSteps; i++) {
@@ -2942,12 +2943,9 @@ public class CSG implements IuserAPI {
 	
 	    return tessellate(incoming, xSteps, ySteps, zSteps, xGrid, yGrid, zGrid, oddRowXOffset, oddRowYOffset, oddRowZOffset, oddColXOffset, oddColYOffset, oddColZOffset, oddLayXOffset, oddLayYOffset, oddLayZOffset);
 	}
-
-	// Tessellate with default grid spacing and no offsets, specifying only xSteps, ySteps, and zSteps
 	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps) {
 	    return tessellate(incoming, xSteps, ySteps, zSteps, incoming.getTotalX(), incoming.getTotalY(), incoming.getTotalZ(), 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
-	// Tessellate with offsets given as 
 	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double oddRowXOffset, double oddRowYOffset, double oddRowZOffset, double oddColXOffset, double oddColYOffset, double oddColZOffset, double oddLayXOffset, double oddLayYOffset, double oddLayZOffset) {
 	    double[][] offsets = {
 	        {oddRowXOffset, oddRowYOffset, oddRowZOffset},
@@ -2956,26 +2954,26 @@ public class CSG implements IuserAPI {
 	    };
 	    return tessellate(incoming, xSteps, ySteps, zSteps, incoming.getTotalX(), incoming.getTotalY(), incoming.getTotalZ(), offsets);
 	}
-	// Tessellate with specific steps, default offsets to zero
 	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps) {
 	    return tessellate(incoming, xSteps, ySteps, zSteps, incoming.getTotalX(), incoming.getTotalY(), incoming.getTotalZ(), 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
-	// Tessellate with uniform grid spacing, specifying only steps and grid spacing
 	public static List<CSG> tessellate(CSG incoming, int steps, double gridSpacing) {
 	    return tessellate(incoming, steps, steps, steps, gridSpacing, gridSpacing, gridSpacing, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
-	// Tessellate with uniform grid spacing, creating a steps x steps x steps grid
 	public static List<CSG> tessellate(CSG incoming, int steps) {
 	    return tessellate(incoming, steps, steps, steps, incoming.getTotalX(), incoming.getTotalY(), incoming.getTotalZ(), 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
-	// Tessellate with specific grid spacing and no offsets, specifying xSteps and ySteps
+
+	public static List<CSG> tessellateXY(CSG incoming, int xSteps, int ySteps, double xGrid, double yGrid, double oddRowXOffset, double oddRowYOffset, double oddColXOffset, double oddColYOffset) {
+	    return tessellate(incoming, xSteps, ySteps, 1, xGrid, yGrid, 0, oddRowXOffset, oddRowYOffset, 0, oddColXOffset, oddColYOffset, 0, 0, 0, 0);
+	}
 	public static List<CSG> tessellateXY(CSG incoming, int xSteps, int ySteps) {
-	    return tessellate(incoming, xSteps, ySteps, 1, incoming.getTotalX(), incoming.getTotalY(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	    return tessellateXY(incoming, xSteps, ySteps, incoming.getTotalX(), incoming.getTotalY(), 0, 0, 0, 0);
 	}
-	// Tessellate with specific grid spacing and no offsets, specifying xSteps and ySteps
 	public static List<CSG> tessellateXY(CSG incoming, int xSteps, int ySteps, double xGrid, double yGrid) {
-	    return tessellate(incoming, xSteps, ySteps, 1, xGrid, yGrid, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	    return tessellateXY(incoming, xSteps, ySteps, xGrid, yGrid, 0, 0, 0, 0);
 	}
+
 
 	/**
 	 * 
