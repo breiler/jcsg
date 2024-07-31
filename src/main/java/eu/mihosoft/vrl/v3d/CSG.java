@@ -2954,9 +2954,6 @@ public class CSG implements IuserAPI {
 	    };
 	    return tessellate(incoming, xSteps, ySteps, zSteps, incoming.getTotalX(), incoming.getTotalY(), incoming.getTotalZ(), offsets);
 	}
-	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps) {
-	    return tessellate(incoming, xSteps, ySteps, zSteps, incoming.getTotalX(), incoming.getTotalY(), incoming.getTotalZ(), 0, 0, 0, 0, 0, 0, 0, 0, 0);
-	}
 	public static List<CSG> tessellate(CSG incoming, int steps, double gridSpacing) {
 	    return tessellate(incoming, steps, steps, steps, gridSpacing, gridSpacing, gridSpacing, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
