@@ -2939,6 +2939,14 @@ public class CSG implements IuserAPI {
 	    }
 	    return back;
 	}
+	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double xGrid, double yGrid, double zGrid, double oddRowXOffset, double oddRowYOffset, double oddRowZOffset, double oddColXOffset, double oddColYOffset, double oddColZOffset, double oddLayXOffset, double oddLayYOffset, double oddLayZOffset) {
+	    double[][] offsets = {
+	        {oddRowXOffset, oddRowYOffset, oddRowZOffset},
+	        {oddColXOffset, oddColYOffset, oddColZOffset},
+	        {oddLayXOffset, oddLayYOffset, oddLayZOffset}
+	    };
+	    return tessellate(incoming, xSteps, ySteps, zSteps, xGrid, yGrid, zGrid, offsets);
+	}
 	public static List<CSG> tessellate(CSG incoming,int xSteps, int ySteps, double oddRowYOffset){
 		return tessellate(incoming,xSteps,ySteps,incoming.getTotalX(),incoming.getTotalY(),oddRowYOffset);
 	}
