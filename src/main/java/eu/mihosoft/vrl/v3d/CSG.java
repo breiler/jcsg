@@ -2893,15 +2893,51 @@ public class CSG implements IuserAPI {
 		getStorage().syncProperties(dying.getStorage());
 		return this;
 	}
-	public static List<CSG> tessellate(CSG incoming,int xSteps, int ySteps, double xGrid, double yGrid, double oddRowYOffset){
-		ArrayList<CSG> back = new ArrayList<CSG>();
-		for(int i=0;i<xSteps;i++) {
-			for(int j=0;j<ySteps;j++) {
-				double yoff = i%2==0?0:oddRowYOffset;
-				back.add(incoming.move(((double)i)*xGrid,yoff+(((double)j)*yGrid), 0));
-			}
-		}
-		return back;
+	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double xGrid, double yGrid, double zGrid, double[][] offsets) {
+	    double oddRowXOffset = offsets[0][0];
+	    double oddRowYOffset = offsets[0][1];
+	    double oddRowZOffset = offsets[0][2];
+	
+	    double oddColXOffset = offsets[1][0];
+	    double oddColYOffset = offsets[1][1];
+	    double oddColZOffset = offsets[1][2];
+	
+	    double oddLayXOffset = offsets[2][0];
+	    double oddLayYOffset = offsets[2][1];
+	    double oddLayZOffset = offsets[2][2];
+	
+	    ArrayList<CSG> back = new ArrayList<CSG>();
+	    for (int i = 0; i < xSteps; i++) {
+	        for (int j = 0; j < ySteps; j++) {
+	            for (int k = 0; k < zSteps; k++) {
+	
+	                double xoff = 0;
+	                double yoff = 0;
+	                double zoff = 0;
+	
+	                if (i % 2 != 0) {
+	                    xoff += oddRowXOffset;
+	                    yoff += oddRowYOffset;
+	                    zoff += oddRowZOffset;
+	                }
+	
+	                if (j % 2 != 0) {
+	                    xoff += oddColXOffset;
+	                    yoff += oddColYOffset;
+	                    zoff += oddColZOffset;
+	                }
+	
+	                if (k % 2 != 0) {
+	                    xoff += oddLayXOffset;
+	                    yoff += oddLayYOffset;
+	                    zoff += oddLayZOffset;
+	                }
+	
+	                back.add(incoming.move(xoff + (i * xGrid), yoff + (j * yGrid), zoff + (k * zGrid)));
+	            }
+	        }
+	    }
+	    return back;
 	}
 	public static List<CSG> tessellate(CSG incoming,int xSteps, int ySteps, double oddRowYOffset){
 		return tessellate(incoming,xSteps,ySteps,incoming.getTotalX(),incoming.getTotalY(),oddRowYOffset);
