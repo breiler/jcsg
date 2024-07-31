@@ -2983,7 +2983,7 @@ public class CSG implements IuserAPI {
 	List<CSG> tessellateHex(CSG incoming,int xSteps, int ySteps, double spacing){
 		double y= incoming.getTotalY()+spacing;
 		double x =(((y/Math.sqrt(3))))*(3/2);
-		return tessellate(incoming,xSteps,ySteps,x,y,y/2);
+		return tessellateXY(incoming,xSteps,ySteps,x,y,0,0,0,y/2);
 	}
 	/**
 	 * 
