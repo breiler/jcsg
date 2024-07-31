@@ -2893,19 +2893,7 @@ public class CSG implements IuserAPI {
 		getStorage().syncProperties(dying.getStorage());
 		return this;
 	}
-	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double xGrid, double yGrid, double zGrid, double[][] offsets) {
-	    double oddRowXOffset = offsets[0][0];
-	    double oddRowYOffset = offsets[0][1];
-	    double oddRowZOffset = offsets[0][2];
-	
-	    double oddColXOffset = offsets[1][0];
-	    double oddColYOffset = offsets[1][1];
-	    double oddColZOffset = offsets[1][2];
-	
-	    double oddLayXOffset = offsets[2][0];
-	    double oddLayYOffset = offsets[2][1];
-	    double oddLayZOffset = offsets[2][2];
-	
+	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double xGrid, double yGrid, double zGrid, double oddRowXOffset, double oddRowYOffset, double oddRowZOffset, double oddColXOffset, double oddColYOffset, double oddColZOffset, double oddLayXOffset, double oddLayYOffset, double oddLayZOffset) {
 	    ArrayList<CSG> back = new ArrayList<CSG>();
 	    for (int i = 0; i < xSteps; i++) {
 	        for (int j = 0; j < ySteps; j++) {
@@ -2939,14 +2927,22 @@ public class CSG implements IuserAPI {
 	    }
 	    return back;
 	}
-	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double xGrid, double yGrid, double zGrid, double oddRowXOffset, double oddRowYOffset, double oddRowZOffset, double oddColXOffset, double oddColYOffset, double oddColZOffset, double oddLayXOffset, double oddLayYOffset, double oddLayZOffset) {
-	    double[][] offsets = {
-	        {oddRowXOffset, oddRowYOffset, oddRowZOffset},
-	        {oddColXOffset, oddColYOffset, oddColZOffset},
-	        {oddLayXOffset, oddLayYOffset, oddLayZOffset}
-	    };
-	    return tessellate(incoming, xSteps, ySteps, zSteps, xGrid, yGrid, zGrid, offsets);
+	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double xGrid, double yGrid, double zGrid, double[][] offsets) {
+	    double oddRowXOffset = offsets[0][0];
+	    double oddRowYOffset = offsets[0][1];
+	    double oddRowZOffset = offsets[0][2];
+	
+	    double oddColXOffset = offsets[1][0];
+	    double oddColYOffset = offsets[1][1];
+	    double oddColZOffset = offsets[1][2];
+	
+	    double oddLayXOffset = offsets[2][0];
+	    double oddLayYOffset = offsets[2][1];
+	    double oddLayZOffset = offsets[2][2];
+	
+	    return tessellate(incoming, xSteps, ySteps, zSteps, xGrid, yGrid, zGrid, oddRowXOffset, oddRowYOffset, oddRowZOffset, oddColXOffset, oddColYOffset, oddColZOffset, oddLayXOffset, oddLayYOffset, oddLayZOffset);
 	}
+
 	// Tessellate with default grid spacing and no offsets, specifying only xSteps, ySteps, and zSteps
 	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps) {
 	    return tessellate(incoming, xSteps, ySteps, zSteps, incoming.getTotalX(), incoming.getTotalY(), incoming.getTotalZ(), 0, 0, 0, 0, 0, 0, 0, 0, 0);
