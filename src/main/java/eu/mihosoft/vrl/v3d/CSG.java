@@ -3059,6 +3059,26 @@ public class CSG implements IuserAPI {
 	public static List<CSG> tessellateXY(CSG incoming, int xSteps, int ySteps, double xGrid, double yGrid, double oddRowXOffset, double oddRowYOffset, double oddColXOffset, double oddColYOffset) {
 	    return tessellate(incoming, xSteps, ySteps, 1, xGrid, yGrid, 0, oddRowXOffset, oddRowYOffset, 0, oddColXOffset, oddColYOffset, 0, 0, 0, 0);
 	}
+
+	/**
+	 * Tessellates a given CSG object into a 2D grid with specified steps, grid spacing, and a 2D array of offsets for odd rows and columns.
+	 *
+	 * @param incoming The CSG object to be tessellated.
+	 * @param xSteps Number of steps (iterations) in the x-direction.
+	 * @param ySteps Number of steps (iterations) in the y-direction.
+	 * @param xGrid Distance between iterations in the x-direction.
+	 * @param yGrid Distance between iterations in the y-direction.
+	 * @param offsets 2D array of offsets for odd rows and columns.
+	 * @return A list of tessellated CSG objects.
+	 */
+	public static List<CSG> tessellateXY(CSG incoming, int xSteps, int ySteps, double xGrid, double yGrid, double[][] offsets) {
+	    double oddRowXOffset = offsets[0][0];
+	    double oddRowYOffset = offsets[0][1];
+	    double oddColXOffset = offsets[1][0];
+	    double oddColYOffset = offsets[1][1];
+	    
+	    return tessellate(incoming, xSteps, ySteps, 1, xGrid, yGrid, 0, oddRowXOffset, oddRowYOffset, 0, oddColXOffset, oddColYOffset, 0, 0, 0, 0);
+	}
 	
 	/**
 	 * Tessellates a given CSG object into a 2D grid with specified steps. The grid spacing is determined by the dimensions of the incoming CSG object.
