@@ -2894,6 +2894,27 @@ public class CSG implements IuserAPI {
 		return this;
 	}
 	
+	/**
+	 * Tessellates a given CSG object into a 3D grid with specified steps and grid spacing, including offsets for odd rows, columns, and layers.
+	 *
+	 * @param incoming The CSG object to be tessellated.
+	 * @param xSteps Number of steps (iterations) in the x-direction.
+	 * @param ySteps Number of steps (iterations) in the y-direction.
+	 * @param zSteps Number of steps (iterations) in the z-direction.
+	 * @param xGrid Distance between iterations in the x-direction.
+	 * @param yGrid Distance between iterations in the y-direction.
+	 * @param zGrid Distance between iterations in the z-direction.
+	 * @param oddRowXOffset X offset for odd rows.
+	 * @param oddRowYOffset Y offset for odd rows.
+	 * @param oddRowZOffset Z offset for odd rows.
+	 * @param oddColXOffset X offset for odd columns.
+	 * @param oddColYOffset Y offset for odd columns.
+	 * @param oddColZOffset Z offset for odd columns.
+	 * @param oddLayXOffset X offset for odd layers.
+	 * @param oddLayYOffset Y offset for odd layers.
+	 * @param oddLayZOffset Z offset for odd layers.
+	 * @return A list of tessellated CSG objects.
+	 */
 	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double xGrid, double yGrid, double zGrid, double oddRowXOffset, double oddRowYOffset, double oddRowZOffset, double oddColXOffset, double oddColYOffset, double oddColZOffset, double oddLayXOffset, double oddLayYOffset, double oddLayZOffset) {
 	    ArrayList<CSG> back = new ArrayList<CSG>();
 	    for (int i = 0; i < xSteps; i++) {
@@ -2928,6 +2949,20 @@ public class CSG implements IuserAPI {
 	    }
 	    return back;
 	}
+	
+	/**
+	 * Tessellates a given CSG object into a 3D grid with specified steps, grid spacing, and a 3D array of offsets for odd rows, columns, and layers.
+	 *
+	 * @param incoming The CSG object to be tessellated.
+	 * @param xSteps Number of steps (iterations) in the x-direction.
+	 * @param ySteps Number of steps (iterations) in the y-direction.
+	 * @param zSteps Number of steps (iterations) in the z-direction.
+	 * @param xGrid Distance between iterations in the x-direction.
+	 * @param yGrid Distance between iterations in the y-direction.
+	 * @param zGrid Distance between iterations in the z-direction.
+	 * @param offsets 3D array of offsets for odd rows, columns, and layers.
+	 * @return A list of tessellated CSG objects.
+	 */
 	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double xGrid, double yGrid, double zGrid, double[][] offsets) {
 	    double oddRowXOffset = offsets[0][0];
 	    double oddRowYOffset = offsets[0][1];
@@ -2943,9 +2978,38 @@ public class CSG implements IuserAPI {
 	
 	    return tessellate(incoming, xSteps, ySteps, zSteps, xGrid, yGrid, zGrid, oddRowXOffset, oddRowYOffset, oddRowZOffset, oddColXOffset, oddColYOffset, oddColZOffset, oddLayXOffset, oddLayYOffset, oddLayZOffset);
 	}
+	
+	/**
+	 * Tessellates a given CSG object into a 3D grid with specified steps. The grid spacing is determined by the dimensions of the incoming CSG object.
+	 *
+	 * @param incoming The CSG object to be tessellated.
+	 * @param xSteps Number of steps (iterations) in the x-direction.
+	 * @param ySteps Number of steps (iterations) in the y-direction.
+	 * @param zSteps Number of steps (iterations) in the z-direction.
+	 * @return A list of tessellated CSG objects.
+	 */
 	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps) {
 	    return tessellate(incoming, xSteps, ySteps, zSteps, incoming.getTotalX(), incoming.getTotalY(), incoming.getTotalZ(), 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
+	
+	/**
+	 * Tessellates a given CSG object into a 3D grid with specified steps and offsets for odd rows, columns, and layers. The grid spacing is determined by the dimensions of the incoming CSG object.
+	 *
+	 * @param incoming The CSG object to be tessellated.
+	 * @param xSteps Number of steps (iterations) in the x-direction.
+	 * @param ySteps Number of steps (iterations) in the y-direction.
+	 * @param zSteps Number of steps (iterations) in the z-direction.
+	 * @param oddRowXOffset X offset for odd rows.
+	 * @param oddRowYOffset Y offset for odd rows.
+	 * @param oddRowZOffset Z offset for odd rows.
+	 * @param oddColXOffset X offset for odd columns.
+	 * @param oddColYOffset Y offset for odd columns.
+	 * @param oddColZOffset Z offset for odd columns.
+	 * @param oddLayXOffset X offset for odd layers.
+	 * @param oddLayYOffset Y offset for odd layers.
+	 * @param oddLayZOffset Z offset for odd layers.
+	 * @return A list of tessellated CSG objects.
+	 */
 	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double oddRowXOffset, double oddRowYOffset, double oddRowZOffset, double oddColXOffset, double oddColYOffset, double oddColZOffset, double oddLayXOffset, double oddLayYOffset, double oddLayZOffset) {
 	    double[][] offsets = {
 	        {oddRowXOffset, oddRowYOffset, oddRowZOffset},
@@ -2954,22 +3018,74 @@ public class CSG implements IuserAPI {
 	    };
 	    return tessellate(incoming, xSteps, ySteps, zSteps, incoming.getTotalX(), incoming.getTotalY(), incoming.getTotalZ(), offsets);
 	}
+	
+	/**
+	 * Tessellates a given CSG object into a 3D grid with specified steps and uniform grid spacing.
+	 *
+	 * @param incoming The CSG object to be tessellated.
+	 * @param steps Number of steps (iterations) in each direction (x, y, z).
+	 * @param gridSpacing Distance between iterations in all directions (x, y, z).
+	 * @return A list of tessellated CSG objects.
+	 */
 	public static List<CSG> tessellate(CSG incoming, int steps, double gridSpacing) {
 	    return tessellate(incoming, steps, steps, steps, gridSpacing, gridSpacing, gridSpacing, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
+	
+	/**
+	 * Tessellates a given CSG object into a 3D grid with specified steps. The grid spacing is determined by the dimensions of the incoming CSG object.
+	 *
+	 * @param incoming The CSG object to be tessellated.
+	 * @param steps Number of steps (iterations) in each direction (x, y, z).
+	 * @return A list of tessellated CSG objects.
+	 */
 	public static List<CSG> tessellate(CSG incoming, int steps) {
 	    return tessellate(incoming, steps, steps, steps, incoming.getTotalX(), incoming.getTotalY(), incoming.getTotalZ(), 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
-
+	
+	/**
+	 * Tessellates a given CSG object into a 2D grid with specified steps and grid spacing, including offsets for odd rows and columns.
+	 *
+	 * @param incoming The CSG object to be tessellated.
+	 * @param xSteps Number of steps (iterations) in the x-direction.
+	 * @param ySteps Number of steps (iterations) in the y-direction.
+	 * @param xGrid Distance between iterations in the x-direction.
+	 * @param yGrid Distance between iterations in the y-direction.
+	 * @param oddRowXOffset X offset for odd rows.
+	 * @param oddRowYOffset Y offset for odd rows.
+	 * @param oddColXOffset X offset for odd columns.
+	 * @param oddColYOffset Y offset for odd columns.
+	 * @return A list of tessellated CSG objects.
+	 */
 	public static List<CSG> tessellateXY(CSG incoming, int xSteps, int ySteps, double xGrid, double yGrid, double oddRowXOffset, double oddRowYOffset, double oddColXOffset, double oddColYOffset) {
 	    return tessellate(incoming, xSteps, ySteps, 1, xGrid, yGrid, 0, oddRowXOffset, oddRowYOffset, 0, oddColXOffset, oddColYOffset, 0, 0, 0, 0);
 	}
+	
+	/**
+	 * Tessellates a given CSG object into a 2D grid with specified steps. The grid spacing is determined by the dimensions of the incoming CSG object.
+	 *
+	 * @param incoming The CSG object to be tessellated.
+	 * @param xSteps Number of steps (iterations) in the x-direction.
+	 * @param ySteps Number of steps (iterations) in the y-direction.
+	 * @return A list of tessellated CSG objects.
+	 */
 	public static List<CSG> tessellateXY(CSG incoming, int xSteps, int ySteps) {
 	    return tessellateXY(incoming, xSteps, ySteps, incoming.getTotalX(), incoming.getTotalY(), 0, 0, 0, 0);
 	}
+	
+	/**
+	 * Tessellates a given CSG object into a 2D grid with specified steps and grid spacing.
+	 *
+	 * @param incoming The CSG object to be tessellated.
+	 * @param xSteps Number of steps (iterations) in the x-direction.
+	 * @param ySteps Number of steps (iterations) in the y-direction.
+	 * @param xGrid Distance between iterations in the x-direction.
+	 * @param yGrid Distance between iterations in the y-direction.
+	 * @return A list of tessellated CSG objects.
+	 */
 	public static List<CSG> tessellateXY(CSG incoming, int xSteps, int ySteps, double xGrid, double yGrid) {
 	    return tessellateXY(incoming, xSteps, ySteps, xGrid, yGrid, 0, 0, 0, 0);
 	}
+
 
 
 	/**
