@@ -41,13 +41,14 @@ import java.util.Set;
 
 import javafx.scene.paint.Color;
 
-// TODO: Auto-generated Javadoc
 /**
  * A simple property storage.
  *
  * @author Michael Hoffer &lt;info@michaelhoffer.de&gt;
  */
 public class PropertyStorage {
+
+    public static final String PROPERTY_MATERIAL_COLOR = "material:color";
 
     /** The map. */
     private final Map<String, Object> map = new HashMap<>();
@@ -121,8 +122,8 @@ public class PropertyStorage {
     static void randomColor(PropertyStorage storage) {
         Color c = colors[(int) (Math.random() * colors.length)];
 
-        storage.set("material:color",
-                "" + c.getRed()
+        storage.set(PROPERTY_MATERIAL_COLOR,
+                c.getRed()
                 + " " + c.getGreen()
                 + " " + c.getBlue());
     }
