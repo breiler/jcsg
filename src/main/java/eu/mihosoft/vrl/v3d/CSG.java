@@ -207,6 +207,10 @@ public class CSG implements IuserAPI {
 	 */
 	public CSG setColor(Color color) {
 		this.color = color;
+        getStorage().set(PropertyStorage.PROPERTY_MATERIAL_COLOR, color.getRed()
+                + " " + color.getGreen()
+                + " " + color.getBlue());
+
 		if (current != null) {
 			PhongMaterial m = new PhongMaterial(getColor());
 			current.setMaterial(m);
@@ -612,7 +616,7 @@ public class CSG implements IuserAPI {
 	/**
 	 * Scaley.
 	 *
-	 * @param scaleValue the scale value
+	 * @param measurment the scale value
 	 * @return the csg
 	 */
 	public CSG scaleToMeasurmentY(Number measurment) {
@@ -624,7 +628,7 @@ public class CSG implements IuserAPI {
 	/**
 	 * Scalex.
 	 *
-	 * @param scaleValue the scale value
+	 * @param measurment the scale value
 	 * @return the csg
 	 */
 	public CSG scaleToMeasurmentX(Number measurment) {
