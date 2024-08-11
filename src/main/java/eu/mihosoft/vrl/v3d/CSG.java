@@ -184,7 +184,7 @@ public class CSG implements IuserAPI {
 		if (ret == null)
 			return null;
 		ret.setName(getName());
-		ret.setColor(getColor());
+		//ret.setColor(getColor());
 		ret.slicePlanes = slicePlanes;
 		ret.mapOfparametrics = mapOfparametrics;
 		ret.exportFormats = exportFormats;
@@ -207,15 +207,16 @@ public class CSG implements IuserAPI {
 	 */
 	public CSG setColor(Color color) {
 		this.color = color;
-        getStorage().set(PropertyStorage.PROPERTY_MATERIAL_COLOR, color.getRed()
-                + " " + color.getGreen()
-                + " " + color.getBlue());
+		for(Polygon p:polygons)
+			p.setColor(color);
+		return this;
+	}
 
+	public void setMeshColor(Color color) {
 		if (current != null) {
-			PhongMaterial m = new PhongMaterial(getColor());
+			PhongMaterial m = new PhongMaterial(color);
 			current.setMaterial(m);
 		}
-		return this;
 	}
 
 	/**
@@ -2207,7 +2208,7 @@ public class CSG implements IuserAPI {
 					this.setParameter(vals, dyingCSG.getMapOfparametrics().get(param));
 			}
 		}
-		this.setColor(dyingCSG.getColor());
+		//this.setColor(dyingCSG.getColor());
 		if (getName().length() == 0)
 			setName(dyingCSG.getName());
 		return this;
@@ -2327,7 +2328,8 @@ public class CSG implements IuserAPI {
 		IParametric function = getMapOfparametrics().get(key);
 		if (function != null)
 			return function.change(this, key, new Long((long) (newValue * 1000))).setManipulator(this.getManipulator())
-					.setColor(this.getColor());
+					//.setColor(this.getColor())
+					;
 		return this;
 	}
 
@@ -2342,7 +2344,8 @@ public class CSG implements IuserAPI {
 			return this;
 		CSG regenerate2 = regenerate.regenerate(this);
 		if (regenerate2 != null)
-			return regenerate2.setManipulator(this.getManipulator()).setColor(this.getColor());
+			return regenerate2.setManipulator(this.getManipulator())//.setColor(this.getColor())
+					;
 		return this;
 	}
 

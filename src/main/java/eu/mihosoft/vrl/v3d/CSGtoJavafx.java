@@ -55,7 +55,7 @@ public class CSGtoJavafx {
 
 					mesh.getPoints().addAll((float) firstVertex.pos.x, (float) firstVertex.pos.y,
 							(float) firstVertex.pos.z);
-
+					
 					mesh.getTexCoords().addAll(0); // texture (not covered)
 					mesh.getTexCoords().addAll(0);
 
