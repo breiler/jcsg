@@ -1556,7 +1556,7 @@ public class CSG implements IuserAPI {
 			// System.out.println("Fixing error in STL " + name + " polygon# " + i + "
 			// number of vertices " + p.vertices.size());
 			try {
-				List<Polygon> triangles = PolygonUtil.concaveToConvex(p,true);
+				List<Polygon> triangles = PolygonUtil.concaveToConvex(p);
 				for(Polygon poly :triangles) {
 					if(poly.isDegenerate()) {
 						degenerates.add(poly);
@@ -1569,7 +1569,7 @@ public class CSG implements IuserAPI {
 				Debug3dProvider.clearScreen();
 				Debug3dProvider.addObject(p);
 				try {
-					List<Polygon> triangles = PolygonUtil.concaveToConvex(p,true);
+					List<Polygon> triangles = PolygonUtil.concaveToConvex(p);
 					toAdd.addAll(triangles);
 				}catch(java.lang.IllegalStateException ise) {
 					ise.printStackTrace();
