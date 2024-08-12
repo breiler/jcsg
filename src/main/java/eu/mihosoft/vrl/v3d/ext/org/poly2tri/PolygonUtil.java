@@ -49,7 +49,6 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.triangulate.polygon.ConstrainedDelaunayTriangulator;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class PolygonUtil.
  *
@@ -101,28 +100,23 @@ public class PolygonUtil {
 	 * @param incoming the concave
 	 * @return the list
 	 */
-	public static List<eu.mihosoft.vrl.v3d.Polygon> concaveToConvex(eu.mihosoft.vrl.v3d.Polygon incoming) {
-		return concaveToConvex(incoming,false);
-	}
-	public static List<eu.mihosoft.vrl.v3d.Polygon> concaveToConvex(eu.mihosoft.vrl.v3d.Polygon incoming, boolean strictTriangulation) {
-		//incoming = pruneDuplicatePoints(incoming);
+	public static List<Polygon> concaveToConvex(Polygon incoming) {
 		List<Polygon> result = new ArrayList<>();
 
 		if (incoming == null)
 			return result;
 		if (incoming.vertices.size() < 3)
 			return result;
-		eu.mihosoft.vrl.v3d.Polygon concave= incoming;;
+		Polygon concave = incoming;
 		Vector3d normalOfPlane = incoming.plane.normal;
 		boolean reorent = normalOfPlane.z < 1.0-Plane.EPSILON;
 		Transform orentationInv = null;
 		boolean debug = false;
-		Vector3d normal2;
 		if (reorent) {
 			double degreesToRotate = Math.toDegrees(Math.atan2(normalOfPlane.x,normalOfPlane.z));
 			Transform orentation = new Transform().roty(degreesToRotate);
 
-			eu.mihosoft.vrl.v3d.Polygon tmp = incoming.transformed(orentation);
+			Polygon tmp = incoming.transformed(orentation);
 			
 			Vector3d normal = tmp.plane.normal;
 			double degreesToRotate2 =90+Math.toDegrees(Math.atan2(normal.z,normal.y));
@@ -133,22 +127,13 @@ public class PolygonUtil {
 				Debug3dProvider.addObject(incoming);
 			}
 			concave = incoming.transformed(orentation2);
-			normal2 = concave.plane.normal;
 			orentationInv = orentation2.inverse();
 			if(concave.plane.normal.z <0) {
 				Transform orentation3 = orentation2.rotx(180);
 				concave = incoming.transformed(orentation3);
 				orentationInv = orentation3.inverse();
 			}
-			
-			
-			//System.out.println("New vectors "+normal2+" "+normal);
 		}
-//		if(concave.plane.normal.z < 0.999) {
-//			result.add(incoming);
-//			return result;
-//			//throw new RuntimeException("Orentaion of plane misaligned for triangulation "+concave.plane.normal.z);
-//		}
 
 
 		Vector3d normal = concave.plane.normal.clone();
@@ -170,22 +155,15 @@ public class PolygonUtil {
 		Vector3d v = concave.vertices.get(0).pos;
 		coordinates[concave.vertices.size()]=new Coordinate(v.x,v.y,zplane);
 		// use the default factory, which gives full double-precision
-		//System.out.println("Triangulating\n"+geom.toText());
 		Geometry triangles;
 		try {
 			Geometry geom = new GeometryFactory().createPolygon(coordinates);
 			triangles= ConstrainedDelaunayTriangulator.triangulate(geom);
-			//System.out.println("Triangulation result\n"+triangles.toText());
 		}catch(Exception ex) {
 			ex.printStackTrace();
 			throw ex;
 		}
-//		eu.mihosoft.vrl.v3d.ext.org.poly2tri.LegacyPolygon p = fromCSGPolygon(concave);
-//		//System.out.println("Triangulating "+p);
-//		eu.mihosoft.vrl.v3d.ext.org.poly2tri.Poly2Tri.triangulate(p);
-//
-//		List<DelaunayTriangle> triangles = p.getTriangles();
-		
+
 		ArrayList<Vertex> triPoints = new ArrayList<>();
 
 		for (int i=0;i<triangles.getNumGeometries();i++) {
@@ -203,14 +181,14 @@ public class PolygonUtil {
 					if (!cw) {
 						Collections.reverse(triPoints);
 					}
-					eu.mihosoft.vrl.v3d.Polygon poly = new eu.mihosoft.vrl.v3d.Polygon(triPoints, concave.getStorage(),true);
+					Polygon poly = new Polygon(triPoints, concave.getStorage(), true);
 					//poly = Extrude.toCCW(poly);
 					poly.plane.normal = concave.plane.normal;
 					boolean b = !Extrude.isCCW(poly);
 					if (cw != b) {
 						// System.out.println("Triangle not matching incoming");
 						Collections.reverse(triPoints);
-						poly = new eu.mihosoft.vrl.v3d.Polygon(triPoints, concave.getStorage(),true);
+						poly = new Polygon(triPoints, concave.getStorage(), true);
 						b = !Extrude.isCCW(poly);
 						if (cw != b) {
 							System.out.println("Error, polygon is reversed!");
@@ -226,16 +204,10 @@ public class PolygonUtil {
 						poly = poly.transform(orentationInv);
 					}
 					poly.plane.normal = normalOfPlane;
-					//poly.setDegenerate(t.isDegenerate());
-					// System.out.println("Updating the normal to " + clone);
-//					if (debug) {
-//						Debug3dProvider.addObject(incoming);
-//						Debug3dProvider.addObject(poly);
-//					}
+					poly.setColor(incoming.getColor());
 					result.add(poly);
 					counter = 0;
 					triPoints = new ArrayList<>();
-
 				} else {
 					counter++;
 				}
