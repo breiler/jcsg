@@ -6,14 +6,6 @@ import org.junit.Test;
 
 public class CSGTest {
 
-    public static final String BLUE_COLOR_AS_STRING = Color.BLUE.getRed() + " " + Color.BLUE.getGreen() + " " + Color.BLUE.getBlue();
-    public static final String RED_COLOR_AS_STRING = Color.RED.getRed() + " " + Color.RED.getGreen() + " " + Color.RED.getBlue();
-
-    private static String getColorAsString(Polygon polygon) {
-    	Color c=polygon.getColor();
-        return c.getRed() + " " + c.getGreen() + " " + c.getBlue();
-    }
-
     @Test
     public void setColor_ShouldSetColorToAllPolygons() {
         CSG cube = new Cube()
@@ -21,10 +13,8 @@ public class CSGTest {
                 .setColor(Color.BLUE);
         assertEquals(Color.BLUE, cube.getColor());
 
-        String colorAsString = Color.BLUE.getRed() + " " + Color.BLUE.getGreen() + " " + Color.BLUE.getBlue();
         cube.getPolygons().forEach(polygon -> {
-            String polygonColorAsString = getColorAsString(polygon);
-            assertEquals("Expected the polygon to get the same color as the CSG", colorAsString, polygonColorAsString);
+            assertEquals("Expected the polygon to get the same color as the CSG", Color.BLUE, polygon.getColor());
         });
     }
 
@@ -41,13 +31,65 @@ public class CSGTest {
         assertEquals(CSG.getDefaultColor(), union.getColor());
 
         union.getPolygons().forEach(polygon -> {
-            String polygonColorAsString = getColorAsString(polygon);
             boolean isLeftCube = polygon.getPoints().stream().allMatch(p -> p.x <= 5);
             if (isLeftCube) {
-                assertEquals("Expected the left cube polygons to be blue", BLUE_COLOR_AS_STRING, polygonColorAsString);
+                assertEquals("Expected the left cube polygons to be blue", Color.BLUE, polygon.getColor());
             } else {
-                assertEquals("Expected the right cube polygons to be red", RED_COLOR_AS_STRING, polygonColorAsString);
+                assertEquals("Expected the right cube polygons to be red", Color.RED, polygon.getColor());
             }
+        });
+    }
+
+    @Test
+    public void setColor_OnUnionedAndTriangulatedCSGShouldRetainColorsOnPolygons() {
+        CSG cube1 = new Cube(10).toCSG()
+                .setColor(Color.BLUE);
+
+        CSG cube2 = new Cube(10).toCSG()
+                .setColor(Color.RED)
+                .transformed(new Transform().translate(10, 0, 0));
+
+        CSG union = cube1.union(cube2).triangulate();
+        assertEquals(CSG.getDefaultColor(), union.getColor());
+
+        union.getPolygons().forEach(polygon -> {
+            boolean isLeftCube = polygon.getPoints().stream().allMatch(p -> p.x <= 5);
+            if (isLeftCube) {
+                assertEquals("Expected the left cube polygons to be blue", Color.BLUE, polygon.getColor());
+            } else {
+                assertEquals("Expected the right cube polygons to be red", Color.RED, polygon.getColor());
+            }
+        });
+    }
+
+    @Test
+    public void setColor_OnCSGShouldChangeColorsOfAllPolygons() {
+        CSG cube = new Cube(10).toCSG()
+                .setColor(Color.BLUE);
+        assertEquals(Color.BLUE, cube.getColor());
+
+        cube.setColor(Color.RED);
+
+        cube.getPolygons().forEach(polygon -> {
+            assertEquals("Expected the cube polygons to be another color", Color.RED, polygon.getColor());
+        });
+    }
+
+    @Test
+    public void setColor_OnUnionedCSGShouldChangeColorsOfAllPolygons() {
+        CSG cube1 = new Cube(10).toCSG()
+                .setColor(Color.BLUE);
+
+        CSG cube2 = new Cube(10).toCSG()
+                .setColor(Color.RED)
+                .transformed(new Transform().translate(10, 0, 0));
+
+        CSG union = cube1.union(cube2);
+        assertEquals("Expected the new object to inherit the color from the latest unioned object", CSG.getDefaultColor(), union.getColor());
+
+        union.setColor(Color.BLUE);
+        union.getPolygons().forEach(polygon -> {
+            assertEquals("Expected the cube polygons to be another color", Color.BLUE, polygon.getColor());
         });
     }
 }
