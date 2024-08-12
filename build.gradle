@@ -62,7 +62,6 @@ task sourcesJar(type: Jar) {
 
 repositories {
     mavenCentral()
-    jcenter()
 	mavenLocal()
 }
 
