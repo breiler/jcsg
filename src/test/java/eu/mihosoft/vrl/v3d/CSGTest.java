@@ -10,9 +10,8 @@ public class CSGTest {
     public static final String RED_COLOR_AS_STRING = Color.RED.getRed() + " " + Color.RED.getGreen() + " " + Color.RED.getBlue();
 
     private static String getColorAsString(Polygon polygon) {
-        return polygon.getStorage().getValue(PropertyStorage.PROPERTY_MATERIAL_COLOR)
-                .map(Object::toString)
-                .orElseThrow(() -> new RuntimeException("Missing property " + PropertyStorage.PROPERTY_MATERIAL_COLOR));
+    	Color c=polygon.getColor();
+        return c.getRed() + " " + c.getGreen() + " " + c.getBlue();
     }
 
     @Test
@@ -39,7 +38,7 @@ public class CSGTest {
                 .transformed(new Transform().translate(10, 0, 0));
 
         CSG union = cube1.union(cube2);
-        assertEquals(Color.RED, union.getColor());
+        assertEquals(CSG.getDefaultColor(), union.getColor());
 
         union.getPolygons().forEach(polygon -> {
             String polygonColorAsString = getColorAsString(polygon);

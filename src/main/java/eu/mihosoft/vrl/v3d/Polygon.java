@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import eu.mihosoft.vrl.v3d.ext.org.poly2tri.PolygonUtil;
+import javafx.scene.paint.Color;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -219,7 +220,7 @@ public final class Polygon {
         this.vertices.forEach((vertex) -> {
             newVertices.add(vertex.clone());
         });
-        return new Polygon(newVertices, getStorage(),true);
+        return new Polygon(newVertices, getStorage(),true).setColor(color);
     }
 
     /**
@@ -675,6 +676,7 @@ public final class Polygon {
 
     private boolean valid = true;
 	private boolean degenerate=false;
+	private Color color;
 
 
 	public void setDegenerate(boolean degenerate) {
@@ -728,5 +730,12 @@ public final class Polygon {
 		return e;
 	}
 
+	public Polygon setColor(Color color) {
+		this.color = color;
+		return this;
+	}
+	public Color getColor() {
+		return this.color;
+	}
 
 }

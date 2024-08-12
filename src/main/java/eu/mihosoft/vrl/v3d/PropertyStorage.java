@@ -48,8 +48,6 @@ import javafx.scene.paint.Color;
  */
 public class PropertyStorage {
 
-    public static final String PROPERTY_MATERIAL_COLOR = "material:color";
-
     /** The map. */
     private final Map<String, Object> map = new HashMap<>();
 
@@ -62,7 +60,6 @@ public class PropertyStorage {
      * Constructor. Creates a new property storage.
      */
     public PropertyStorage() {
-       randomColor(this);
     }
 
     /**
@@ -114,19 +111,7 @@ public class PropertyStorage {
         return map.containsKey(key);
     }
 
-    /**
-     * Random color.
-     *
-     * @param storage the storage
-     */
-    static void randomColor(PropertyStorage storage) {
-        Color c = colors[(int) (Math.random() * colors.length)];
 
-        storage.set(PROPERTY_MATERIAL_COLOR,
-                c.getRed()
-                + " " + c.getGreen()
-                + " " + c.getBlue());
-    }
     public Set<String> getKeys(){
     	return map.keySet();
     }
