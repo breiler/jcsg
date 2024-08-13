@@ -37,7 +37,6 @@ package eu.mihosoft.vrl.v3d;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Auto-generated Javadoc
 /**
  * Represents a plane in 3D space.
  *
@@ -170,7 +169,6 @@ public class Plane {
         for (int i = 0; i < polygon.vertices.size(); i++) {
             double t = this.normal.dot(polygon.vertices.get(i).pos) - this.dist; 
             int type = (t < negEpsilon) ? BACK : (t > posEpsilon) ? FRONT : COPLANAR;
-            //polygonType |= type;
             if(type==BACK)
             	somePointsInBack=true;
             if(type==FRONT)
@@ -184,23 +182,18 @@ public class Plane {
         }else if(somePointsInfront)
         	polygonType=FRONT;
 
-        //System.out.println("> switching");
         // Put the polygon in the correct list, splitting it when necessary.
         switch (polygonType) {
             case COPLANAR:
-                //System.out.println(" -> coplanar");
                 (this.normal.dot(polygon.plane.normal) > 0 ? coplanarFront : coplanarBack).add(polygon);
                 break;
             case FRONT:
-                //System.out.println(" -> front");
                 front.add(polygon);
                 break;
             case BACK:
-                //System.out.println(" -> back");
                 back.add(polygon);
                 break;
             case SPANNING:
-                //System.out.println(" -> spanning");
                 List<Vertex> f = new ArrayList<>();
                 List<Vertex> b = new ArrayList<>();
                 for (int i = 0; i < polygon.vertices.size(); i++) {
@@ -224,13 +217,13 @@ public class Plane {
                     }
                 }
                 if (f.size() >= 3) {
-                    front.add(new Polygon(f, polygon.getStorage()));
-                }else {
+                    front.add(new Polygon(f, polygon.getStorage()).setColor(polygon.getColor()));
+                } else {
                 	System.out.println("Front Clip Fault!");
                 }
                 if (b.size() >= 3) {
-                    back.add(new Polygon(b, polygon.getStorage()));
-                }else {
+                    back.add(new Polygon(b, polygon.getStorage()).setColor(polygon.getColor()));
+                } else {
                 	System.out.println("Back Clip Fault!");
                 }
                 break;
