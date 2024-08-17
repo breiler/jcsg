@@ -46,6 +46,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -708,19 +709,11 @@ public class CSG implements IuserAPI {
 	@Override
 	public CSG clone() {
 		CSG csg = new CSG();
-
 		csg.setOptType(this.getOptType());
-
-		Stream<Polygon> polygonStream;
-
-//		if (getPolygons().size() > 200) {
-//			polygonStream = getPolygons().parallelStream();
-//		} else {
-//			polygonStream =getPolygons().stream();
-//		}
-		polygonStream=getPolygons().stream();
-		csg.setPolygons(polygonStream.map((Polygon p) -> p!=null?p.clone():null).filter(p-> p!=null).collect(Collectors.toList()));
-
+		csg.setPolygons(polygons.stream()
+				.filter(Objects::nonNull)
+				.map(Polygon::clone)
+				.collect(Collectors.toList()));
 		return csg.historySync(this);
 	}
 
@@ -1213,15 +1206,13 @@ public class CSG implements IuserAPI {
 	 * @return the csg
 	 */
 	private CSG _differenceCSGBoundsOpt(CSG csg) {
-		CSG b = csg;
-
-		CSG a1 = this._differenceNoOpt(csg.getBounds().toCSG());
-		CSG a2 = this.intersect(csg.getBounds().toCSG());
-		CSG BACK = a2._differenceNoOpt(b)._unionIntersectOpt(a1).optimization(getOptType());
+		CSG a1 = this._differenceNoOpt(csg.getBounds().toCSG().setColor(csg.getColor()));
+		CSG a2 = this.intersect(csg.getBounds().toCSG().setColor(csg.getColor()));
+		CSG result = a2._differenceNoOpt(csg)._unionIntersectOpt(a1).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			BACK.setName( name);
+			result.setName( name);
 		}
-		return BACK;
+		return result;
 	}
 
 	/**
@@ -1937,7 +1928,7 @@ public class CSG implements IuserAPI {
 	 *
 	 * @return the optType
 	 */
-	private OptType getOptType() {
+	protected OptType getOptType() {
 		return optType != null ? optType : defaultOptType;
 	}
 
@@ -2208,7 +2199,6 @@ public class CSG implements IuserAPI {
 					this.setParameter(vals, dyingCSG.getMapOfparametrics().get(param));
 			}
 		}
-		//this.setColor(dyingCSG.getColor());
 		if (getName().length() == 0)
 			setName(dyingCSG.getName());
 		return this;
