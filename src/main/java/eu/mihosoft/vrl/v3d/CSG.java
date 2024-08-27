@@ -185,7 +185,7 @@ public class CSG implements IuserAPI {
 		if (ret == null)
 			return null;
 		ret.setName(getName());
-		//ret.setColor(getColor());
+		ret.color=color;
 		ret.slicePlanes = slicePlanes;
 		ret.mapOfparametrics = mapOfparametrics;
 		ret.exportFormats = exportFormats;
@@ -1206,12 +1206,13 @@ public class CSG implements IuserAPI {
 	 * @return the csg
 	 */
 	private CSG _differenceCSGBoundsOpt(CSG csg) {
-		CSG a1 = this._differenceNoOpt(csg.getBounds().toCSG().setColor(csg.getColor()));
-		CSG a2 = this.intersect(csg.getBounds().toCSG().setColor(csg.getColor()));
+		CSG a1 = this._differenceNoOpt(csg.getBounds().toCSG());
+		CSG a2 = this.intersect(csg.getBounds().toCSG());
 		CSG result = a2._differenceNoOpt(csg)._unionIntersectOpt(a1).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
 			result.setName( name);
 		}
+		result.color=color;
 		return result;
 	}
 
@@ -2201,6 +2202,7 @@ public class CSG implements IuserAPI {
 		}
 		if (getName().length() == 0)
 			setName(dyingCSG.getName());
+		color=dyingCSG.getColor();
 		return this;
 	}
 
@@ -2316,10 +2318,11 @@ public class CSG implements IuserAPI {
 
 	public CSG setParameterNewValue(String key, double newValue) {
 		IParametric function = getMapOfparametrics().get(key);
-		if (function != null)
-			return function.change(this, key, new Long((long) (newValue * 1000))).setManipulator(this.getManipulator())
-					//.setColor(this.getColor())
-					;
+		if (function != null) {
+			CSG setManipulator = function.change(this, key, new Long((long) (newValue * 1000))).setManipulator(this.getManipulator());
+			setManipulator.color=color;
+			return setManipulator;
+		}
 		return this;
 	}
 
@@ -2334,8 +2337,7 @@ public class CSG implements IuserAPI {
 			return this;
 		CSG regenerate2 = regenerate.regenerate(this);
 		if (regenerate2 != null)
-			return regenerate2.setManipulator(this.getManipulator())//.setColor(this.getColor())
-					;
+			return regenerate2.setManipulator(this.getManipulator()).historySync(this);					;
 		return this;
 	}
 
