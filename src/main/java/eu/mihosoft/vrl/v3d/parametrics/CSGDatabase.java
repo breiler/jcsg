@@ -62,10 +62,14 @@ public class CSGDatabase {
 	}
 	
 	public static  ArrayList<IParameterChanged> getParamListeners(String key){
-		if(parameterListeners.get(key)==null){
-			parameterListeners.put(key, new ArrayList<>());
+		synchronized (parameterListeners) {
+			ArrayList<IParameterChanged> back = parameterListeners.get(key);
+			if(back==null){
+				back = new ArrayList<>();
+				parameterListeners.put(key, back);
+			}
+			return back;
 		}
-		return parameterListeners.get(key);
 	}
 	
 
