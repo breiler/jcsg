@@ -7,6 +7,8 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -16,11 +18,12 @@ import com.google.gson.reflect.TypeToken;
 
 public class CSGDatabase {
 	
-	private static HashMap<String,Parameter> database=null;
+	private static ConcurrentHashMap<String,Parameter> database=null;
 	private static File dbFile=new File("CSGdatabase.json");
-    private static final Type TT_mapStringString = new TypeToken<HashMap<String,Parameter>>(){}.getType();
+    private static final Type TT_mapStringString = new TypeToken<ConcurrentHashMap<String,Parameter>>(){}.getType();
     private static final Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
-    private static final HashMap<String,ArrayList<IParameterChanged>> parameterListeners=new HashMap<>();
+    //private static final HashMap<String,ArrayList<IParameterChanged>> parameterListeners=new HashMap<>();
+    private static final ConcurrentHashMap<String, CopyOnWriteArrayList<IParameterChanged>> parameterListeners = new ConcurrentHashMap<>();
 	public static void set(String key, Parameter value){
 		getDatabase();
 		//synchronized(database){
@@ -46,7 +49,7 @@ public class CSGDatabase {
 		saveDatabase();
 	}
 	public static  void addParameterListener(String key, IParameterChanged l){
-		ArrayList<IParameterChanged> list = getParamListeners(key);
+		CopyOnWriteArrayList<IParameterChanged> list = getParamListeners(key);
 		if(!list.contains(l)){
 			list.add(l);
 		}
@@ -55,17 +58,17 @@ public class CSGDatabase {
 		if(parameterListeners.get(key)==null){
 			return;
 		}
-		ArrayList<IParameterChanged> list = parameterListeners.get(key);
+		CopyOnWriteArrayList<IParameterChanged> list = parameterListeners.get(key);
 		if(list.contains(l)){
 			list.remove(l);
 		}
 	}
 	
-	public static  ArrayList<IParameterChanged> getParamListeners(String key){
+	public static  CopyOnWriteArrayList<IParameterChanged> getParamListeners(String key){
 		synchronized (parameterListeners) {
-			ArrayList<IParameterChanged> back = parameterListeners.get(key);
+			CopyOnWriteArrayList<IParameterChanged> back = parameterListeners.get(key);
 			if(back==null){
-				back = new ArrayList<>();
+				back = new CopyOnWriteArrayList<>();
 				parameterListeners.put(key, back);
 			}
 			return back;
@@ -78,7 +81,7 @@ public class CSGDatabase {
 			getDatabase().remove(key);
 		//}
 	}
-	private static HashMap<String,Parameter> getDatabase() {
+	private static ConcurrentHashMap<String,Parameter> getDatabase() {
 		if(database==null){
 			new Thread(){
 				public void run(){
@@ -86,7 +89,7 @@ public class CSGDatabase {
 					try {
 						
 						if(!getDbFile().exists()){
-							setDatabase(new HashMap<String,Parameter>());
+							setDatabase(new ConcurrentHashMap<String,Parameter>());
 						}
 						else{
 					        InputStream in = null;
@@ -96,7 +99,7 @@ public class CSGDatabase {
 					        } finally {
 					            IOUtils.closeQuietly(in);
 					        }
-					        HashMap<String,Parameter> tm=gson.fromJson(jsonString, TT_mapStringString);
+					        ConcurrentHashMap<String,Parameter> tm=gson.fromJson(jsonString, TT_mapStringString);
 					        
 					        
 					        if(tm!=null){
@@ -110,7 +113,7 @@ public class CSGDatabase {
 					} catch (Exception e) {
 						e.printStackTrace();
 						System.err.println(dbFile.getAbsolutePath());
-						setDatabase(new HashMap<String,Parameter>());
+						setDatabase(new ConcurrentHashMap<String,Parameter>());
 					}
 					Runtime.getRuntime().addShutdownHook(new Thread() {
 						@Override
@@ -129,7 +132,7 @@ public class CSGDatabase {
 					e.printStackTrace();
 				}
 				if((System.currentTimeMillis()-start)>500){
-					setDatabase(new HashMap<String,Parameter>());
+					setDatabase(new ConcurrentHashMap<String,Parameter>());
 				}
 			}
 		}
@@ -188,7 +191,7 @@ public class CSGDatabase {
 			e.printStackTrace();
 		}
 	}
-	private static void setDatabase(HashMap<String,Parameter> database) {
+	private static void setDatabase(ConcurrentHashMap<String,Parameter> database) {
 		if(CSGDatabase.database!=null){
 			return;
 		}

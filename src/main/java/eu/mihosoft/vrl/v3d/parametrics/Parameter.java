@@ -1,6 +1,7 @@
 package eu.mihosoft.vrl.v3d.parametrics;
 
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Parameter {
 	
@@ -53,7 +54,7 @@ public class Parameter {
 	public void setValue(Long newVal){
 		if(value!=newVal){
 			value=newVal;
-			ArrayList<IParameterChanged> listeners = CSGDatabase.getParamListeners(name);
+			CopyOnWriteArrayList<IParameterChanged> listeners = CSGDatabase.getParamListeners(name);
 			for(int i=0;i<listeners.size();i++){
 			  IParameterChanged l=listeners.get(i);
 				l.parameterChanged(name, this);
@@ -75,7 +76,7 @@ public class Parameter {
 	public void setStrValue(String newValue) {
 		if(!strValue.contentEquals(newValue)){
 			strValue = newValue;
-			ArrayList<IParameterChanged> listeners = CSGDatabase.getParamListeners(name);
+			CopyOnWriteArrayList<IParameterChanged> listeners = CSGDatabase.getParamListeners(name);
 			for(IParameterChanged l:listeners){
 				l.parameterChanged(name, this);
 			}
