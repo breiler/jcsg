@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -146,7 +144,7 @@ public class CSGDatabase {
             try {
 				in = FileUtils.openInputStream(f);
 				jsonString= IOUtils.toString(in);
-		        HashMap<String,Parameter> tm=gson.fromJson(jsonString, TT_mapStringString);
+				ConcurrentHashMap<String,Parameter> tm=gson.fromJson(jsonString, TT_mapStringString);
 		        if(tm !=null)
 			        for(String k:tm.keySet()){
 			        	set(k,tm.get(k));
