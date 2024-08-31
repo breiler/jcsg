@@ -5,6 +5,8 @@
  */
 package eu.mihosoft.vrl.v3d;
 
+import com.google.gson.annotations.Expose;
+
 // TODO: Auto-generated Javadoc
 /**
  * Bounding box for CSGs.
@@ -14,21 +16,27 @@ package eu.mihosoft.vrl.v3d;
 public class Bounds {
 
     /** The center. */
+	@Expose (serialize = true, deserialize = true)
     private final Vector3d center;
     
     /** The bounds. */
+	@Expose (serialize = true, deserialize = true)
     private final Vector3d bounds;
     
     /** The min. */
+	@Expose (serialize = true, deserialize = true)
     private final Vector3d min;
     
     /** The max. */
+	@Expose (serialize = true, deserialize = true)
     private final Vector3d max;
     
     /** The csg. */
+	@Expose (serialize = false, deserialize = false)
     private CSG csg;
     
     /** The cube. */
+	@Expose (serialize = false, deserialize = false)
     private Cube cube;
 
     /**

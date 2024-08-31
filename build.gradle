@@ -108,6 +108,7 @@ dependencies {
 	// triangulation algorithm
 	implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.19.0'
 	
+	implementation 'com.google.code.gson:gson:2.5'
 	
 }
 

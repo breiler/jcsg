@@ -39,14 +39,32 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import java.util.Random;
 
+import com.google.gson.annotations.Expose;
+
 // TODO: Auto-generated Javadoc
 /**
  * 3D Vector3d.
  *
  * @author Michael Hoffer &lt;info@michaelhoffer.de&gt;
  */
-public class Vector3d extends javax.vecmath.Vector3d{
+public class Vector3d {
+    /**
+     * The x coordinate.
+     */
+	@Expose (serialize = true, deserialize = true)
+    public	double	x;
 
+    /**
+     * The y coordinate.
+     */
+	@Expose (serialize = true, deserialize = true)
+    public	double	y;
+
+    /**
+     * The z coordinate.
+     */
+	@Expose (serialize = true, deserialize = true)
+    public	double	z;
 
     /**
 	 * 
@@ -67,7 +85,14 @@ public class Vector3d extends javax.vecmath.Vector3d{
     
     /** The Constant Z_ONE. */
     public static final Vector3d Z_ONE = new Vector3d(0, 0, 1);
-
+    /**
+     * Returns the length of this vector.
+     * @return the length of this vector
+     */
+    public double length()
+    {
+        return Math.sqrt(this.x*this.x + this.y*this.y + this.z*this.z);
+    }
     /**
      * Creates a new vector.
      *
