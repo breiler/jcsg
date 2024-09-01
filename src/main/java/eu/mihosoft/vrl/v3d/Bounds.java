@@ -221,5 +221,112 @@ public class Bounds {
 	public boolean contains(Transform com) {
 		return contains(new Vector3d(com.getX(), com.getY(), com.getZ()));
 	}
+	/**
+	 * Helper function wrapping bounding box values
+	 * 
+	 * @return CenterX
+	 */
+	public double getCenterX() {
+		return ((getMinX() / 2) + (getMaxX() / 2));
+	}
+
+	/**
+	 * Helper function wrapping bounding box values
+	 * 
+	 * @return CenterY
+	 */
+	public double getCenterY() {
+		return ((getMinY() / 2) + (getMaxY() / 2));
+	}
+
+	/**
+	 * Helper function wrapping bounding box values
+	 * 
+	 * @return CenterZ
+	 */
+	public double getCenterZ() {
+		return ((getMinZ() / 2) + (getMaxZ() / 2));
+	}
+
+	/**
+	 * Helper function wrapping bounding box values
+	 * 
+	 * @return MaxX
+	 */
+	public double getMaxX() {
+		return getMax().x;
+	}
+
+	/**
+	 * Helper function wrapping bounding box values
+	 * 
+	 * @return MaxY
+	 */
+	public double getMaxY() {
+		return getMax().y;
+	}
+
+	/**
+	 * Helper function wrapping bounding box values
+	 * 
+	 * @return MaxZ
+	 */
+	public double getMaxZ() {
+		return getMax().z;
+	}
+
+	/**
+	 * Helper function wrapping bounding box values
+	 * 
+	 * @return MinX
+	 */
+	public double getMinX() {
+		return getMin().x;
+	}
+
+	/**
+	 * Helper function wrapping bounding box values
+	 * 
+	 * @return MinY
+	 */
+	public double getMinY() {
+		return getMin().y;
+	}
+
+	/**
+	 * Helper function wrapping bounding box values
+	 * 
+	 * @return tMinZ
+	 */
+	public double getMinZ() {
+		return getMin().z;
+	}
+
+	/**
+	 * Helper function wrapping bounding box values
+	 * 
+	 * @return MinX
+	 */
+	public double getTotalX() {
+		return (-this.getMinX() + this.getMaxX());
+	}
+
+	/**
+	 * Helper function wrapping bounding box values
+	 * 
+	 * @return MinY
+	 */
+	public double getTotalY() {
+		return (-this.getMinY() + this.getMaxY());
+	}
+
+	/**
+	 * Helper function wrapping bounding box values
+	 * 
+	 * @return tMinZ
+	 */
+	public double getTotalZ() {
+		return (-this.getMinZ() + this.getMaxZ());
+	}
 
 }
