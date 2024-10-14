@@ -90,6 +90,7 @@ public class Extrude {
 			Polygon polygon2 = polygon1.translated(dir);
 
 			int numvertices = polygon1.vertices.size();
+			System.out.println("Building Polygon "+polygon1.getPoints().size());
 			for (int i = 0; i < numvertices; i++) {
 
 				int nexti = (i + 1) % numvertices;
@@ -99,8 +100,8 @@ public class Extrude {
 				Vector3d bottomV2 = polygon1.vertices.get(nexti).pos;
 				Vector3d topV2 = polygon2.vertices.get(nexti).pos;
 				double distance = bottomV1.minus(bottomV2).magnitude();
-				if(Math.abs(distance)<Plane.EPSILON*10) {
-					//System.out.println("Skipping invalid polygon");
+				if(Math.abs(distance)<Plane.EPSILON) {
+					System.out.println("Skipping invalid polygon "+i+" to "+nexti);
 					continue;
 				}
 				List<Vector3d> pPoints = Arrays.asList(bottomV2, topV2, topV1, bottomV1);

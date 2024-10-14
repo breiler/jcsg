@@ -58,9 +58,15 @@ public class SVGLoadTest {
 		double depth = 5 + (layers.size() * 5);
 		for (int i = 0; i < layers.size(); i++) {
 			String layerName = layers.get(i);
-			CSG extrudeLayerToCSG = s.extrudeLayerToCSG(depth, layerName);
+			HashMap<String, ArrayList<CSG>> extrudeLayerToCSG = s.extrudeLayers(depth,0.1, layerName);
 			// extrudeLayerToCSG.setColor(Color.web(SVGExporter.colorNames.get(i)));
-			polys.add(extrudeLayerToCSG);
+			for(String key:extrudeLayerToCSG.keySet()) {
+				System.out.println("Adding layer: "+key);
+				polys.add(CSG.unionAll(extrudeLayerToCSG.get(key)));
+//				for(CSG c:extrudeLayerToCSG.get(key)) {
+//					polys.add(c);
+//				}
+			}
 			depth -= 5;
 		}
 

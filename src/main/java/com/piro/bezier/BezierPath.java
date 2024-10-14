@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import eu.mihosoft.vrl.v3d.Plane;
 import eu.mihosoft.vrl.v3d.Vector3d;
 
 public class BezierPath {
@@ -14,7 +15,7 @@ public class BezierPath {
 
 	BezierListProducer path;
 
-	private ArrayList<Vector3d> pointList = new ArrayList<Vector3d>();
+	private ArrayList<Vector3d> plInternal = new ArrayList<Vector3d>();
 	double resolution = 0.075;
 
 	/** Creates a new instance of Animate */
@@ -60,45 +61,45 @@ public class BezierPath {
 				x = nextFloat(tokens);
 				y = nextFloat(tokens);
 				path.movetoAbs(x, y);
-				pointList.add(new Vector3d(x, y, 0));
+				setThePoint(new Vector3d(x, y, 0));
 				curCmd = 'L';
 				break;
 			case 'm':
 				x = nextFloat(tokens);
 				y = nextFloat(tokens);
 				path.movetoRel(x, y);
-				pointList.add(new Vector3d(x, y, 0));
+				setThePoint(new Vector3d(x, y, 0));
 				curCmd = 'l';
 				break;
 			case 'L':
 				path.linetoAbs(nextFloat(tokens), nextFloat(tokens));
-				pointList.add(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(1));
+				setThePoint(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(1));
 				break;
 			case 'l':
 				path.linetoRel(nextFloat(tokens), nextFloat(tokens));
-				pointList.add(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(1));
+				setThePoint(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(1));
 				break;
 			case 'H':
 				path.linetoHorizontalAbs(nextFloat(tokens));
 
-				pointList.add(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(1));
+				setThePoint(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(1));
 
 				break;
 			case 'h':
 				path.linetoHorizontalRel(nextFloat(tokens));
 
-				pointList.add(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(1));
+				setThePoint(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(1));
 
 				break;
 			case 'V':
 				path.linetoVerticalAbs(nextFloat(tokens));
 
-				pointList.add(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(1));
+				setThePoint(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(1));
 
 				break;
 			case 'v':
 				path.linetoVerticalAbs(nextFloat(tokens));
-				pointList.add(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(1));
+				setThePoint(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(1));
 				break;
 			case 'A':
 			case 'a':
@@ -106,51 +107,51 @@ public class BezierPath {
 			case 'Q':
 				path.curvetoQuadraticAbs(nextFloat(tokens), nextFloat(tokens), nextFloat(tokens), nextFloat(tokens));
 				for (double i = resolution; i < 1; i += resolution) {
-					pointList.add(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(i));
+					addingPoint(i);
 				}
 				break;
 			case 'q':
 				path.curvetoQuadraticAbs(nextFloat(tokens), nextFloat(tokens), nextFloat(tokens), nextFloat(tokens));
 				for (double i = resolution; i < 1; i += resolution) {
-					pointList.add(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(i));
+					addingPoint(i);
 				}
 				break;
 			case 'T':
 				path.curvetoQuadraticSmoothAbs(nextFloat(tokens), nextFloat(tokens));
 				for (double i = resolution; i < 1; i += resolution) {
-					pointList.add(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(i));
+					addingPoint(i);
 				}
 				break;
 			case 't':
 				path.curvetoQuadraticSmoothRel(nextFloat(tokens), nextFloat(tokens));
 				for (double i = resolution; i < 1; i += resolution) {
-					pointList.add(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(i));
+					addingPoint(i);
 				}
 				break;
 			case 'C':
 				path.curvetoCubicAbs(nextFloat(tokens), nextFloat(tokens), nextFloat(tokens), nextFloat(tokens),
 						nextFloat(tokens), nextFloat(tokens));
 				for (double i = resolution; i < 1; i += resolution) {
-					pointList.add(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(i));
+					addingPoint(i);
 				}
 				break;
 			case 'c':
 				path.curvetoCubicRel(nextFloat(tokens), nextFloat(tokens), nextFloat(tokens), nextFloat(tokens),
 						nextFloat(tokens), nextFloat(tokens));
 				for (double i = resolution; i < 1; i += resolution) {
-					pointList.add(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(i));
+					addingPoint(i);
 				}
 				break;
 			case 'S':
 				path.curvetoCubicSmoothAbs(nextFloat(tokens), nextFloat(tokens), nextFloat(tokens), nextFloat(tokens));
 				for (double i = resolution; i < 1; i += resolution) {
-					pointList.add(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(i));
+					addingPoint(i);
 				}
 				break;
 			case 's':
 				path.curvetoCubicSmoothRel(nextFloat(tokens), nextFloat(tokens), nextFloat(tokens), nextFloat(tokens));
 				for (double i = resolution; i < 1; i += resolution) {
-					pointList.add(path.bezierSegs.get(path.bezierSegs.size() - 1).eval(i));
+					addingPoint(i);
 				}
 				break;
 			case 'Z':
@@ -165,6 +166,19 @@ public class BezierPath {
 				throw new RuntimeException("Invalid path element");
 			}
 		}
+	}
+
+	private boolean addingPoint(double i) {
+		Vector3d eval = path.bezierSegs.get(path.bezierSegs.size() - 1).eval(i);
+		return setThePoint(eval);
+	}
+
+	private boolean setThePoint(Vector3d eval) {
+		for(Vector3d v:plInternal) {
+			if(Math.abs(v.minus(eval).magnitude())<Plane.EPSILON)
+				return false;
+		}
+		return plInternal.add(eval);
 	}
 
 	static protected float nextFloat(LinkedList<String> l) {
@@ -206,7 +220,7 @@ public class BezierPath {
 	 */
 	public ArrayList<Vector3d> evaluate() {
 
-		return pointList;
+		return plInternal;
 	}
 
 }
