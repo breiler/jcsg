@@ -584,11 +584,13 @@ public class SVGLoad {
 			// println "Single path found"
 
 			// setHolePolarity(true);
-			try {
+//			try {
 				loadSingle(code, resolution, startingFrame,encapsulatingLayer, c);
-			} catch (Exception ex) {
-				// BowlerStudio.printStackTrace(ex);
-			}
+//			} catch (Exception ex) {
+//				System.out.println("Polygon failed to load!");
+//				ex.printStackTrace();
+//				// BowlerStudio.printStackTrace(ex);
+//			}
 		} else {
 
 			// setHolePolarity(false);

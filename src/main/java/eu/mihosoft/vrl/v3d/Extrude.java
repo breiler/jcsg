@@ -98,11 +98,18 @@ public class Extrude {
 				Vector3d topV1 = polygon2.vertices.get(i).pos;
 				Vector3d bottomV2 = polygon1.vertices.get(nexti).pos;
 				Vector3d topV2 = polygon2.vertices.get(nexti).pos;
-
+				double distance = bottomV1.minus(bottomV2).magnitude();
+				if(Math.abs(distance)<Plane.EPSILON*10) {
+					//System.out.println("Skipping invalid polygon");
+					continue;
+				}
 				List<Vector3d> pPoints = Arrays.asList(bottomV2, topV2, topV1, bottomV1);
-
-				newPolygons.add(Polygon.fromPoints(pPoints, polygon1.getStorage()));
-
+				try {
+					newPolygons.add(Polygon.fromPoints(pPoints, polygon1.getStorage()));
+				}catch(Exception ex) {
+					System.out.println("Polygon has problems: ");
+					ex.printStackTrace();
+				}
 			}
 
 			polygon2 = polygon2.flipped();

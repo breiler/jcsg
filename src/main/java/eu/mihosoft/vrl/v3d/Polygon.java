@@ -62,7 +62,7 @@ public final class Polygon {
      *
      *  Note:  uses first three vertices to define the plane.
      */
-    public final Plane plane;
+    public  Plane plane;
     
 
     /**
@@ -111,10 +111,15 @@ public final class Polygon {
     public Polygon(List<Vertex> vertices, PropertyStorage shared, boolean allowDegenerate) {
         this.vertices = pruneDuplicatePoints(vertices);
         this.shared = shared;
-        this.plane = Plane.createFromPoints(
-                vertices.get(0).pos,
-                vertices.get(1).pos,
-                vertices.get(2).pos);
+//        try {
+	        this.plane = Plane.createFromPoints(
+	                vertices);
+//        }catch(java.lang.NumberFormatException nf) {
+//        	System.out.println("plane failed to load");
+//        	nf.printStackTrace();
+//	        this.plane = Plane.createFromPoints(
+//	                vertices);
+//        }
         validateAndInit(allowDegenerate);
     }
     /**
@@ -142,9 +147,7 @@ public final class Polygon {
     public Polygon(List<Vertex> vertices) {
         this.vertices = pruneDuplicatePoints(vertices);
         this.plane = Plane.createFromPoints(
-                vertices.get(0).pos,
-                vertices.get(1).pos,
-                vertices.get(2).pos);
+                vertices);
         validateAndInit(true);
     }
     public static List<Vertex> pruneDuplicatePoints(List<Vertex> incoming) {
@@ -171,10 +174,10 @@ public final class Polygon {
 	}
 	private void validateAndInit( boolean allowDegenerate) {
 		for (Vertex v : vertices) {
-			v.normal = plane.normal;
+			v.normal = plane.getNormal();
 		}
 		setDegenerate(true);
-		if (Vector3d.ZERO.equals(plane.normal)) {
+		if (Vector3d.ZERO.equals(plane.getNormal())) {
 			valid = false;
 			throw new RuntimeException(
 					"Normal is zero! Probably, duplicate points have been specified!\n\n" + toStlString());
@@ -279,7 +282,7 @@ public final class Polygon {
             for (int i = 0; i < this.vertices.size() - 2; i++) {
                 sb.
                         append("  facet normal ").append(
-                                this.plane.normal.toStlString()).append("\n").
+                                this.plane.getNormal().toStlString()).append("\n").
                         append("    outer loop\n").
                         append("      ").append(firstVertexStl).append("\n").
                         append("      ");
@@ -311,7 +314,7 @@ public final class Polygon {
         Vector3d b = this.vertices.get(1).pos;
         Vector3d c = this.vertices.get(2).pos;
 
-        this.plane.normal = b.minus(a).cross(c.minus(a));
+        this.plane.setNormal(b.minus(a).cross(c.minus(a)));
 
         return this;
     }
@@ -349,8 +352,8 @@ public final class Polygon {
 
         Vector3d a = this.vertices.get(0).pos;
 
-        this.plane.normal = computeNormal();
-        this.plane.dist = this.plane.normal.dot(a);
+        this.plane.setNormal(Plane.computeNormal(this.vertices));
+        this.plane.setDist(this.plane.getNormal().dot(a));
 
         if (transform.isMirror()) {
             // the transformation includes mirroring. flip polygon
@@ -359,21 +362,21 @@ public final class Polygon {
         }
         return this;
     }
-    public Vector3d computeNormal() {
-        Vector3d normal = new Vector3d(0, 0, 0);
-        int n = this.vertices.size();
-
-        for (int i = 0; i < n; i++) {
-            Vector3d current = this.vertices.get(i).pos;
-            Vector3d next = this.vertices.get((i + 1) % n).pos;
-            
-            normal.x += (current.y - next.y) * (current.z + next.z);
-            normal.y += (current.z - next.z) * (current.x + next.x);
-            normal.z += (current.x - next.x) * (current.y + next.y);
-        }
-
-        return normal.normalized();
-    }
+//    public Vector3d computeNormal(List<Vertex> vertices) {
+//        Vector3d normal = new Vector3d(0, 0, 0);
+//        int n = vertices.size();
+//
+//        for (int i = 0; i < n; i++) {
+//            Vector3d current = vertices.get(i).pos;
+//            Vector3d next = vertices.get((i + 1) % n).pos;
+//            
+//            normal.x += (current.y - next.y) * (current.z + next.z);
+//            normal.y += (current.z - next.z) * (current.x + next.x);
+//            normal.z += (current.x - next.x) * (current.y + next.y);
+//        }
+//
+//        return normal.normalized();
+//    }
     /**
      * Returns a transformed copy of this polygon.
      *
@@ -435,7 +438,7 @@ public final class Polygon {
             List<Vector3d> points, PropertyStorage shared, Plane plane, boolean allowDegenerate) {
 
         Vector3d normal
-                = (plane != null) ? plane.normal.clone() : new Vector3d(0, 0, 0);
+                = (plane != null) ? plane.getNormal().clone() : new Vector3d(0, 0, 0);
 
         List<Vertex> vertices = new ArrayList<>();
 
