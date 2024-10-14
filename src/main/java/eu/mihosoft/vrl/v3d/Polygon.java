@@ -348,10 +348,8 @@ public final class Polygon {
         );
 
         Vector3d a = this.vertices.get(0).pos;
-        Vector3d b = this.vertices.get(1).pos;
-        Vector3d c = this.vertices.get(2).pos;
 
-        this.plane.normal = b.minus(a).cross(c.minus(a)).normalized();
+        this.plane.normal = computeNormal();
         this.plane.dist = this.plane.normal.dot(a);
 
         if (transform.isMirror()) {
@@ -361,7 +359,21 @@ public final class Polygon {
         }
         return this;
     }
+    public Vector3d computeNormal() {
+        Vector3d normal = new Vector3d(0, 0, 0);
+        int n = this.vertices.size();
 
+        for (int i = 0; i < n; i++) {
+            Vector3d current = this.vertices.get(i).pos;
+            Vector3d next = this.vertices.get((i + 1) % n).pos;
+            
+            normal.x += (current.y - next.y) * (current.z + next.z);
+            normal.y += (current.z - next.z) * (current.x + next.x);
+            normal.z += (current.x - next.x) * (current.y + next.y);
+        }
+
+        return normal.normalized();
+    }
     /**
      * Returns a transformed copy of this polygon.
      *

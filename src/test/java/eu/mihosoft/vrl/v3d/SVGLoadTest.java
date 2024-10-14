@@ -13,7 +13,15 @@ import org.junit.Test;
 import eu.mihosoft.vrl.v3d.svg.SVGLoad;
 
 public class SVGLoadTest {
-
+	@Test
+	public void adversarial() throws IOException {
+		File svg = new File("Part-Num-0.svg");
+		if(!svg.exists())
+			throw new RuntimeException("Test file missing!"+svg.getAbsolutePath());
+		SVGLoad s = new SVGLoad(svg.toURI());
+		run(s);
+		//fail("Not yet implemented");
+	}
 	@Test
 	public void test() throws IOException {
 		File svg = new File("Test.SVG");
@@ -45,5 +53,7 @@ public class SVGLoadTest {
 		
 		return polys;
 	}
+	
+	
 
 }
