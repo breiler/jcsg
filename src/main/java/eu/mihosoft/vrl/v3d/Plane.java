@@ -140,9 +140,11 @@ public class Plane {
 		// If all else fails, return a default normal (e.g., in the z direction)
 		lengthSquared = normal.lengthSquared();
 
-		if (lengthSquared < d) {
+		if (lengthSquared < Double.MIN_VALUE*10) {
 			throw new NumberFormatException("This set of points is not a valid polygon");
 		}
+		if(normalized.lengthSquared()<EPSILON)
+			throw new NumberFormatException("Invalid Normalized Values!");
 		return normalized;
 	}
 
