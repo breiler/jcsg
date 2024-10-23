@@ -53,8 +53,14 @@ public class CSGDatabase {
 		}
 	}
 	public static  void clearParameterListeners(String key){
-		CopyOnWriteArrayList<IParameterChanged> list = getParamListeners(key);
-		list.clear();
+		synchronized (parameterListeners) {
+			CopyOnWriteArrayList<IParameterChanged> back = parameterListeners.get(key);
+			if(back==null){
+				back = new CopyOnWriteArrayList<>();
+				parameterListeners.put(key, back);
+			}
+			back.clear();
+		}
 	}
 	public static  void removeParameterListener(String key, IParameterChanged l){
 		if(parameterListeners.get(key)==null){
