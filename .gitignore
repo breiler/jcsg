@@ -14,7 +14,7 @@
 /testSpline.svg
 /CSGdatabase.json
 /*.stl
-/*.svg
+/Test.svg
 out
 
 /*.mtl
@@ -26,3 +26,4 @@ html
 /handmade.step
 /test-export-2.step
 /test-export.step
+/Part-Num-0.svg.png

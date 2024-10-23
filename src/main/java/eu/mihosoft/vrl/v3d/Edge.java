@@ -125,7 +125,7 @@ public class Edge {
         Polygon p = Polygon.fromPoints(points);
 
         p.vertices.stream().forEachOrdered((vertex) -> {
-            vertex.normal = plane.normal.clone();
+            vertex.normal = plane.getNormal().clone();
         });
 
 //        // we try to detect wrong orientation by comparing normals
@@ -897,8 +897,8 @@ public class Edge {
                     continue;
                 }
 
-                Vector3d nOuter = pOuter.plane.normal;
-                Vector3d nInner = pInner.plane.normal;
+                Vector3d nOuter = pOuter.plane.getNormal();
+                Vector3d nInner = pInner.plane.getNormal();
 
                 double angle = nOuter.angle(nInner);
 

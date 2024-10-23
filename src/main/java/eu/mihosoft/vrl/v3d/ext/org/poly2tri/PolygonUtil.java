@@ -108,7 +108,7 @@ public class PolygonUtil {
 		if (incoming.vertices.size() < 3)
 			return result;
 		Polygon concave = incoming;
-		Vector3d normalOfPlane = incoming.plane.normal;
+		Vector3d normalOfPlane = incoming.plane.getNormal();
 		boolean reorent = normalOfPlane.z < 1.0-Plane.EPSILON;
 		Transform orentationInv = null;
 		boolean debug = false;
@@ -118,7 +118,7 @@ public class PolygonUtil {
 
 			Polygon tmp = incoming.transformed(orentation);
 			
-			Vector3d normal = tmp.plane.normal;
+			Vector3d normal = tmp.plane.getNormal();
 			double degreesToRotate2 =90+Math.toDegrees(Math.atan2(normal.z,normal.y));
 			Transform orentation2 = orentation.rotx(degreesToRotate2);// th triangulation function needs
 			// the polygon on the xy plane
@@ -128,7 +128,7 @@ public class PolygonUtil {
 			}
 			concave = incoming.transformed(orentation2);
 			orentationInv = orentation2.inverse();
-			if(concave.plane.normal.z <0) {
+			if(concave.plane.getNormal().z <0) {
 				Transform orentation3 = orentation2.rotx(180);
 				concave = incoming.transformed(orentation3);
 				orentationInv = orentation3.inverse();
@@ -136,7 +136,7 @@ public class PolygonUtil {
 		}
 
 
-		Vector3d normal = concave.plane.normal.clone();
+		Vector3d normal = concave.plane.getNormal().clone();
 
 		boolean cw = !Extrude.isCCW(concave);
 		//concave = Extrude.toCCW(concave);
@@ -183,7 +183,7 @@ public class PolygonUtil {
 					}
 					Polygon poly = new Polygon(triPoints, concave.getStorage(), true);
 					//poly = Extrude.toCCW(poly);
-					poly.plane.normal = concave.plane.normal;
+					poly.plane.setNormal(concave.plane.getNormal());
 					boolean b = !Extrude.isCCW(poly);
 					if (cw != b) {
 						// System.out.println("Triangle not matching incoming");
@@ -203,7 +203,7 @@ public class PolygonUtil {
 					if (reorent) {
 						poly = poly.transform(orentationInv);
 					}
-					poly.plane.normal = normalOfPlane;
+					poly.plane.setNormal(normalOfPlane);
 					poly.setColor(incoming.getColor());
 					result.add(poly);
 					counter = 0;

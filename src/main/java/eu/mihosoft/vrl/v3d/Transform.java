@@ -328,10 +328,10 @@ public class Transform {
 
 		System.err.println("WARNING: I'm too dumb to implement the mirror() operation correctly. Please fix me!");
 
-		double nx = plane.normal.x;
-		double ny = plane.normal.y;
-		double nz = plane.normal.z;
-		double w = plane.dist;
+		double nx = plane.getNormal().x;
+		double ny = plane.getNormal().y;
+		double nz = plane.getNormal().z;
+		double w = plane.getDist();
 		double elemenents[] = { (1.0 - 2.0 * nx * nx), (-2.0 * ny * nx), (-2.0 * nz * nx), 0, (-2.0 * nx * ny),
 				(1.0 - 2.0 * ny * ny), (-2.0 * nz * ny), 0, (-2.0 * nx * nz), (-2.0 * ny * nz), (1.0 - 2.0 * nz * nz),
 				0, (-2.0 * nx * w), (-2.0 * ny * w), (-2.0 * nz * w), 1 };
