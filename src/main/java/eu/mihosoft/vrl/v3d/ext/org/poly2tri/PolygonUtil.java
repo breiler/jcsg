@@ -48,6 +48,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.triangulate.polygon.ConstrainedDelaunayTriangulator;
+import org.locationtech.jts.triangulate.polygon.PolygonTriangulator;
 
 /**
  * The Class PolygonUtil.
@@ -109,17 +110,17 @@ public class PolygonUtil {
 			return result;
 		Polygon concave = incoming;
 		Vector3d normalOfPlane = incoming.plane.getNormal();
-		boolean reorent = normalOfPlane.z < 1.0-Plane.EPSILON;
+		boolean reorent = normalOfPlane.z < 1.0 - Plane.EPSILON;
 		Transform orentationInv = null;
 		boolean debug = false;
 		if (reorent) {
-			double degreesToRotate = Math.toDegrees(Math.atan2(normalOfPlane.x,normalOfPlane.z));
+			double degreesToRotate = Math.toDegrees(Math.atan2(normalOfPlane.x, normalOfPlane.z));
 			Transform orentation = new Transform().roty(degreesToRotate);
 
 			Polygon tmp = incoming.transformed(orentation);
-			
+
 			Vector3d normal = tmp.plane.getNormal();
-			double degreesToRotate2 =90+Math.toDegrees(Math.atan2(normal.z,normal.y));
+			double degreesToRotate2 = 90 + Math.toDegrees(Math.atan2(normal.z, normal.y));
 			Transform orentation2 = orentation.rotx(degreesToRotate2);// th triangulation function needs
 			// the polygon on the xy plane
 			if (debug) {
@@ -128,51 +129,63 @@ public class PolygonUtil {
 			}
 			concave = incoming.transformed(orentation2);
 			orentationInv = orentation2.inverse();
-			if(concave.plane.getNormal().z <0) {
+			if (concave.plane.getNormal().z < 0) {
 				Transform orentation3 = orentation2.rotx(180);
 				concave = incoming.transformed(orentation3);
 				orentationInv = orentation3.inverse();
 			}
 		}
 
-
 		Vector3d normal = concave.plane.getNormal().clone();
 
 		boolean cw = !Extrude.isCCW(concave);
-		//concave = Extrude.toCCW(concave);
+		// concave = Extrude.toCCW(concave);
 		if (debug) {
 			Debug3dProvider.clearScreen();
 			Debug3dProvider.addObject(concave);
-			//Debug3dProvider.clearScreen();
+			// Debug3dProvider.clearScreen();
 		}
-		
-		Coordinate[] coordinates = new Coordinate[concave.vertices.size()+1];
-		double zplane =concave.vertices.get(0).pos.z;
-		for(int i=0;i<concave.vertices.size();i++) {
-			Vector3d v = concave.vertices.get(i).pos;
-			coordinates[i]=new Coordinate(v.x,v.y,zplane);
-		}
-		Vector3d v = concave.vertices.get(0).pos;
-		coordinates[concave.vertices.size()]=new Coordinate(v.x,v.y,zplane);
-		// use the default factory, which gives full double-precision
 		Geometry triangles;
+		double zplane = concave.vertices.get(0).pos.z;
+
 		try {
+			Coordinate[] coordinates = new Coordinate[concave.vertices.size() + 1];
+			for (int i = 0; i < concave.vertices.size(); i++) {
+				Vector3d v = concave.vertices.get(i).pos;
+				coordinates[i] = new Coordinate(v.x, v.y, zplane);
+			}
+			Vector3d v = concave.vertices.get(0).pos;
+			coordinates[concave.vertices.size()] = new Coordinate(v.x, v.y, zplane);
+			// use the default factory, which gives full double-precision
 			Geometry geom = new GeometryFactory().createPolygon(coordinates);
-			triangles= ConstrainedDelaunayTriangulator.triangulate(geom);
-		}catch(Exception ex) {
+			triangles = ConstrainedDelaunayTriangulator.triangulate(geom);
+		} catch (java.lang.IllegalStateException e) {
+			Coordinate[] coordinates = new Coordinate[concave.vertices.size() + 1];
+			for (int i = 0; i < concave.vertices.size(); i++) {
+				Vector3d v = concave.vertices.get(i).pos;
+				coordinates[coordinates.length-i-1] = new Coordinate(v.x, v.y, zplane);
+			}
+			Vector3d v = concave.vertices.get(0).pos;
+			coordinates[0] = new Coordinate(v.x, v.y, zplane);
+			// use the default factory, which gives full double-precision
+			
+
+			Geometry geom = new GeometryFactory().createPolygon(coordinates);
+			triangles =  PolygonTriangulator.triangulate(geom);
+		} catch (Exception ex) {
 			ex.printStackTrace();
 			throw ex;
 		}
 
 		ArrayList<Vertex> triPoints = new ArrayList<>();
 
-		for (int i=0;i<triangles.getNumGeometries();i++) {
+		for (int i = 0; i < triangles.getNumGeometries(); i++) {
 			Geometry tri = triangles.getGeometryN(i);
 			Coordinate[] coords = tri.getCoordinates();
 			int counter = 0;
-			if(coords.length!=4)
+			if (coords.length != 4)
 				throw new RuntimeException("Failed to triangulate");
-			for (int j=0;j<3;j++) {
+			for (int j = 0; j < 3; j++) {
 				Coordinate tp = coords[j];
 				Vector3d pos = new Vector3d(tp.getX(), tp.getY(), zplane);
 				triPoints.add(new Vertex(pos, normal));
@@ -182,7 +195,7 @@ public class PolygonUtil {
 						Collections.reverse(triPoints);
 					}
 					Polygon poly = new Polygon(triPoints, concave.getStorage(), true);
-					//poly = Extrude.toCCW(poly);
+					// poly = Extrude.toCCW(poly);
 					poly.plane.setNormal(concave.plane.getNormal());
 					boolean b = !Extrude.isCCW(poly);
 					if (cw != b) {
@@ -191,15 +204,15 @@ public class PolygonUtil {
 						poly = new Polygon(triPoints, concave.getStorage(), true);
 						b = !Extrude.isCCW(poly);
 						if (cw != b) {
-							//com.neuronrobotics.sdk.common.Log.error("Error, polygon is reversed!");
+							// com.neuronrobotics.sdk.common.Log.error("Error, polygon is reversed!");
 						}
 					}
 					if (debug) {
-						//Debug3dProvider.clearScreen();
-						//Debug3dProvider.addObject(concave);
+						// Debug3dProvider.clearScreen();
+						// Debug3dProvider.addObject(concave);
 						Debug3dProvider.addObject(poly);
 					}
-					
+
 					if (reorent) {
 						poly = poly.transform(orentationInv);
 					}
@@ -324,7 +337,7 @@ public class PolygonUtil {
 			Vertex v = incoming.vertices.get(i);
 			boolean duplicate = false;
 			for (Vertex vx : newPoints) {
-				if (vx.pos.test(v.pos,	Plane.EPSILON_duplicate)) {
+				if (vx.pos.test(v.pos, Plane.EPSILON_duplicate)) {
 					duplicate = true;
 				}
 			}
@@ -333,9 +346,9 @@ public class PolygonUtil {
 			}
 
 		}
-		if(newPoints.size()<3)
+		if (newPoints.size() < 3)
 			return null;
-	
+
 		return new Polygon(newPoints);
 
 	}

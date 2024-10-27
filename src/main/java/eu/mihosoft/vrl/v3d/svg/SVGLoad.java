@@ -1,7 +1,5 @@
 package eu.mihosoft.vrl.v3d.svg;
 
-
-
 import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
 import org.apache.batik.anim.dom.SVGOMGElement;
 import org.apache.batik.anim.dom.SVGOMImageElement;
@@ -51,9 +49,9 @@ public class SVGLoad {
 	private static final String GROUP_ELEMENT_NAME = "g";
 	private Document svgDocument;
 	boolean hp = true;
-	private HashMap<String,List<Polygon>> polygonByLayers = null;
-	private HashMap<String,ArrayList<CSG>> csgByLayers = new HashMap<String, ArrayList<CSG>>(); 
-	private HashMap<Polygon,Color> colors=new HashMap<>();
+	private HashMap<String, List<Polygon>> polygonByLayers = null;
+	private HashMap<String, ArrayList<CSG>> csgByLayers = new HashMap<String, ArrayList<CSG>>();
+	private HashMap<Polygon, Color> colors = new HashMap<>();
 //	private ArrayList<CSG> sections = null;
 //	private ArrayList<CSG> holes = null;
 //
@@ -63,8 +61,8 @@ public class SVGLoad {
 	private boolean negativeThickness = false;
 	private double height = 0;
 	private double width = 0;
-	private Double scale=null;
-	private HashMap<String,Double> units=new HashMap<>();
+	private Double scale = null;
+	private HashMap<String, Double> units = new HashMap<>();
 //	static {
 //		units.put("mm", (1/SVGExporter.Scale));
 //		units.put("px", 1.0);
@@ -74,42 +72,45 @@ public class SVGLoad {
 //		units.put("m", units.get("mm")/1000.0);
 //
 //	}
-	
-	private  double toPx(String value) {
 
-		for(String key : units.keySet()) {
-			if(value.endsWith(key)) {
-				String []split = value.split(key);
-				if(key.contentEquals("m")&& split.length>1) {
+	private double toPx(String value) {
+
+		for (String key : units.keySet()) {
+			if (value.endsWith(key)) {
+				String[] split = value.split(key);
+				if (key.contentEquals("m") && split.length > 1) {
 					// meters but not meters units
 					break;
 				}
-				////com.neuronrobotics.sdk.common.Log.error("Units set to "+key+" for "+value);
-				return Double.parseDouble(split[0])/ units.get(key);
+				//// com.neuronrobotics.sdk.common.Log.error("Units set to "+key+" for "+value);
+				return Double.parseDouble(split[0]) / units.get(key);
 			}
 		}
 		return Double.parseDouble(value);
 	}
+
 	private void setScale(double value) {
-		
-		scale=value;
-		if(scale.isInfinite()||scale.isNaN())
+
+		scale = value;
+		if (scale.isInfinite() || scale.isNaN())
 			throw new RuntimeException("Scale must be real number");
-		units.put("mm", (1/getScale()));
+		units.put("mm", (1 / getScale()));
 		units.put("px", 1.0);
-		units.put("cm", units.get("mm")/10.0);
-		units.put("in", units.get("mm")/25.4);
-		units.put("ft", units.get("in")/12.0);
-		units.put("m", units.get("mm")/1000.0);
+		units.put("cm", units.get("mm") / 10.0);
+		units.put("in", units.get("mm") / 25.4);
+		units.put("ft", units.get("in") / 12.0);
+		units.put("m", units.get("mm") / 1000.0);
 	}
+
 	private Double getScale() {
 		return scale.doubleValue();
 	}
-	
-	private  double toMM(String value) {
-		Double px= toPx(value);
-		return px*1/getScale();
+
+	private double toMM(String value) {
+		Double px = toPx(value);
+		return px * 1 / getScale();
 	}
+
 	private static ISVGLoadProgress progressDefault = new ISVGLoadProgress() {
 
 		@Override
@@ -136,9 +137,8 @@ public class SVGLoad {
 		 * Use to create an instance of a class that can parse an SVG path element to
 		 * produce MetaPost code.
 		 *
-		 * @param pathNode
-		 *            The path node containing a "d" attribute (output as MetaPost
-		 *            code).
+		 * @param pathNode The path node containing a "d" attribute (output as MetaPost
+		 *                 code).
 		 */
 		public MetaPostPath2(Node pathNode) {
 			setPathNode(pathNode);
@@ -174,9 +174,8 @@ public class SVGLoad {
 		/**
 		 * Typecasts the given pathNode to an SVGOMPathElement for later analysis.
 		 * 
-		 * @param pathNode
-		 *            The path element that contains curves, lines, and other SVG
-		 *            instructions.
+		 * @param pathNode The path element that contains curves, lines, and other SVG
+		 *                 instructions.
 		 */
 		private void setPathNode(Node pathNode) {
 			this.pathElement = (SVGOMPathElement) pathNode;
@@ -196,10 +195,8 @@ public class SVGLoad {
 	/**
 	 * Creates an SVG Document given a URI.
 	 *
-	 * @param uri
-	 *            Path to the file.
-	 * @throws Exception
-	 *             Something went wrong parsing the SVG file.
+	 * @param uri Path to the file.
+	 * @throws Exception Something went wrong parsing the SVG file.
 	 */
 	public SVGLoad(URI uri) throws IOException {
 		setSVGDocument(createSVGDocument(uri));
@@ -208,10 +205,8 @@ public class SVGLoad {
 	/**
 	 * Creates an SVG Document given a URI.
 	 *
-	 * @param f
-	 *            Path to the file.
-	 * @throws Exception
-	 *             Something went wrong parsing the SVG file.
+	 * @param f Path to the file.
+	 * @throws Exception Something went wrong parsing the SVG file.
 	 */
 	public SVGLoad(File f) throws IOException {
 		setSVGDocument(createSVGDocument(f.toURI()));
@@ -220,10 +215,8 @@ public class SVGLoad {
 	/**
 	 * Creates an SVG Document String of SVG data.
 	 *
-	 * @param data
-	 *            Contents of an svg file
-	 * @throws Exception
-	 *             Something went wrong parsing the SVG file.
+	 * @param data Contents of an svg file
+	 * @throws Exception Something went wrong parsing the SVG file.
 	 */
 	public SVGLoad(String data) throws IOException {
 		File tmpsvg = new File(System.getProperty("java.io.tmpdir") + "/" + Math.random());
@@ -251,18 +244,17 @@ public class SVGLoad {
 	 * This function will create a list of polygons that can be exported back to an
 	 * SVG
 	 * 
-	 * @param f
-	 *            the file containing the SVG data
+	 * @param f the file containing the SVG data
 	 * @return
 	 * @throws IOException
 	 */
-	public static HashMap<String,List<Polygon>> toPolygons(File f) throws IOException {
+	public static HashMap<String, List<Polygon>> toPolygons(File f) throws IOException {
 		return new SVGLoad(f.toURI()).toPolygons();
 
 	}
 
-	public HashMap<String,List<Polygon>> toPolygons(double resolution) {
-		if(polygonByLayers==null)
+	public HashMap<String, List<Polygon>> toPolygons(double resolution) {
+		if (polygonByLayers == null)
 			try {
 				loadAllGroups(resolution, new Transform());
 			} catch (Exception e) {
@@ -273,7 +265,7 @@ public class SVGLoad {
 		return getPolygonByLayers();
 	}
 
-	public HashMap<String,List<Polygon>> toPolygons() {
+	public HashMap<String, List<Polygon>> toPolygons() {
 		return toPolygons(0.001);
 	}
 
@@ -292,37 +284,39 @@ public class SVGLoad {
 	}
 
 	private void loadAllGroups(double resolution, Transform startingFrame) {
-		
+
 		NodeList pn = getSVGDocument().getDocumentElement().getChildNodes();// .getElementsByTagName("g");
 		try {
 			String hval = getSVGDocument().getDocumentElement().getAttribute("height");
 			String wval = getSVGDocument().getDocumentElement().getAttribute("width");
 			String viewbox = getSVGDocument().getDocumentElement().getAttribute("viewBox");
 			double viewW = Double.parseDouble(viewbox.split(" ")[2]);
-			setScale( 1);// use to compute bounds
+			setScale(1);// use to compute bounds
 			height = toMM(hval);
 			width = toMM(wval);
-			double value =viewW/width;
-			////com.neuronrobotics.sdk.common.Log.error("Page size height = "+height+" width ="+width+" with scale "+(int)(value*25.4)+" DPI ");
-			setScale( value);
+			double value = viewW / width;
+			//// com.neuronrobotics.sdk.common.Log.error("Page size height = "+height+"
+			//// width ="+width+" with scale "+(int)(value*25.4)+" DPI ");
+			setScale(value);
 		} catch (Throwable t) {
 			t.printStackTrace();
 			height = 0;
 			width = 0;
-			setScale(  3.543307); // Assume 90 DPI and mm
+			setScale(3.543307); // Assume 90 DPI and mm
 		}
 		// println "Loading groups from "+pn.getClass()
 		int pnCount = pn.getLength();
 		for (int j = 0; j < pnCount; j++) {
 			Node item = pn.item(j);
-			////com.neuronrobotics.sdk.common.Log.error("\tTOP LEVEL :"+item);
+			//// com.neuronrobotics.sdk.common.Log.error("\tTOP LEVEL :"+item);
 			if (SVGOMGElement.class.isInstance(item)) {
-				
+
 				SVGOMGElement element = (SVGOMGElement) item;
-				loadGroup(element, resolution, startingFrame,null);
-			} if(SVGOMPathElement.class.isInstance(item) || SVGOMImageElement.class.isInstance(item)) {
+				loadGroup(element, resolution, startingFrame, null);
+			}
+			if (SVGOMPathElement.class.isInstance(item) || SVGOMImageElement.class.isInstance(item)) {
 				try {
-					loadPath(item, resolution, startingFrame,"TOP");
+					loadPath(item, resolution, startingFrame, "TOP");
 				} catch (Throwable t) {
 
 					t.printStackTrace();
@@ -332,34 +326,38 @@ public class SVGLoad {
 
 	}
 
-	private void loadGroup(SVGOMGElement element, double resolution, Transform startingFrame, String encapsulatingLayer) {
+	private void loadGroup(SVGOMGElement element, double resolution, Transform startingFrame,
+			String encapsulatingLayer) {
 		Node transforms = element.getAttributes().getNamedItem("transform");
 		Transform newFrame = getNewframe(startingFrame, transforms);
 		String layername;
-		
+
 		try {
-			layername=element.getAttributeNS("http://www.inkscape.org/namespaces/inkscape", "label");
-			if(layername==null|| layername.length()==0)
+			layername = element.getAttributeNS("http://www.inkscape.org/namespaces/inkscape", "label");
+			if (layername == null || layername.length() == 0)
 				throw new RuntimeException();
-		}catch (Throwable t) {
-			layername=null;
+		} catch (Throwable t) {
+			layername = null;
 		}
-		if(layername==null) {
-			layername=encapsulatingLayer;
-		}else {
-			////com.neuronrobotics.sdk.common.Log.error("Updated to layer "+layername+" from "+encapsulatingLayer);
+		if (layername == null) {
+			layername = encapsulatingLayer;
+		} else {
+			//// com.neuronrobotics.sdk.common.Log.error("Updated to layer "+layername+"
+			//// from "+encapsulatingLayer);
 		}
-		////com.neuronrobotics.sdk.common.Log.error("\tGroup " + element.getAttribute("id") +"\n\t inkscape name: "+layername+ " \n\t root " + newFrame.getX() + " " + newFrame.getY());
-		
+		//// com.neuronrobotics.sdk.common.Log.error("\tGroup " +
+		//// element.getAttribute("id") +"\n\t inkscape name: "+layername+ " \n\t root "
+		//// + newFrame.getX() + " " + newFrame.getY());
+
 		NodeList children = element.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			Node n = children.item(i);
 			if (SVGOMGElement.class.isInstance(n)) {
-				loadGroup((SVGOMGElement) n, resolution, newFrame,layername);
+				loadGroup((SVGOMGElement) n, resolution, newFrame, layername);
 			} else {
-				////com.neuronrobotics.sdk.common.Log.error("\tNot group:"+n);
+				//// com.neuronrobotics.sdk.common.Log.error("\tNot group:"+n);
 				try {
-					loadPath(n, resolution, newFrame,layername);
+					loadPath(n, resolution, newFrame, layername);
 				} catch (Throwable t) {
 
 					t.printStackTrace();
@@ -373,26 +371,26 @@ public class SVGLoad {
 			return startingFrame;
 		Transform newFrame = new Transform().apply(startingFrame);
 		String transformValue = transforms.getNodeValue();
-		////com.neuronrobotics.sdk.common.Log.error("\tApply " + transformValue + " root " + startingFrame.getX() + " " + startingFrame.getY());
+		//// com.neuronrobotics.sdk.common.Log.error("\tApply " + transformValue + "
+		//// root " + startingFrame.getX() + " " + startingFrame.getY());
 		if (transformValue.contains("translate")) {
 			String[] transformValues = transformValue.replaceAll("translate", "").replaceAll("\\(", "")
 					.replaceAll("\\)", "").split("\\,");
-			newFrame.apply(new Transform().translate(toPx(transformValues[0]),
-					toPx(transformValues[1]), 0));
+			newFrame.apply(new Transform().translate(toPx(transformValues[0]), toPx(transformValues[1]), 0));
 
-		}else if (transformValue.contains("rotate")) {
-			String[] rotvals = transformValue.replaceAll("rotate", "").replaceAll("\\(", "")
-					.replaceAll("\\)", "").split("\\,");
-			newFrame= startingFrame.inverse()
-					.apply(new Transform().rotZ(-Double.parseDouble(rotvals[0])))
+		} else if (transformValue.contains("rotate")) {
+			String[] rotvals = transformValue.replaceAll("rotate", "").replaceAll("\\(", "").replaceAll("\\)", "")
+					.split("\\,");
+			newFrame = startingFrame.inverse().apply(new Transform().rotZ(-Double.parseDouble(rotvals[0])))
 					.apply(startingFrame);
 
-		}  else if (transformValue.contains("scale")) {
+		} else if (transformValue.contains("scale")) {
 			String[] transformValues = transformValue.replaceAll("scale", "").replaceAll("\\(", "")
 					.replaceAll("\\)", "").split("\\,");
-			// //com.neuronrobotics.sdk.common.Log.error(id.getNodeValue() + " " + transformValues);
+			// //com.neuronrobotics.sdk.common.Log.error(id.getNodeValue() + " " +
+			// transformValues);
 			double scalex = toPx(transformValues[0]);
-			double scaley = toPx(transformValues.length==2?transformValues[1]:transformValues[0]);
+			double scaley = toPx(transformValues.length == 2 ? transformValues[1] : transformValues[0]);
 			newFrame.scale(scalex, scaley, 1);
 
 		} else if (transformValue.contains("matrix")) {
@@ -421,18 +419,17 @@ public class SVGLoad {
 		if (pathNode != null) {
 			// //com.neuronrobotics.sdk.common.Log.error("\tPath
 			// "+pathNode.getAttributes().getNamedItem("id").getNodeValue());
-				////com.neuronrobotics.sdk.common.Log.error("Path loading "+pathNode);
-				
+			//// com.neuronrobotics.sdk.common.Log.error("Path loading "+pathNode);
 
-				newFrame = startingFrame;
-				try {
-					Node transforms = pathNode.getAttributes().getNamedItem("transform");
-					newFrame = getNewframe(startingFrame, transforms);
-				}catch(Exception ex) {
-					// no transform
-				}
-				try {
-					if(SVGOMPathElement.class.isInstance(pathNode)) {
+			newFrame = startingFrame;
+			try {
+				Node transforms = pathNode.getAttributes().getNamedItem("transform");
+				newFrame = getNewframe(startingFrame, transforms);
+			} catch (Exception ex) {
+				// no transform
+			}
+			try {
+				if (SVGOMPathElement.class.isInstance(pathNode)) {
 //						NamedNodeMap attribs = pathNode.getAttributes();
 //						for(int i=0;i<attribs.getLength();i++) {
 //							Node n = attribs.item(i);
@@ -447,137 +444,138 @@ public class SVGLoad {
 //							//com.neuronrobotics.sdk.common.Log.error("");
 //							
 //						}
-						Color c = null;
-						////com.neuronrobotics.sdk.common.Log.error("Layer "+encapsulatingLayer);
-						try {
-							String []style = pathNode.getAttributes().getNamedItem( "style").getNodeValue().split(";");
-							for(String s:style) {
-								if(s.startsWith("fill:")) {
-									String string = s.split(":")[1];
-									c=Color.web(string);
-									break;
-								}
-							}
-						}catch(java.lang.IllegalArgumentException ex) {
-							// this means the fill is set to "none"
-						}catch(Exception ex) {
-							//ex.printStackTrace();
-						}
-						if(c==null) {
-							try {
-								String []style = pathNode.getAttributes().getNamedItem( "style").getNodeValue().split(";");
-								for(String s:style) {
-									if(s.startsWith("stroke:")) {
-										String string = s.split(":")[1];
-										c=Color.web(string);
-										break;
-									}
-								}
-							}catch(java.lang.IllegalArgumentException ex1) {
-								// this means the stroke is set to "none" the default green color will be used
-								
-							}catch(Exception ex1) {
-								//ex1.printStackTrace();
+					Color c = null;
+					//// com.neuronrobotics.sdk.common.Log.error("Layer "+encapsulatingLayer);
+					try {
+						String[] style = pathNode.getAttributes().getNamedItem("style").getNodeValue().split(";");
+						for (String s : style) {
+							if (s.startsWith("fill:")) {
+								String string = s.split(":")[1];
+								c = Color.web(string);
+								break;
 							}
 						}
-						MetaPostPath2 mpp = new MetaPostPath2(pathNode);
-						String code = mpp.toCode();
-						////com.neuronrobotics.sdk.common.Log.error("\tPath "+pathNode.getAttributes().getNamedItem("id").getNodeValue()+" "+newFrame);
-						loadComposite(code, resolution, newFrame,encapsulatingLayer,c);
-					}else if(SVGOMPolylineElement.class.isInstance(pathNode)) {
-						Color c = null;
-						////com.neuronrobotics.sdk.common.Log.error("Layer "+encapsulatingLayer);
-						try {
-							String []style = pathNode.getAttributes().getNamedItem( "style").getNodeValue().split(";");
-							for(String s:style) {
-								if(s.startsWith("fill:")) {
-									String string = s.split(":")[1];
-									c=Color.web(string);
-									break;
-								}
-							}
-						}catch(java.lang.IllegalArgumentException ex) {
-							// this means the fill is set to "none"
-						}catch(Exception ex) {
-							//ex.printStackTrace();
-						}
-						try {
-							c=Color.web(pathNode.getAttributes().getNamedItem( "stroke").getNodeValue());
-						}catch(java.lang.IllegalArgumentException ex) {
-							// this means the fill is set to "none"
-						}catch(Exception ex) {
-							//ex.printStackTrace();
-						}
-						if(c==null) {
-							try {
-								String []style = pathNode.getAttributes().getNamedItem( "style").getNodeValue().split(";");
-								for(String s:style) {
-									if(s.startsWith("stroke:")) {
-										String string = s.split(":")[1];
-										c=Color.web(string);
-										break;
-									}
-								}
-							}catch(java.lang.IllegalArgumentException ex1) {
-								// this means the stroke is set to "none" the default green color will be used
-								
-							}catch(Exception ex1) {
-								//ex1.printStackTrace();
-							}
-						}
-						
-						
-						String sb =null;
-						SVGOMPolylineElement pathElement = (SVGOMPolylineElement)pathNode;
-						SVGPointList pathList = pathElement.getPoints();
-						// String offset = pathElement.getOwnerSVGElement();
-
-						int pathObjects = pathList.getNumberOfItems();
-
-						for (int i = 0; i < pathObjects; i++) {
-							SVGItem item = (SVGItem) pathList.getItem(i);
-							String itemLine = String.format("%s%n", item.getValueAsString());
-							if(sb==null) {
-								sb="M "+itemLine;
-							}
-							sb += "L "+itemLine;
-						}
-						sb+="z\n";
-						loadComposite(sb, resolution, newFrame,encapsulatingLayer,c);
-					}else if(SVGOMImageElement.class.isInstance(pathNode)) {
-						SVGImageElement image = (SVGOMImageElement) pathNode;
-						////com.neuronrobotics.sdk.common.Log.error("Loading Image element..");
-						double x=toPx(image.getAttributes().getNamedItem("x").getNodeValue());
-						double y=toPx(image.getAttributes().getNamedItem("y").getNodeValue());
-						double pheight=toPx(image.getAttributes().getNamedItem("height").getNodeValue());
-						double pwidth=toPx(image.getAttributes().getNamedItem("width").getNodeValue());
-						String []imageData = null;
-						for(int i=0;i<image.getAttributes().getLength();i++) {
-							Node n = image.getAttributes().item(i);
-							if(n.getNodeName().contains("href"))
-								try {
-									imageData=n.getNodeValue().split("/");
-									
-								} catch (Exception e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-						}
-						//TODO parse the Image string into an Image object
-						//for(int i=0;i<10;i++)
-						//	//com.neuronrobotics.sdk.common.Log.error(imageData[i]);
+					} catch (java.lang.IllegalArgumentException ex) {
+						// this means the fill is set to "none"
+					} catch (Exception ex) {
+						// ex.printStackTrace();
 					}
-				}catch (java.lang.ClassCastException ex){
-					// attempt to load image
-					//com.neuronrobotics.sdk.common.Log.error("Found "+pathNode.getClass());
-					//ex.printStackTrace();
+					if (c == null) {
+						try {
+							String[] style = pathNode.getAttributes().getNamedItem("style").getNodeValue().split(";");
+							for (String s : style) {
+								if (s.startsWith("stroke:")) {
+									String string = s.split(":")[1];
+									c = Color.web(string);
+									break;
+								}
+							}
+						} catch (java.lang.IllegalArgumentException ex1) {
+							// this means the stroke is set to "none" the default green color will be used
+
+						} catch (Exception ex1) {
+							// ex1.printStackTrace();
+						}
+					}
+					MetaPostPath2 mpp = new MetaPostPath2(pathNode);
+					String code = mpp.toCode();
+					//// com.neuronrobotics.sdk.common.Log.error("\tPath
+					//// "+pathNode.getAttributes().getNamedItem("id").getNodeValue()+" "+newFrame);
+					loadComposite(code, resolution, newFrame, encapsulatingLayer, c);
+				} else if (SVGOMPolylineElement.class.isInstance(pathNode)) {
+					Color c = null;
+					//// com.neuronrobotics.sdk.common.Log.error("Layer "+encapsulatingLayer);
+					try {
+						String[] style = pathNode.getAttributes().getNamedItem("style").getNodeValue().split(";");
+						for (String s : style) {
+							if (s.startsWith("fill:")) {
+								String string = s.split(":")[1];
+								c = Color.web(string);
+								break;
+							}
+						}
+					} catch (java.lang.IllegalArgumentException ex) {
+						// this means the fill is set to "none"
+					} catch (Exception ex) {
+						// ex.printStackTrace();
+					}
+					try {
+						c = Color.web(pathNode.getAttributes().getNamedItem("stroke").getNodeValue());
+					} catch (java.lang.IllegalArgumentException ex) {
+						// this means the fill is set to "none"
+					} catch (Exception ex) {
+						// ex.printStackTrace();
+					}
+					if (c == null) {
+						try {
+							String[] style = pathNode.getAttributes().getNamedItem("style").getNodeValue().split(";");
+							for (String s : style) {
+								if (s.startsWith("stroke:")) {
+									String string = s.split(":")[1];
+									c = Color.web(string);
+									break;
+								}
+							}
+						} catch (java.lang.IllegalArgumentException ex1) {
+							// this means the stroke is set to "none" the default green color will be used
+
+						} catch (Exception ex1) {
+							// ex1.printStackTrace();
+						}
+					}
+
+					String sb = null;
+					SVGOMPolylineElement pathElement = (SVGOMPolylineElement) pathNode;
+					SVGPointList pathList = pathElement.getPoints();
+					// String offset = pathElement.getOwnerSVGElement();
+
+					int pathObjects = pathList.getNumberOfItems();
+
+					for (int i = 0; i < pathObjects; i++) {
+						SVGItem item = (SVGItem) pathList.getItem(i);
+						String itemLine = String.format("%s%n", item.getValueAsString());
+						if (sb == null) {
+							sb = "M " + itemLine;
+						}
+						sb += "L " + itemLine;
+					}
+					sb += "z\n";
+					loadComposite(sb, resolution, newFrame, encapsulatingLayer, c);
+				} else if (SVGOMImageElement.class.isInstance(pathNode)) {
+					SVGImageElement image = (SVGOMImageElement) pathNode;
+					//// com.neuronrobotics.sdk.common.Log.error("Loading Image element..");
+					double x = toPx(image.getAttributes().getNamedItem("x").getNodeValue());
+					double y = toPx(image.getAttributes().getNamedItem("y").getNodeValue());
+					double pheight = toPx(image.getAttributes().getNamedItem("height").getNodeValue());
+					double pwidth = toPx(image.getAttributes().getNamedItem("width").getNodeValue());
+					String[] imageData = null;
+					for (int i = 0; i < image.getAttributes().getLength(); i++) {
+						Node n = image.getAttributes().item(i);
+						if (n.getNodeName().contains("href"))
+							try {
+								imageData = n.getNodeValue().split("/");
+
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+					}
+					// TODO parse the Image string into an Image object
+					// for(int i=0;i<10;i++)
+					// //com.neuronrobotics.sdk.common.Log.error(imageData[i]);
 				}
+			} catch (java.lang.ClassCastException ex) {
+				// attempt to load image
+				// com.neuronrobotics.sdk.common.Log.error("Found "+pathNode.getClass());
+				// ex.printStackTrace();
+			}
 
 		}
 
 	}
 
-	private void loadComposite(String code, double resolution, Transform startingFrame, String encapsulatingLayer, Color c) {
+	private void loadComposite(String code, double resolution, Transform startingFrame, String encapsulatingLayer,
+			Color c) {
 		// Count the occourences of M
 		int count = code.length() - code.replace("M", "").length();
 		if (count < 2) {
@@ -585,7 +583,7 @@ public class SVGLoad {
 
 			// setHolePolarity(true);
 //			try {
-				loadSingle(code, resolution, startingFrame,encapsulatingLayer, c);
+			loadSingle(code, resolution, startingFrame, encapsulatingLayer, c);
 //			} catch (Exception ex) {
 //				//com.neuronrobotics.sdk.common.Log.error("Polygon failed to load!");
 //				ex.printStackTrace();
@@ -602,29 +600,33 @@ public class SVGLoad {
 				if (sectionedPart.length() > 1) {
 
 					// println "Seperated complex: "
-					loadSingle(sectionedPart, resolution, startingFrame,encapsulatingLayer, c);
+					loadSingle(sectionedPart, resolution, startingFrame, encapsulatingLayer, c);
 				}
 			}
 		}
-		// //com.neuronrobotics.sdk.common.Log.error("SVG has this many elements loaded: "+sections.size());
+		// //com.neuronrobotics.sdk.common.Log.error("SVG has this many elements loaded:
+		// "+sections.size());
 		// BowlerStudioController.setCsg(sections,null);
 	}
+
 	public static boolean isCCW(Polygon polygon) {
-		double runningTotal=0;
+		double runningTotal = 0;
 		List<Edge> edges = Edge.fromPolygon(polygon);
-		for(Edge e:edges) {
-			//runningTotal+=((e.getP1().pos.x-e.getP2().pos.x)*(e.getP1().pos.y-e.getP2().pos.y));
-			runningTotal+=e.getP1().pos.x*e.getP2().pos.y;
-			runningTotal-=e.getP2().pos.x*e.getP1().pos.y;
+		for (Edge e : edges) {
+			// runningTotal+=((e.getP1().pos.x-e.getP2().pos.x)*(e.getP1().pos.y-e.getP2().pos.y));
+			runningTotal += e.getP1().pos.x * e.getP2().pos.y;
+			runningTotal -= e.getP2().pos.x * e.getP1().pos.y;
 		}
-		
-		return runningTotal<0;
+
+		return runningTotal < 0;
 	}
-	private void loadSingle(String code, double resolution, Transform startingFrame, String encapsulatingLayer, Color c) {
+
+	private void loadSingle(String code, double resolution, Transform startingFrame, String encapsulatingLayer,
+			Color c) {
 		// println code
 		BezierPath path = new BezierPath();
 		path.parsePathString(code);
-		
+
 		ArrayList<Vector3d> p = path.evaluate();
 		for (Vector3d point : p) {
 			point.transform(startingFrame);
@@ -636,39 +638,44 @@ public class SVGLoad {
 
 		// //com.neuronrobotics.sdk.common.Log.error(" Path " + code);
 		Polygon poly = Polygon.fromPoints(p);
-		if(getPolygonByLayers()==null)
+		if (getPolygonByLayers() == null)
 			setPolygonByLayers(new HashMap<String, List<Polygon>>());
 		if (getPolygonByLayers().get(encapsulatingLayer) == null)
 			getPolygonByLayers().put(encapsulatingLayer, new ArrayList<Polygon>());
-		List<Polygon>  list = getPolygonByLayers().get(encapsulatingLayer);
+		List<Polygon> list = getPolygonByLayers().get(encapsulatingLayer);
 		poly = Polygon.fromPoints(Extrude.toCCW(poly.getPoints()));
-		if(c!=null)
+		if (c != null)
 			colors.put(poly, c);
 		list.add(poly);
 
 	}
-	public List<String> getLayers(){
-		ArrayList<String> layers= new ArrayList<String>();
-		if(getPolygonByLayers()==null) {
+
+	public List<String> getLayers() {
+		ArrayList<String> layers = new ArrayList<String>();
+		if (getPolygonByLayers() == null) {
 			toPolygons();
 		}
-		for(Object key:getPolygonByLayers().keySet().stream().sorted().toArray() )
+		for (Object key : getPolygonByLayers().keySet().stream().sorted().toArray())
 			layers.add((String) key);
 		return layers;
 	}
-	public CSG extrudeLayerToCSG(double t,String layer){
-		CSG unionAll = CSG.unionAll(extrudeLayers(t,0.01,layer).get(layer));
+
+	public CSG extrudeLayerToCSG(double t, String layer) {
+		CSG unionAll = CSG.unionAll(extrudeLayers(t, 0.01, layer).get(layer));
 		unionAll.setName(layer);
-		
+
 		return unionAll;
 	}
-	public ArrayList<CSG> extrudeLayer(double t,String layer){
-		return extrudeLayers(t,0.01,layer).get(layer);
+
+	public ArrayList<CSG> extrudeLayer(double t, String layer) {
+		return extrudeLayers(t, 0.01, layer).get(layer);
 	}
-	public HashMap<String,ArrayList<CSG>> extrudeLayers(double t){
-		return extrudeLayers(t,0.01,null);
+
+	public HashMap<String, ArrayList<CSG>> extrudeLayers(double t) {
+		return extrudeLayers(t, 0.01, null);
 	}
-	public HashMap<String,ArrayList<CSG>> extrudeLayers(double t, double resolution, String targetLayer){
+
+	public HashMap<String, ArrayList<CSG>> extrudeLayers(double t, double resolution, String targetLayer) {
 		this.thickness = t;
 
 		if (thickness < 0) {
@@ -679,45 +686,46 @@ public class SVGLoad {
 		}
 
 		toPolygons(0.001);
-		
-		for(String key: getPolygonByLayers().keySet()) {
-			if(targetLayer!=null)
-				if(!targetLayer.contentEquals(key))
+
+		for (String key : getPolygonByLayers().keySet()) {
+			if (targetLayer != null)
+				if (!targetLayer.contentEquals(key))
 					continue;
-			if(csgByLayers.get(key)==null) {
+			if (csgByLayers.get(key) == null) {
 				csgByLayers.put(key, new ArrayList<CSG>());
 			}
 			ArrayList<CSG> parts = csgByLayers.get(key);
 			parts.clear();
-			for(Polygon p:getPolygonByLayers().get(key)) {
+			for (Polygon p : getPolygonByLayers().get(key)) {
 				CSG newbit;
-				newbit = Extrude.getExtrusionEngine().extrude(new Vector3d(0, 0, thickness), p);
-				if (negativeThickness) {
-					newbit = newbit.toZMax();
+				try {
+					newbit = Extrude.getExtrusionEngine().extrude(new Vector3d(0, 0, thickness), p);
+					if (negativeThickness) {
+						newbit = newbit.toZMax();
+					}
+					if (colors.get(p) != null) {
+						newbit.setColor(colors.get(p));
+					}
+					parts.add(newbit);
+				} catch (Exception ex) {
+					ex.printStackTrace();
 				}
-				if(colors.get(p)!=null) {
-					newbit.setColor(colors.get(p));
-				}
-				parts.add(newbit);
 			}
 		}
-		
+
 		return csgByLayers;
 	}
 
 	public ArrayList<CSG> extrude(double t, double resolution) throws IOException {
 
-
-		HashMap<String,ArrayList<CSG>> layers =extrudeLayers( t,  resolution,null);
+		HashMap<String, ArrayList<CSG>> layers = extrudeLayers(t, resolution, null);
 		ArrayList<CSG> all = new ArrayList<CSG>();
-		for(String key:layers.keySet()) {
+		for (String key : layers.keySet()) {
 			all.addAll(layers.get(key));
 		}
-		
-		
+
 		return all;
 	}
-
 
 	/**
 	 * This will set the document to parse. This method also initializes the SVG DOM
@@ -725,8 +733,7 @@ public class SVGLoad {
 	 * initialization is also required to extract information from the SVG path
 	 * elements.
 	 *
-	 * @param document
-	 *            The document that contains SVG content.
+	 * @param document The document that contains SVG content.
 	 */
 	public void setSVGDocument(Document document) {
 		initSVGDOM(document);
@@ -746,8 +753,7 @@ public class SVGLoad {
 	 * Enhance the SVG DOM for the given document to provide CSS- and SVG-specific
 	 * DOM interfaces.
 	 * 
-	 * @param document
-	 *            The document to enhance.
+	 * @param document The document to enhance.
 	 * @link http://wiki.apache.org/xmlgraphics-batik/BootSvgAndCssDom
 	 */
 	private void initSVGDOM(Document document) {
@@ -763,11 +769,9 @@ public class SVGLoad {
 	/**
 	 * Use the SAXSVGDocumentFactory to parse the given URI into a DOM.
 	 * 
-	 * @param uri
-	 *            The path to the SVG file to read.
+	 * @param uri The path to the SVG file to read.
 	 * @return A Document instance that represents the SVG file.
-	 * @throws Exception
-	 *             The file could not be read.
+	 * @throws Exception The file could not be read.
 	 */
 	private Document createSVGDocument(URI uri) throws IOException {
 		String parser = XMLResourceDescriptor.getXMLParserClassName();
@@ -786,13 +790,13 @@ public class SVGLoad {
 	public static ISVGLoadProgress getProgressDefault() {
 		return progressDefault;
 	}
-	
-	private HashMap<String,List<Polygon>> getPolygonByLayers() {
+
+	private HashMap<String, List<Polygon>> getPolygonByLayers() {
 		return polygonByLayers;
 	}
-	private void setPolygonByLayers(HashMap<String,List<Polygon>> polygonByLayers) {
+
+	private void setPolygonByLayers(HashMap<String, List<Polygon>> polygonByLayers) {
 		this.polygonByLayers = polygonByLayers;
 	}
-
 
 }

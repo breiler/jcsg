@@ -16,6 +16,24 @@ import javafx.scene.shape.CullFace;
 
 public class SVGLoadTest {
 	@Test
+	public void box() throws IOException {
+		JavaFXInitializer.go();
+		File svg = new File("box.svg");
+		if (!svg.exists())
+			throw new RuntimeException("Test file missing!" + svg.getAbsolutePath());
+		SVGLoad s = new SVGLoad(svg.toURI());
+		ArrayList<CSG>parts =run(s);
+		try {
+			ThumbnailImage.setCullFaceValue(CullFace.NONE);
+			ThumbnailImage.writeImage(parts,new File(svg.getAbsolutePath()+".png")).join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		// fail("Not yet implemented");
+	}
+	@Test
 	public void adversarial() throws IOException {
 		JavaFXInitializer.go();
 		File svg = new File("Part-Num-0.svg");
