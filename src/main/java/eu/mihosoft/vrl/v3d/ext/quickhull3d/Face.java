@@ -668,7 +668,7 @@ class Face
 					face0 = face;
 				}
 			}catch(Throwable t) {
-				com.neuronrobotics.sdk.common.Log.error("Face processing threw exception");
+				//com.neuronrobotics.sdk.common.Log.error("Face processing threw exception");
 				t.printStackTrace();
 			}
 		}

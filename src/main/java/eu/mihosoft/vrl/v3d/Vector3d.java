@@ -606,10 +606,10 @@ public class Vector3d extends javax.vecmath.Vector3d{
                 break;
 
             case 3:
-                com.neuronrobotics.sdk.common.Log.error("This vector is equal to (0,0,0). ");
+                //com.neuronrobotics.sdk.common.Log.error("This vector is equal to (0,0,0). ");
 
             default:
-                com.neuronrobotics.sdk.common.Log.error("The orthogonal one is set randomly.");
+                //com.neuronrobotics.sdk.common.Log.error("The orthogonal one is set randomly.");
 
                 o1 = r.nextDouble();
                 o2 = r.nextDouble();

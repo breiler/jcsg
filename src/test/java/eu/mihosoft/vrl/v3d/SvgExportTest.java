@@ -121,7 +121,7 @@ public class SvgExportTest {
       File defaultDir = new File("svg/SVGExportTest6.svg");
       SVGLoad s = new SVGLoad(defaultDir.toURI());
       ArrayList<CSG>gear = s.extrude(10,0.001);
-      com.neuronrobotics.sdk.common.Log.error("SVG Elements ="+gear);
+      //System.out.println("SVG Elements ="+gear);
       
   }   	
 	@Test

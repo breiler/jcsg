@@ -17,6 +17,6 @@ public class GsonTest {
 				.create();
 		Bounds b = new Cube(100).toCSG().getBounds();
 		String json = gson.toJson(b);
-		com.neuronrobotics.sdk.common.Log.error(json);
+		//System.out.println(json);
 	}
 }

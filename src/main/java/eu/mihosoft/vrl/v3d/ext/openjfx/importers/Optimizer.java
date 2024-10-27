@@ -413,8 +413,8 @@ public class Optimizer {
                 if (kvOrig != null) {
                     kvRemoved++;
                     if (!kvOrig.getEndValue().equals(kvDup.getEndValue()) && kvOrig.getTarget() == kvDup.getTarget()) {
-                        com.neuronrobotics.sdk.common.Log.error("KeyValues set different values for KeyFrame " + duplicate.getTime() + ":"
-                                + "\n kvOrig = " + kvOrig + ", \nkvDup = " + kvDup);
+//                        com.neuronrobotics.sdk.common.Log.error("KeyValues set different values for KeyFrame " + duplicate.getTime() + ":"
+//                                + "\n kvOrig = " + kvOrig + ", \nkvDup = " + kvDup);
                     }
                 }
             }
@@ -578,7 +578,7 @@ public class Optimizer {
                 if (newKeyValues.isEmpty()) {
                     if (keyFrame.getOnFinished() == null) {
                         if (keyFrame.getName() != null) {
-                            com.neuronrobotics.sdk.common.Log.error("Removed KeyFrame with name = " + keyFrame.getName());
+                            //com.neuronrobotics.sdk.common.Log.error("Removed KeyFrame with name = " + keyFrame.getName());
                         }
                         timeline.getKeyFrames().remove(i);
                         i--;

@@ -24,7 +24,7 @@ public class SliceTest {
 		// Construct a CSG from that Polygon List
 		CSG finished = CSG.fromPolygons(polygons);
 
-		com.neuronrobotics.sdk.common.Log.error(finished.toStlString());
+		//System.out.println(finished.toStlString());
 	}
 
 	@Test
@@ -38,6 +38,6 @@ public class SliceTest {
 		// Construct a CSG from that Polygon List
 		CSG finished = CSG.fromPolygons(polygons);
 
-		com.neuronrobotics.sdk.common.Log.error(finished.toStlString());
+		//System.out.println(finished.toStlString());
 	}
 }

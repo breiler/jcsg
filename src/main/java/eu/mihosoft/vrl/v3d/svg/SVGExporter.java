@@ -180,22 +180,22 @@ public class SVGExporter {
 			eu.mihosoft.vrl.v3d.JavaFXInitializer.go();
 		} catch (Throwable t) {
 			t.printStackTrace();
-			com.neuronrobotics.sdk.common.Log.error("ERROR No UI engine availible");
+			//System.out.println("ERROR No UI engine availible");
 		}
 		if (!eu.mihosoft.vrl.v3d.JavaFXInitializer.errored) {
 			SVGExporter svg = new SVGExporter();
 			int i = 0;
 			long start = System.currentTimeMillis();
 			for (CSG tmp : currentCsg) {
-				//com.neuronrobotics.sdk.common.Log.error("Slicing CSG " + tmp.getName() + " " + (i + 1) + " of " + (currentCsg.size()));
+				////System.out.println("Slicing CSG " + tmp.getName() + " " + (i + 1) + " of " + (currentCsg.size()));
 				addCsg(tmp, svg);
 				i++;
 			}
 
 			write(svg.make(), defaultDir);
-			//com.neuronrobotics.sdk.common.Log.error("Finished slicing CSGs took "+ ((((double) (System.currentTimeMillis() - start))) / 1000.0) + " seconds");
+			////System.out.println("Finished slicing CSGs took "+ ((((double) (System.currentTimeMillis() - start))) / 1000.0) + " seconds");
 		} else {
-			com.neuronrobotics.sdk.common.Log.error("ERROR No UI engine availible, SVG slicing is GPU accelerated and will not work");
+			//System.out.println("ERROR No UI engine availible, SVG slicing is GPU accelerated and will not work");
 		}
 	}
 	private static void addCsg(CSG currentCsg, SVGExporter svg) throws IOException {

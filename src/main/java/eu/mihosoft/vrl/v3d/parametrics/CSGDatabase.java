@@ -111,16 +111,16 @@ public class CSGDatabase {
 					        
 					        
 					        if(tm!=null){
-//					        	//com.neuronrobotics.sdk.common.Log.error("Hash Map loaded from "+jsonString);
+//					        	////System.out.println("Hash Map loaded from "+jsonString);
 //					        	for(String k:tm.keySet()){
-//						        	//com.neuronrobotics.sdk.common.Log.error("Key: "+k+" vlaue= "+tm.get(k));
+//						        	////System.out.println("Key: "+k+" vlaue= "+tm.get(k));
 //						        }
 					        	setDatabase(tm);
 					        }
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
-						com.neuronrobotics.sdk.common.Log.error(dbFile.getAbsolutePath());
+						//System.out.println(dbFile.getAbsolutePath());
 						setDatabase(new ConcurrentHashMap<String,Parameter>());
 					}
 					Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -161,7 +161,7 @@ public class CSGDatabase {
 			        }
 		        saveDatabase();
 			} catch (Exception e) {
-				com.neuronrobotics.sdk.common.Log.error(f.getAbsolutePath());
+				//System.out.println(f.getAbsolutePath());
 				e.printStackTrace();
 			}
             
