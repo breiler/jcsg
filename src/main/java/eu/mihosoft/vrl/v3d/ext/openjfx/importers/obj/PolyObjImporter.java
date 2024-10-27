@@ -112,7 +112,7 @@ public class PolyObjImporter {
      */
     static void log(String string) {
         if (debug) {
-            System.out.println(string);
+            //System.out.println(string);
         }
     }
 
@@ -455,11 +455,11 @@ public class PolyObjImporter {
         }
         
         if (debug) {
-            System.out.println("mesh.points = " + mesh.getPoints());
-            System.out.println("mesh.texCoords = " + mesh.getTexCoords());
-            System.out.println("mesh.faces: ");
+            //System.out.println("mesh.points = " + mesh.getPoints());
+            //System.out.println("mesh.texCoords = " + mesh.getTexCoords());
+            //System.out.println("mesh.faces: ");
             for (int[] face: mesh.faces) {
-                System.out.println("    face:: "+Arrays.toString(face));
+                //System.out.println("    face:: "+Arrays.toString(face));
             }
         }
 

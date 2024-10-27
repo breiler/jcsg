@@ -84,7 +84,7 @@ public class SVGLoad {
 					// meters but not meters units
 					break;
 				}
-				//System.out.println("Units set to "+key+" for "+value);
+				////System.out.println("Units set to "+key+" for "+value);
 				return Double.parseDouble(split[0])/ units.get(key);
 			}
 		}
@@ -303,7 +303,7 @@ public class SVGLoad {
 			height = toMM(hval);
 			width = toMM(wval);
 			double value =viewW/width;
-			//System.out.println("Page size height = "+height+" width ="+width+" with scale "+(int)(value*25.4)+" DPI ");
+			////System.out.println("Page size height = "+height+" width ="+width+" with scale "+(int)(value*25.4)+" DPI ");
 			setScale( value);
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -315,7 +315,7 @@ public class SVGLoad {
 		int pnCount = pn.getLength();
 		for (int j = 0; j < pnCount; j++) {
 			Node item = pn.item(j);
-			//System.out.println("\tTOP LEVEL :"+item);
+			////System.out.println("\tTOP LEVEL :"+item);
 			if (SVGOMGElement.class.isInstance(item)) {
 				
 				SVGOMGElement element = (SVGOMGElement) item;
@@ -347,9 +347,9 @@ public class SVGLoad {
 		if(layername==null) {
 			layername=encapsulatingLayer;
 		}else {
-			//System.out.println("Updated to layer "+layername+" from "+encapsulatingLayer);
+			////System.out.println("Updated to layer "+layername+" from "+encapsulatingLayer);
 		}
-		//System.out.println("\tGroup " + element.getAttribute("id") +"\n\t inkscape name: "+layername+ " \n\t root " + newFrame.getX() + " " + newFrame.getY());
+		////System.out.println("\tGroup " + element.getAttribute("id") +"\n\t inkscape name: "+layername+ " \n\t root " + newFrame.getX() + " " + newFrame.getY());
 		
 		NodeList children = element.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
@@ -357,7 +357,7 @@ public class SVGLoad {
 			if (SVGOMGElement.class.isInstance(n)) {
 				loadGroup((SVGOMGElement) n, resolution, newFrame,layername);
 			} else {
-				//System.out.println("\tNot group:"+n);
+				////System.out.println("\tNot group:"+n);
 				try {
 					loadPath(n, resolution, newFrame,layername);
 				} catch (Throwable t) {
@@ -373,7 +373,7 @@ public class SVGLoad {
 			return startingFrame;
 		Transform newFrame = new Transform().apply(startingFrame);
 		String transformValue = transforms.getNodeValue();
-		//System.out.println("\tApply " + transformValue + " root " + startingFrame.getX() + " " + startingFrame.getY());
+		////System.out.println("\tApply " + transformValue + " root " + startingFrame.getX() + " " + startingFrame.getY());
 		if (transformValue.contains("translate")) {
 			String[] transformValues = transformValue.replaceAll("translate", "").replaceAll("\\(", "")
 					.replaceAll("\\)", "").split("\\,");
@@ -390,7 +390,7 @@ public class SVGLoad {
 		}  else if (transformValue.contains("scale")) {
 			String[] transformValues = transformValue.replaceAll("scale", "").replaceAll("\\(", "")
 					.replaceAll("\\)", "").split("\\,");
-			// System.out.println(id.getNodeValue() + " " + transformValues);
+			// //System.out.println(id.getNodeValue() + " " + transformValues);
 			double scalex = toPx(transformValues[0]);
 			double scaley = toPx(transformValues.length==2?transformValues[1]:transformValues[0]);
 			newFrame.scale(scalex, scaley, 1);
@@ -398,7 +398,7 @@ public class SVGLoad {
 		} else if (transformValue.contains("matrix")) {
 			String[] transformValues = transformValue.replaceAll("matrix", "").replaceAll("\\(", "")
 					.replaceAll("\\)", "").split("\\,");
-			// System.out.println("Matrix found " +new
+			// //System.out.println("Matrix found " +new
 			// ArrayList<>(Arrays.asList(transformValues)));
 			double a = toPx(transformValues[0]);
 			double b = toPx(transformValues[1]);
@@ -419,9 +419,9 @@ public class SVGLoad {
 		// NodeList pathNodes = element.getElementsByTagName("path");
 		// Node transforms = element.getAttributes().getNamedItem("transform");
 		if (pathNode != null) {
-			// System.out.println("\tPath
+			// //System.out.println("\tPath
 			// "+pathNode.getAttributes().getNamedItem("id").getNodeValue());
-				//System.out.println("Path loading "+pathNode);
+				////System.out.println("Path loading "+pathNode);
 				
 
 				newFrame = startingFrame;
@@ -444,11 +444,11 @@ public class SVGLoad {
 //							}catch(Exception ex) {
 //								
 //							}
-//							System.out.println("");
+//							//System.out.println("");
 //							
 //						}
 						Color c = null;
-						//System.out.println("Layer "+encapsulatingLayer);
+						////System.out.println("Layer "+encapsulatingLayer);
 						try {
 							String []style = pathNode.getAttributes().getNamedItem( "style").getNodeValue().split(";");
 							for(String s:style) {
@@ -482,11 +482,11 @@ public class SVGLoad {
 						}
 						MetaPostPath2 mpp = new MetaPostPath2(pathNode);
 						String code = mpp.toCode();
-						//System.out.println("\tPath "+pathNode.getAttributes().getNamedItem("id").getNodeValue()+" "+newFrame);
+						////System.out.println("\tPath "+pathNode.getAttributes().getNamedItem("id").getNodeValue()+" "+newFrame);
 						loadComposite(code, resolution, newFrame,encapsulatingLayer,c);
 					}else if(SVGOMPolylineElement.class.isInstance(pathNode)) {
 						Color c = null;
-						//System.out.println("Layer "+encapsulatingLayer);
+						////System.out.println("Layer "+encapsulatingLayer);
 						try {
 							String []style = pathNode.getAttributes().getNamedItem( "style").getNodeValue().split(";");
 							for(String s:style) {
@@ -546,7 +546,7 @@ public class SVGLoad {
 						loadComposite(sb, resolution, newFrame,encapsulatingLayer,c);
 					}else if(SVGOMImageElement.class.isInstance(pathNode)) {
 						SVGImageElement image = (SVGOMImageElement) pathNode;
-						//System.out.println("Loading Image element..");
+						////System.out.println("Loading Image element..");
 						double x=toPx(image.getAttributes().getNamedItem("x").getNodeValue());
 						double y=toPx(image.getAttributes().getNamedItem("y").getNodeValue());
 						double pheight=toPx(image.getAttributes().getNamedItem("height").getNodeValue());
@@ -565,11 +565,11 @@ public class SVGLoad {
 						}
 						//TODO parse the Image string into an Image object
 						//for(int i=0;i<10;i++)
-						//	System.out.println(imageData[i]);
+						//	//System.out.println(imageData[i]);
 					}
 				}catch (java.lang.ClassCastException ex){
 					// attempt to load image
-					System.out.println("Found "+pathNode.getClass());
+					//System.out.println("Found "+pathNode.getClass());
 					//ex.printStackTrace();
 				}
 
@@ -587,7 +587,7 @@ public class SVGLoad {
 //			try {
 				loadSingle(code, resolution, startingFrame,encapsulatingLayer, c);
 //			} catch (Exception ex) {
-//				System.out.println("Polygon failed to load!");
+//				//System.out.println("Polygon failed to load!");
 //				ex.printStackTrace();
 //				// BowlerStudio.printStackTrace(ex);
 //			}
@@ -606,7 +606,7 @@ public class SVGLoad {
 				}
 			}
 		}
-		// System.out.println("SVG has this many elements loaded: "+sections.size());
+		// //System.out.println("SVG has this many elements loaded: "+sections.size());
 		// BowlerStudioController.setCsg(sections,null);
 	}
 	public static boolean isCCW(Polygon polygon) {
@@ -634,7 +634,7 @@ public class SVGLoad {
 			point.transform(new Transform().rotY(180));
 		}
 
-		// System.out.println(" Path " + code);
+		// //System.out.println(" Path " + code);
 		Polygon poly = Polygon.fromPoints(p);
 		if(getPolygonByLayers()==null)
 			setPolygonByLayers(new HashMap<String, List<Polygon>>());

@@ -111,9 +111,9 @@ public class CSGDatabase {
 					        
 					        
 					        if(tm!=null){
-//					        	System.out.println("Hash Map loaded from "+jsonString);
+//					        	//System.out.println("Hash Map loaded from "+jsonString);
 //					        	for(String k:tm.keySet()){
-//						        	System.out.println("Key: "+k+" vlaue= "+tm.get(k));
+//						        	//System.out.println("Key: "+k+" vlaue= "+tm.get(k));
 //						        }
 					        	setDatabase(tm);
 					        }

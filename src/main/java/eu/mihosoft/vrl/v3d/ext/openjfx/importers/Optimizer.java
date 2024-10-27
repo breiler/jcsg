@@ -170,7 +170,7 @@ public class Optimizer {
                 Parent parent = p.getParent();
                 if (parent instanceof Group) {
                     trEmpty++;
-//                    System.out.println("Empty group = " + node.getId());
+//                    //System.out.println("Empty group = " + node.getId());
                     emptyParents.add(p);
                 } else {
 //                    System.err.println("parent is not group = " + parent);
@@ -609,7 +609,7 @@ public class Optimizer {
                 }
             }
         }
-//        System.out.println("bound.size() = " + bound.size());
+//        //System.out.println("bound.size() = " + bound.size());
         System.out.printf("Removed %d (%.2f%%) repeating KeyValues out of total %d.\n", kvRemoved, 100d * kvRemoved / kvTotal, kvTotal);
         System.out.printf("Removed %d (%.2f%%) and simplified %d (%.2f%%) KeyFrames out of total %d. %d (%.2f%%) were not removed due to event handler attached.\n",
                 kfRemoved, 100d * kfRemoved / kfTotal,

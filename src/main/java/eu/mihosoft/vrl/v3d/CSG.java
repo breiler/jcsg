@@ -155,7 +155,7 @@ public class CSG implements IuserAPI {
 	private static ICSGProgress progressMoniter = new ICSGProgress() {
 		@Override
 		public void progressUpdate(int currentIndex, int finalIndex, String type, CSG intermediateShape) {
-			System.out.println(type + "ing " + currentIndex + " of " + finalIndex);
+			//System.out.println(type + "ing " + currentIndex + " of " + finalIndex);
 		}
 	};
 
@@ -826,23 +826,23 @@ public class CSG implements IuserAPI {
 //		for(int i=0;i<csgs.size();i++) {
 //			incomingPolys.addAll(csgs.get(i).getPolygons());
 //		}
-//		//System.out.println("Node list A");
+//		////System.out.println("Node list A");
 //		Node a = new Node(this.clone().getPolygons());
-//		//System.out.println("Node list B");
+//		////System.out.println("Node list B");
 //		Node b = new Node(incomingPolys);
-//		//System.out.println("a.clipTo(b)");
+//		////System.out.println("a.clipTo(b)");
 //		a.clipTo(b);
-//		//System.out.println("b.clipTo(a)");
+//		////System.out.println("b.clipTo(a)");
 //		b.clipTo(a);
-//		//System.out.println("b.invert();");
+//		////System.out.println("b.invert();");
 //		b.invert();
-//		//System.out.println("b.clipTo(a);");
+//		////System.out.println("b.clipTo(a);");
 //		b.clipTo(a);
-//		//System.out.println("b.invert();");
+//		////System.out.println("b.invert();");
 //		b.invert();
-//		//System.out.println("a.build(b.allPolygons());");
+//		////System.out.println("a.build(b.allPolygons());");
 //		a.build(b.allPolygons());
-//		//System.out.println("CSG.fromPolygons(a.allPolygons()).optimization(getOptType())");
+//		////System.out.println("CSG.fromPolygons(a.allPolygons()).optimization(getOptType())");
 //		return CSG.fromPolygons(a.allPolygons()).optimization(getOptType());
 
 		CSG result = this;
@@ -1429,7 +1429,7 @@ public class CSG implements IuserAPI {
 		if(triangulated)
 			return this;
 		
-		//System.out.println("CSG triangulating for " + name+"..");
+		////System.out.println("CSG triangulating for " + name+"..");
 		ArrayList<Polygon> toAdd = new ArrayList<Polygon>();
 		ArrayList<Polygon> degenerates = new ArrayList<Polygon>();
 		if (providerOf3d == null && Debug3dProvider.provider != null)
@@ -1458,7 +1458,7 @@ public class CSG implements IuserAPI {
 					Debug3dProvider.clearScreen();
 					Stream<Polygon> degenStreeam;
 					degenStreeam =polygons.stream(); // this operation is read-modify-write and can not be done in parallel
-					System.out.println("Found "+degenerates.size()+" degenerate triangles, Attempting to fix");
+					//System.out.println("Found "+degenerates.size()+" degenerate triangles, Attempting to fix");
 					degenStreeam.forEach(p -> fixDegenerates(toAdd, p));
 				}else {
 					needsDegeneratesPruned=true;
@@ -1490,7 +1490,7 @@ public class CSG implements IuserAPI {
 			ArrayList<Edge> edges = ptoA.edges(); 
 			for(Edge e :edges) {
 				if(e.equals(longEdge)) {
-					//System.out.println("Degenerate Mate Found!");
+					////System.out.println("Degenerate Mate Found!");
 					polygonsSharing.add(ptoA);
 					Debug3dProvider.addObject(ptoA);
 					// TODO inject the points into the found edge
@@ -1524,7 +1524,7 @@ public class CSG implements IuserAPI {
 			}
 		}
 		if(polygonsSharing.size()==0) {
-			//System.out.println("Error! Degenerate triangle does not share edge with any triangle");
+			////System.out.println("Error! Degenerate triangle does not share edge with any triangle");
 		}
 		if(polygonsSharingFixed.size()>0) {
 			toAdd.removeAll(polygonsSharing);
@@ -1545,7 +1545,7 @@ public class CSG implements IuserAPI {
 		if (p.vertices.size() == 3) {
 			toAdd.add(p);
 		}else{
-			// System.out.println("Fixing error in STL " + name + " polygon# " + i + "
+			// //System.out.println("Fixing error in STL " + name + " polygon# " + i + "
 			// number of vertices " + p.vertices.size());
 			try {
 				List<Polygon> triangles = PolygonUtil.concaveToConvex(p);
@@ -1987,7 +1987,7 @@ public class CSG implements IuserAPI {
 	 */
 	@Deprecated
 	public ArrayList<CSG> minovsky(CSG travelingShape) {
-		System.out.println("Hail Zeon!");
+		//System.out.println("Hail Zeon!");
 		return minkowski(travelingShape);
 	}
 

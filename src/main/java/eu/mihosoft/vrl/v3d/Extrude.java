@@ -90,7 +90,7 @@ public class Extrude {
 			Polygon polygon2 = polygon1.translated(dir);
 
 			int numvertices = polygon1.vertices.size();
-			System.out.println("Building Polygon "+polygon1.getPoints().size());
+			//System.out.println("Building Polygon "+polygon1.getPoints().size());
 			for (int i = 0; i < numvertices; i++) {
 
 				int nexti = (i + 1) % numvertices;
@@ -101,14 +101,14 @@ public class Extrude {
 				Vector3d topV2 = polygon2.vertices.get(nexti).pos;
 				double distance = bottomV1.minus(bottomV2).magnitude();
 				if(Math.abs(distance)<Plane.EPSILON) {
-					System.out.println("Skipping invalid polygon "+i+" to "+nexti);
+					//System.out.println("Skipping invalid polygon "+i+" to "+nexti);
 					continue;
 				}
 				List<Vector3d> pPoints = Arrays.asList(bottomV2, topV2, topV1, bottomV1);
 				try {
 					newPolygons.add(Polygon.fromPoints(pPoints, polygon1.getStorage()));
 				}catch(Exception ex) {
-					System.out.println("Polygon has problems: ");
+					//System.out.println("Polygon has problems: ");
 					ex.printStackTrace();
 				}
 			}
@@ -437,7 +437,7 @@ public class Extrude {
 	}
 
 	public static ArrayList<Transform> bezierToTransforms(List<Vector3d> parts, int iterations) {
-		// System.out.println("Bezier type "+parts.size());
+		// //System.out.println("Bezier type "+parts.size());
 		if (parts.size() == 3)
 			return bezierToTransforms(parts.get(0), parts.get(1), parts.get(2), iterations);
 		if (parts.size() == 2)
@@ -471,7 +471,7 @@ public class Extrude {
 			double rise = zdiff;
 			double run = Math.sqrt((ydiff * ydiff) + (xdiff * xdiff));
 			double rotz = 90 - Math.toDegrees(Math.atan2(xdiff, ydiff));
-			// System.out.println("Rot z = "+rotz+" x="+xdiff+" y="+ydiff);
+			// //System.out.println("Rot z = "+rotz+" x="+xdiff+" y="+ydiff);
 			double roty = Math.toDegrees(Math.atan2(rise, run));
 			Transform t = new Transform();
 			t.translateX(x);
@@ -517,13 +517,13 @@ public class Extrude {
 			rise = zdiff;
 			run = Math.sqrt((ydiff * ydiff) + (xdiff * xdiff));
 			rotz = 90 - Math.toDegrees(Math.atan2(xdiff, ydiff));
-			// System.out.println("Rot z = "+rotz+" x="+xdiff+" y="+ydiff);
+			// //System.out.println("Rot z = "+rotz+" x="+xdiff+" y="+ydiff);
 			roty = Math.toDegrees(Math.atan2(rise, run));
 
 			t.rotZ(-rotz);
 			t.rotY(roty);
 			// if(i==0)
-			// System.out.println( " Tr = "+x+" "+y+" "+z+" path = "+pathFunction);
+			// //System.out.println( " Tr = "+x+" "+y+" "+z+" path = "+pathFunction);
 			// println "z = "+rotz+" y = "+roty
 			p.add(t);
 			lastx = x;
@@ -576,7 +576,7 @@ public class Extrude {
 		path2.parsePathString(b);
 		// newParts.remove(parts.size()-1)
 		// newParts.remove(0)
-		// System.out.println("Parsing "+startString+" \nand\n"+b);
+		// //System.out.println("Parsing "+startString+" \nand\n"+b);
 		return bezierToTransforms(path, path2, iterations, controlA, controlB);
 	}
 

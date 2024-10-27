@@ -50,20 +50,20 @@ import java.io.*;
  *   QuickHull3D hull = new QuickHull3D();
  *   hull.build (points);
  *
- *   System.out.println ("Vertices:");
+ *   //System.out.println ("Vertices:");
  *   Point3d[] vertices = hull.getVertices();
  *   for (int i = 0; i < vertices.length; i++)
  *    { Point3d pnt = vertices[i];
- *      System.out.println (pnt.x + " " + pnt.y + " " + pnt.z);
+ *      //System.out.println (pnt.x + " " + pnt.y + " " + pnt.z);
  *    }
  *
- *   System.out.println ("Faces:");
+ *   //System.out.println ("Faces:");
  *   int[][] faceIndices = hull.getFaces();
  *   for (int i = 0; i < faceIndices.length; i++)
  *    { for (int k = 0; k < faceIndices[i].length; k++)
  *       { System.out.print (faceIndices[i][k] + " ");
  *       }
- *      System.out.println ("");
+ *      //System.out.println ("");
  *    }
  *  
  * As a convenience, there are also {@link #build(double[]) build}
@@ -433,7 +433,7 @@ class QuickHull3D
 	      wrote = true;
 	    }
 	   if (wrote)
-	    { System.out.println("");
+	    { //System.out.println("");
 	    }
 	 }
 
@@ -481,7 +481,7 @@ class QuickHull3D
 	       { stok.nextToken();
 	       }
 	      if (stok.ttype != StreamTokenizer.TT_NUMBER)
-	       { System.out.println ("Expecting number of faces");
+	       { //System.out.println ("Expecting number of faces");
 		 System.exit(1); 
 	       }
 	      int numf = (int)stok.nval;
@@ -491,7 +491,7 @@ class QuickHull3D
 	       { indexList.clear();
 		 while (stok.nextToken() != StreamTokenizer.TT_EOL)
 		  { if (stok.ttype != StreamTokenizer.TT_NUMBER)
-		     { System.out.println ("Expecting face index");
+		     { //System.out.println ("Expecting face index");
 		       System.exit(1); 
 		     }
 		    indexList.add (0, new Integer((int)stok.nval));
@@ -838,11 +838,11 @@ protected void initBuffers (int nump)
 	    }
 
 	   if (debug)
-	    { System.out.println ("initial vertices:");
-	      System.out.println (vtx[0].index + ": " + vtx[0].pnt);
-	      System.out.println (vtx[1].index + ": " + vtx[1].pnt);
-	      System.out.println (vtx[2].index + ": " + vtx[2].pnt);
-	      System.out.println (vtx[3].index + ": " + vtx[3].pnt);
+	    { //System.out.println ("initial vertices:");
+	      //System.out.println (vtx[0].index + ": " + vtx[0].pnt);
+	      //System.out.println (vtx[1].index + ": " + vtx[1].pnt);
+	      //System.out.println (vtx[2].index + ": " + vtx[2].pnt);
+	      //System.out.println (vtx[3].index + ": " + vtx[3].pnt);
 	    }
 
 	   Face[] tris = new Face[4];
@@ -1151,13 +1151,12 @@ protected void initBuffers (int nump)
 	       { 
 		 addPointToFace (vtx, maxFace);
  		 if (debug && vtx.index == findIndex)
- 		  { System.out.println (findIndex + " CLAIMED BY " +
- 		     maxFace.getVertexString()); 
+ 		  { //System.out.println (findIndex + " CLAIMED BY " + maxFace.getVertexString()); 
  		  }
 	       }
 	      else
 	       { if (debug && vtx.index == findIndex)
-		  { System.out.println (findIndex + " DISCARDED"); 
+		  { //System.out.println (findIndex + " DISCARDED"); 
 		  } 
 	       }
 	    }
@@ -1260,9 +1259,7 @@ protected void initBuffers (int nump)
 
 	      if (merge)
 	       { if (debug)
-		  { System.out.println (
-		    "  merging " + face.getVertexString() + "  and  " +
-		    oppFace.getVertexString());
+		  { //System.out.println ("  merging " + face.getVertexString() + "  and  " +oppFace.getVertexString());
 		  }
 
 		 int numd = face.mergeAdjacentFace (hedge, discardedFaces);
@@ -1270,8 +1267,7 @@ protected void initBuffers (int nump)
 		  { deleteFacePoints (discardedFaces[i], face);
 		  }
 		 if (debug)
-		  { System.out.println (
-		       "  result: " + face.getVertexString());
+		  { //System.out.println ("  result: " + face.getVertexString());
 		  }
 		 return true;
 	       }
@@ -1299,7 +1295,7 @@ protected void initBuffers (int nump)
 	   deleteFacePoints (face, null);
  	   face.mark = Face.DELETED;
 	   if (debug)
-	    { System.out.println ("  visiting face " + face.getVertexString());
+	    { //System.out.println ("  visiting face " + face.getVertexString());
 	    }
 	   HalfEdge edge;
 	   if (edge0 == null)
@@ -1319,8 +1315,7 @@ protected void initBuffers (int nump)
 		 else
 		  { horizon.add (edge);
 		    if (debug)
-		     { System.out.println ("  adding horizon edge " +
-					   edge.getVertexString());
+		     { //System.out.println ("  adding horizon edge " + edge.getVertexString());
 		     }
 		  }
 	       }
@@ -1366,7 +1361,7 @@ protected void initBuffers (int nump)
 				HalfEdge horizonHe = (HalfEdge) it.next();
 				HalfEdge hedgeSide = addAdjoiningFace(eyeVtx, horizonHe);
 				if (debug) {
-					System.out.println("new face: " + hedgeSide.face.getVertexString());
+					//System.out.println("new face: " + hedgeSide.face.getVertexString());
 				}
 				if (hedgeSidePrev != null) {
 					hedgeSide.next.setOpposite(hedgeSidePrev);
@@ -1420,10 +1415,8 @@ protected void initBuffers (int nump)
 	     unclaimed.clear();
 	      
 	     if (debug)
-	      { System.out.println ("Adding point: " + eyeVtx.index);
-		System.out.println (
-		   " which is " + eyeVtx.face.distanceToPlane(eyeVtx.pnt) +
-		   " above face " + eyeVtx.face.getVertexString());
+	      { //System.out.println ("Adding point: " + eyeVtx.index);
+		//System.out.println (" which is " + eyeVtx.face.distanceToPlane(eyeVtx.pnt) +" above face " + eyeVtx.face.getVertexString());
 	      }
 	     removePointFromFace (eyeVtx, eyeVtx.face);
 	     calculateHorizon (eyeVtx.pnt, null, eyeVtx.face, horizon);
@@ -1467,12 +1460,12 @@ protected void initBuffers (int nump)
 	    { addPointToHull (eyeVtx);
 	      cnt++;
 	      if (debug)
-	       { System.out.println ("iteration " + cnt + " done"); 
+	       { //System.out.println ("iteration " + cnt + " done"); 
 	       }
 	    }
 	   reindexFacesAndVertices();
 	   if (debug)
-	    { System.out.println ("hull done");
+	    { //System.out.println ("hull done");
 	    }
 	 }
 

@@ -621,8 +621,8 @@ public class Vector3d extends javax.vecmath.Vector3d{
 //        if ((this.x ==Double.NaN) || (this.y == Double.NaN) || (this.z == Double.NaN)) {
 //            throw new IllegalStateException("NaN is not a valid entry for a vector.");
 //        }
-//        System.out.println(" this : "+ this);
-//        System.out.println(" result : "+ result);
+//        //System.out.println(" this : "+ this);
+//        //System.out.println(" result : "+ result);
         // check if the created vector is really orthogonal to this
         // if not try one more time
         while (this.dot(result) != 0.0) {

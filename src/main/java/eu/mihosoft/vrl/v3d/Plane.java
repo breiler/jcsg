@@ -269,7 +269,7 @@ public class Plane {
 					// skip adding broken polygon here
 				}
 			} else {
-				System.out.println("Front Clip Fault!");
+				//System.out.println("Front Clip Fault!");
 			}
 			if (b.size() >= 3) {
 				try {
@@ -279,7 +279,7 @@ public class Plane {
 					// skip adding broken polygon here
 				}
 			} else {
-				System.out.println("Back Clip Fault!");
+				//System.out.println("Back Clip Fault!");
 			}
 			break;
 		}

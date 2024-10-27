@@ -45,7 +45,7 @@ public class DXF{
 					if (entityIterator != null) {
 						for (; entityIterator.hasNext();) {
 							String entityType = (String) entityIterator.next();
-							System.out.println(entityType);
+							//System.out.println(entityType);
 							if (entityType.contentEquals(DXFConstants.ENTITY_TYPE_POLYLINE)) {
 								
 								// get all polylines from the layer
@@ -57,23 +57,23 @@ public class DXF{
 											DXFVertex vertex = pline.getVertex(i);
 											Point point = vertex.getPoint();
 											points.add(new Vector3d(point.getX(), point.getY(), point.getZ()));
-											System.out.println(points.get(points.size()-1)+",");
+											//System.out.println(points.get(points.size()-1)+",");
 										}
 									}
 								}
 							}
 							else if (entityType.contentEquals(DXFConstants.ENTITY_TYPE_LINE)) {
 								// get all polylines from the layer
-								System.out.println("Loading line");
+								//System.out.println("Loading line");
 								List plines = layer.getDXFEntities(entityType);
 								if (plines != null) {
 									for (Object p : plines) {
 										DXFLine pline = (DXFLine) p;
 										Point point = pline.getStartPoint();
 										points.add(new Vector3d(point.getX(), point.getY(), point.getZ()));
-										System.out.println(points.get(points.size()-1)+",");
+										//System.out.println(points.get(points.size()-1)+",");
 									}
-									System.out.println("Extruding");
+									//System.out.println("Extruding");
 									parts.add(Extrude.points(new Vector3d(0, 0, extrudeDistance), points));
 									points.clear();
 									
@@ -90,20 +90,20 @@ public class DXF{
 											for (;splinePointIterator.hasNext();) {
 												SplinePoint point =(SplinePoint) splinePointIterator.next();
 												points.add(new Vector3d(point.getX(), point.getY(), point.getZ()));
-												System.out.println(points.get(points.size()-1)+",");
+												//System.out.println(points.get(points.size()-1)+",");
 											}
 									}
 								}
 							}
 							else {
-								System.out.println("Found type: " + entityType);
+								//System.out.println("Found type: " + entityType);
 
 							}
-//							System.out.println("Points: \n{");
+//							//System.out.println("Points: \n{");
 //							for(Vector3d v: points){
-//								System.out.println(v+",");
+//								//System.out.println(v+",");
 //							}
-//							System.out.println("}");
+//							//System.out.println("}");
 							
 						}
 						

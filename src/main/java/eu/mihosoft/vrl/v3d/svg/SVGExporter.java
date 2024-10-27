@@ -187,14 +187,13 @@ public class SVGExporter {
 			int i = 0;
 			long start = System.currentTimeMillis();
 			for (CSG tmp : currentCsg) {
-				System.out.println("Slicing CSG " + tmp.getName() + " " + (i + 1) + " of " + (currentCsg.size()));
+				//System.out.println("Slicing CSG " + tmp.getName() + " " + (i + 1) + " of " + (currentCsg.size()));
 				addCsg(tmp, svg);
 				i++;
 			}
 
 			write(svg.make(), defaultDir);
-			System.out.println("Finished slicing CSGs took "
-					+ ((((double) (System.currentTimeMillis() - start))) / 1000.0) + " seconds");
+			//System.out.println("Finished slicing CSGs took "+ ((((double) (System.currentTimeMillis() - start))) / 1000.0) + " seconds");
 		} else {
 			System.err.println("ERROR No UI engine availible, SVG slicing is GPU accelerated and will not work");
 		}
