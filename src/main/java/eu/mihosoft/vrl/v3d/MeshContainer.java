@@ -237,7 +237,7 @@ public class MeshContainer {
 //
 //        double scale = minContDim / (maxDim * 2);
 //
-//        //System.out.println("scale: " + scale + ", maxDim: " + maxDim + ", " + meshContainer);
+//        //com.neuronrobotics.sdk.common.Log.error("scale: " + scale + ", maxDim: " + maxDim + ", " + meshContainer);
 //        meshView.setScaleX(scale);
 //        meshView.setScaleY(scale);
 //        meshView.setScaleZ(scale);

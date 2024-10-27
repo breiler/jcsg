@@ -606,10 +606,10 @@ public class Vector3d extends javax.vecmath.Vector3d{
                 break;
 
             case 3:
-                System.err.println("This vector is equal to (0,0,0). ");
+                com.neuronrobotics.sdk.common.Log.error("This vector is equal to (0,0,0). ");
 
             default:
-                System.err.println("The orthogonal one is set randomly.");
+                com.neuronrobotics.sdk.common.Log.error("The orthogonal one is set randomly.");
 
                 o1 = r.nextDouble();
                 o2 = r.nextDouble();
@@ -621,8 +621,8 @@ public class Vector3d extends javax.vecmath.Vector3d{
 //        if ((this.x ==Double.NaN) || (this.y == Double.NaN) || (this.z == Double.NaN)) {
 //            throw new IllegalStateException("NaN is not a valid entry for a vector.");
 //        }
-//        //System.out.println(" this : "+ this);
-//        //System.out.println(" result : "+ result);
+//        //com.neuronrobotics.sdk.common.Log.error(" this : "+ this);
+//        //com.neuronrobotics.sdk.common.Log.error(" result : "+ result);
         // check if the created vector is really orthogonal to this
         // if not try one more time
         while (this.dot(result) != 0.0) {

@@ -261,7 +261,7 @@ public class TextExtrude {
 	        DoubleProperty res=new SimpleDoubleProperty();
 	        IntStream.range(0, points.size()-1)
 	                .forEach(i->res.set(res.get()+points.get(i).cross(points.get(i+1)).z));
-	        // System.out.println("path: "+res.doubleValue()/2);
+	        // com.neuronrobotics.sdk.common.Log.error("path: "+res.doubleValue()/2);
 	        
 	        return res.doubleValue()/2d;
 	    }

@@ -197,7 +197,7 @@ public class SmoothingGroups {
     private static boolean isNormalsEqual(Vector3f n1, Vector3f n2) {
         if (n1.x == 1.0e20f || n1.y == 1.0e20f || n1.z == 1.0e20f
                 || n2.x == 1.0e20f || n2.y == 1.0e20f || n2.z == 1.0e20f) {
-            ////System.out.println("unlocked normal found, skipping");
+            ////com.neuronrobotics.sdk.common.Log.error("unlocked normal found, skipping");
             return false;
         }
         Vector3f myN1 = new Vector3f(n1);
@@ -227,8 +227,8 @@ public class SmoothingGroups {
                 Edge[] adjFaceEdges = faceEdges[adjFace];
                 int adjEdgeInd = Arrays.asList(adjFaceEdges).indexOf(edge);
                 if (adjEdgeInd == -1) {
-                    //System.out.println("Can't find edge " + edge + " in face " + adjFace);
-                    //System.out.println(Arrays.asList(adjFaceEdges));
+                    //com.neuronrobotics.sdk.common.Log.error("Can't find edge " + edge + " in face " + adjFace);
+                    //com.neuronrobotics.sdk.common.Log.error(Arrays.asList(adjFaceEdges));
                     continue;
                 }
                 Edge adjEdge = adjFaceEdges[adjEdgeInd];
@@ -250,7 +250,7 @@ public class SmoothingGroups {
      * @return the list
      */
     private List<List<Integer>> calcConnComponents(Map<Edge, List<Integer>> smoothEdges) {
-        ////System.out.println("smoothEdges = " + smoothEdges);
+        ////com.neuronrobotics.sdk.common.Log.error("smoothEdges = " + smoothEdges);
         List<List<Integer>> groups = new ArrayList<List<Integer>>();
         while (hasNextConnectedComponent()) {
             List<Integer> smoothGroup = getNextConnectedComponent(smoothEdges);
@@ -299,7 +299,7 @@ public class SmoothingGroups {
         // smooth edge -> [faces]
         Map<Edge, List<Integer>> smoothEdges = getSmoothEdges(adjacentFaces);
 
-        ////System.out.println("smoothEdges = " + smoothEdges);
+        ////com.neuronrobotics.sdk.common.Log.error("smoothEdges = " + smoothEdges);
         List<List<Integer>> groups = calcConnComponents(smoothEdges);
 
         return generateSmGroups(groups);

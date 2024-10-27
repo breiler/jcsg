@@ -314,7 +314,7 @@ public class Slice {
 			usedPixels.clear();
 			// if(display)BowlerStudioController.getBowlerStudio().getJfx3dmanager().clearUserNode()
 			// BowlerStudioController.getBowlerStudio() .addObject(polys, new File("."));
-			//System.out.println("Slice took: " + (((double) (System.currentTimeMillis() - startTime)) / 1000.0) + " seconds");
+			//com.neuronrobotics.sdk.common.Log.error("Slice took: " + (((double) (System.currentTimeMillis() - startTime)) / 1000.0) + " seconds");
 			return polys;
 		}
 

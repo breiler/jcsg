@@ -112,7 +112,7 @@ public class PolyObjImporter {
      */
     static void log(String string) {
         if (debug) {
-            //System.out.println(string);
+            //com.neuronrobotics.sdk.common.Log.error(string);
         }
     }
 
@@ -455,11 +455,11 @@ public class PolyObjImporter {
         }
         
         if (debug) {
-            //System.out.println("mesh.points = " + mesh.getPoints());
-            //System.out.println("mesh.texCoords = " + mesh.getTexCoords());
-            //System.out.println("mesh.faces: ");
+            //com.neuronrobotics.sdk.common.Log.error("mesh.points = " + mesh.getPoints());
+            //com.neuronrobotics.sdk.common.Log.error("mesh.texCoords = " + mesh.getTexCoords());
+            //com.neuronrobotics.sdk.common.Log.error("mesh.faces: ");
             for (int[] face: mesh.faces) {
-                //System.out.println("    face:: "+Arrays.toString(face));
+                //com.neuronrobotics.sdk.common.Log.error("    face:: "+Arrays.toString(face));
             }
         }
 

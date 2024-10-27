@@ -170,10 +170,10 @@ public class Optimizer {
                 Parent parent = p.getParent();
                 if (parent instanceof Group) {
                     trEmpty++;
-//                    //System.out.println("Empty group = " + node.getId());
+//                    //com.neuronrobotics.sdk.common.Log.error("Empty group = " + node.getId());
                     emptyParents.add(p);
                 } else {
-//                    System.err.println("parent is not group = " + parent);
+//                    com.neuronrobotics.sdk.common.Log.error("parent is not group = " + parent);
                 }
             }
         }
@@ -413,7 +413,7 @@ public class Optimizer {
                 if (kvOrig != null) {
                     kvRemoved++;
                     if (!kvOrig.getEndValue().equals(kvDup.getEndValue()) && kvOrig.getTarget() == kvDup.getTarget()) {
-                        System.err.println("KeyValues set different values for KeyFrame " + duplicate.getTime() + ":"
+                        com.neuronrobotics.sdk.common.Log.error("KeyValues set different values for KeyFrame " + duplicate.getTime() + ":"
                                 + "\n kvOrig = " + kvOrig + ", \nkvDup = " + kvDup);
                     }
                 }
@@ -528,7 +528,7 @@ public class Optimizer {
                         prevPrevValues.put(target, prev);
 //                        KeyInfo oldKeyInfo = prevPrevValues.put(target, prev);
 //                        if (oldKeyInfo != null && oldKeyInfo.keyFrame.getTime().equals(prev.keyFrame.getTime())) {
-//                            System.err.println("prevPrev replaced more than once per keyFrame on " + target + "\n"
+//                            com.neuronrobotics.sdk.common.Log.error("prevPrev replaced more than once per keyFrame on " + target + "\n"
 //                                    + "old = " + oldKeyInfo.keyFrame.getTime() + ", " + oldKeyInfo.keyValue + "\n"
 //                                    + "new = " + prev.keyFrame.getTime() + ", " + prev.keyValue
 //                                    );
@@ -578,7 +578,7 @@ public class Optimizer {
                 if (newKeyValues.isEmpty()) {
                     if (keyFrame.getOnFinished() == null) {
                         if (keyFrame.getName() != null) {
-                            System.err.println("Removed KeyFrame with name = " + keyFrame.getName());
+                            com.neuronrobotics.sdk.common.Log.error("Removed KeyFrame with name = " + keyFrame.getName());
                         }
                         timeline.getKeyFrames().remove(i);
                         i--;
@@ -609,7 +609,7 @@ public class Optimizer {
                 }
             }
         }
-//        //System.out.println("bound.size() = " + bound.size());
+//        //com.neuronrobotics.sdk.common.Log.error("bound.size() = " + bound.size());
         System.out.printf("Removed %d (%.2f%%) repeating KeyValues out of total %d.\n", kvRemoved, 100d * kvRemoved / kvTotal, kvTotal);
         System.out.printf("Removed %d (%.2f%%) and simplified %d (%.2f%%) KeyFrames out of total %d. %d (%.2f%%) were not removed due to event handler attached.\n",
                 kfRemoved, 100d * kfRemoved / kfTotal,
@@ -655,7 +655,7 @@ public class Optimizer {
         @Override public int compare(KeyFrame o1, KeyFrame o2) {
 //            int compareTo = o1.getTime().compareTo(o2.getTime());
 //            if (compareTo == 0 && o1 != o2) {
-//                System.err.println("those two KeyFrames are equal: o1 = " + o1.getTime() + " and o2 = " + o2.getTime());
+//                com.neuronrobotics.sdk.common.Log.error("those two KeyFrames are equal: o1 = " + o1.getTime() + " and o2 = " + o2.getTime());
 //            }
             return o1.getTime().compareTo(o2.getTime());
         }

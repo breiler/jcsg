@@ -199,11 +199,11 @@ public class Plane {
 		for (int i = 0; i < polygon.vertices.size(); i++) {
 			double t = polygon.plane.getNormal().dot(polygon.vertices.get(i).pos) - polygon.plane.getDist();
 			if (t > posEpsilon) {
-				// System.err.println("Non flat polygon, increasing positive epsilon "+t);
+				// com.neuronrobotics.sdk.common.Log.error("Non flat polygon, increasing positive epsilon "+t);
 				posEpsilon = t + Plane.EPSILON;
 			}
 			if (t < negEpsilon) {
-				// System.err.println("Non flat polygon, decreasing negative epsilon "+t);
+				// com.neuronrobotics.sdk.common.Log.error("Non flat polygon, decreasing negative epsilon "+t);
 				negEpsilon = t - Plane.EPSILON;
 			}
 		}
@@ -269,7 +269,7 @@ public class Plane {
 					// skip adding broken polygon here
 				}
 			} else {
-				//System.out.println("Front Clip Fault!");
+				//com.neuronrobotics.sdk.common.Log.error("Front Clip Fault!");
 			}
 			if (b.size() >= 3) {
 				try {
@@ -279,7 +279,7 @@ public class Plane {
 					// skip adding broken polygon here
 				}
 			} else {
-				//System.out.println("Back Clip Fault!");
+				//com.neuronrobotics.sdk.common.Log.error("Back Clip Fault!");
 			}
 			break;
 		}

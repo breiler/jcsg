@@ -115,7 +115,7 @@ public final class Polygon {
 	        this.plane = Plane.createFromPoints(
 	                vertices);
 //        }catch(java.lang.NumberFormatException nf) {
-//        	System.out.println("plane failed to load");
+//        	com.neuronrobotics.sdk.common.Log.error("plane failed to load");
 //        	nf.printStackTrace();
 //	        this.plane = Plane.createFromPoints(
 //	                vertices);

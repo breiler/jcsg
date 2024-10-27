@@ -474,7 +474,7 @@ class QuickHull3DTest
 	    }
 	   catch (Exception e) 
 	    { for (int i=0; i<coordsx.length/3; i++)
-  	       { System.out.println (
+  	       { com.neuronrobotics.sdk.common.Log.error (
   		    coordsx[i*3+0]+", "+
   		    coordsx[i*3+1]+", "+
   		    coordsx[i*3+2]+", ");
@@ -537,7 +537,7 @@ class QuickHull3DTest
 	 {
 	   int nump = coords.length/3;
 	   for (int i=0; i<nump; i++)
-	    { System.out.println (
+	    { com.neuronrobotics.sdk.common.Log.error (
 		 coords[i*3+0]+", "+
 		 coords[i*3+1]+", "+
 		 coords[i*3+2]+", ");
@@ -561,17 +561,17 @@ class QuickHull3DTest
 	    { ex = e; 
 	    }
 	   if (ex == null)
-	    { System.out.println ("Expected exception " + msg);
-	      System.out.println ("Got no exception");
-	      System.out.println ("Input pnts:");
+	    { com.neuronrobotics.sdk.common.Log.error ("Expected exception " + msg);
+	      com.neuronrobotics.sdk.common.Log.error ("Got no exception");
+	      com.neuronrobotics.sdk.common.Log.error ("Input pnts:");
 	      printCoords (coords);
 	      System.exit(1); 
 	    }
 	   else if (ex.getMessage() == null ||
 		    !ex.getMessage().equals(msg))
-	    { System.out.println ("Expected exception " + msg);
-	      System.out.println ("Got exception " + ex.getMessage());
-	      System.out.println ("Input pnts:");
+	    { com.neuronrobotics.sdk.common.Log.error ("Expected exception " + msg);
+	      com.neuronrobotics.sdk.common.Log.error ("Got exception " + ex.getMessage());
+	      com.neuronrobotics.sdk.common.Log.error ("Input pnts:");
 	      printCoords (coords);
 	      System.exit(1);
 	    }
@@ -620,7 +620,7 @@ class QuickHull3DTest
 	    { 
 	      double[] coords = null;
 
-	      System.out.println (
+	      com.neuronrobotics.sdk.common.Log.error (
 "Testing degenerate input ...");
 	      for (int dimen=0; dimen<3; dimen++)
 	       { for (int i=0; i<10; i++)
@@ -640,7 +640,7 @@ class QuickHull3DTest
 		  }
 	       }
 
-	      System.out.println (
+	      com.neuronrobotics.sdk.common.Log.error (
 "Explicit tests ...");
 
 	      // test cases furnished by Mariano Zelke, Berlin
@@ -675,40 +675,40 @@ class QuickHull3DTest
 		 };
 	      test (coords, null);
 	   
-	      System.out.println (
+	      com.neuronrobotics.sdk.common.Log.error (
 "Testing 20 to 200 random points ...");
 	      for (int n=20; n<200; n+=10)
-	       { // System.out.println (n);
+	       { // com.neuronrobotics.sdk.common.Log.error (n);
 		 for (int i=0; i<10; i++)
 		  { coords = randomPoints (n, 1.0);
 		    test (coords, null);
 		  }
 	       }
 
-	      System.out.println (
+	      com.neuronrobotics.sdk.common.Log.error (
 "Testing 20 to 200 random points in a sphere ...");
 	      for (int n=20; n<200; n+=10)
-	       { // System.out.println (n);
+	       { // com.neuronrobotics.sdk.common.Log.error (n);
 		 for (int i=0; i<10; i++)
 		  { coords = randomSphericalPoints (n, 1.0);
 		    test (coords, null);
 		  }
 	       }
 
-	      System.out.println (
+	      com.neuronrobotics.sdk.common.Log.error (
 "Testing 20 to 200 random points clipped to a cube ...");
 	      for (int n=20; n<200; n+=10)
-	       { // System.out.println (n);
+	       { // com.neuronrobotics.sdk.common.Log.error (n);
 		 for (int i=0; i<10; i++)
 		  { coords = randomCubedPoints (n, 1.0, 0.5);
 		    test (coords, null);
 		  }
 	       }
 
-	      System.out.println (
+	      com.neuronrobotics.sdk.common.Log.error (
 "Testing 8 to 1000 randomly shuffled points on a grid ...");
 	      for (int n=2; n<=10; n++)
-	       { // System.out.println (n*n*n);
+	       { // com.neuronrobotics.sdk.common.Log.error (n*n*n);
 		 for (int i=0; i<10; i++)
 		  { coords = randomGridPoints (n, 4.0);
 		    test (coords, null);
@@ -721,7 +721,7 @@ class QuickHull3DTest
 	      System.exit(1); 
 	    }
 
-	   System.out.println ("\nPassed\n");
+	   com.neuronrobotics.sdk.common.Log.error ("\nPassed\n");
 	 }
 
 	/**
@@ -733,7 +733,7 @@ class QuickHull3DTest
 	   long t0, t1;
 	   int n = 10;
 	   QuickHull3D hull = new QuickHull3D ();
-	   System.out.println ("warming up ... ");
+	   com.neuronrobotics.sdk.common.Log.error ("warming up ... ");
 	   for (int i=0; i<2; i++)
 	    { double[] coords = randomSphericalPoints (10000, 1.0);
 	      hull.build (coords); 
@@ -747,7 +747,7 @@ class QuickHull3DTest
 	       { hull.build (coords);
 	       }
 	      t1 = System.currentTimeMillis();
-	      System.out.println (n + " points: " + (t1-t0)/(double)cnt +
+	      com.neuronrobotics.sdk.common.Log.error (n + " points: " + (t1-t0)/(double)cnt +
 				  " msec");
 	    }
 	 }
@@ -773,7 +773,7 @@ class QuickHull3DTest
 		 doTesting = false;
 	       }
 	      else
-	       { System.out.println (
+	       { com.neuronrobotics.sdk.common.Log.error (
 "Usage: java quickhull3d.QuickHull3DTest [-timing]");
 		 System.exit(1);
 	       }

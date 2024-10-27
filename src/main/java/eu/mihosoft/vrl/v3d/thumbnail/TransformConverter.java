@@ -27,8 +27,8 @@ public class TransformConverter {
 		Matrix4d rotation = new Matrix4d(v );
 		//eu.mihosoft.vrl.v3d.Transform transform = new eu.mihosoft.vrl.v3d.Transform(rotation);
 		eu.mihosoft.vrl.v3d.Transform transform = new eu.mihosoft.vrl.v3d.Transform();		
-		//System.out.println("Incoming "+rotations);
-		//System.out.println("Converted to "+transform);
+		//com.neuronrobotics.sdk.common.Log.error("Incoming "+rotations);
+		//com.neuronrobotics.sdk.common.Log.error("Converted to "+transform);
 		return transform;
 	}
 }

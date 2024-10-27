@@ -45,7 +45,7 @@ public class DXF{
 					if (entityIterator != null) {
 						for (; entityIterator.hasNext();) {
 							String entityType = (String) entityIterator.next();
-							//System.out.println(entityType);
+							//com.neuronrobotics.sdk.common.Log.error(entityType);
 							if (entityType.contentEquals(DXFConstants.ENTITY_TYPE_POLYLINE)) {
 								
 								// get all polylines from the layer
@@ -57,23 +57,23 @@ public class DXF{
 											DXFVertex vertex = pline.getVertex(i);
 											Point point = vertex.getPoint();
 											points.add(new Vector3d(point.getX(), point.getY(), point.getZ()));
-											//System.out.println(points.get(points.size()-1)+",");
+											//com.neuronrobotics.sdk.common.Log.error(points.get(points.size()-1)+",");
 										}
 									}
 								}
 							}
 							else if (entityType.contentEquals(DXFConstants.ENTITY_TYPE_LINE)) {
 								// get all polylines from the layer
-								//System.out.println("Loading line");
+								//com.neuronrobotics.sdk.common.Log.error("Loading line");
 								List plines = layer.getDXFEntities(entityType);
 								if (plines != null) {
 									for (Object p : plines) {
 										DXFLine pline = (DXFLine) p;
 										Point point = pline.getStartPoint();
 										points.add(new Vector3d(point.getX(), point.getY(), point.getZ()));
-										//System.out.println(points.get(points.size()-1)+",");
+										//com.neuronrobotics.sdk.common.Log.error(points.get(points.size()-1)+",");
 									}
-									//System.out.println("Extruding");
+									//com.neuronrobotics.sdk.common.Log.error("Extruding");
 									parts.add(Extrude.points(new Vector3d(0, 0, extrudeDistance), points));
 									points.clear();
 									
@@ -90,20 +90,20 @@ public class DXF{
 											for (;splinePointIterator.hasNext();) {
 												SplinePoint point =(SplinePoint) splinePointIterator.next();
 												points.add(new Vector3d(point.getX(), point.getY(), point.getZ()));
-												//System.out.println(points.get(points.size()-1)+",");
+												//com.neuronrobotics.sdk.common.Log.error(points.get(points.size()-1)+",");
 											}
 									}
 								}
 							}
 							else {
-								//System.out.println("Found type: " + entityType);
+								//com.neuronrobotics.sdk.common.Log.error("Found type: " + entityType);
 
 							}
-//							//System.out.println("Points: \n{");
+//							//com.neuronrobotics.sdk.common.Log.error("Points: \n{");
 //							for(Vector3d v: points){
-//								//System.out.println(v+",");
+//								//com.neuronrobotics.sdk.common.Log.error(v+",");
 //							}
-//							//System.out.println("}");
+//							//com.neuronrobotics.sdk.common.Log.error("}");
 							
 						}
 						

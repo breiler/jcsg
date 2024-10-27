@@ -419,9 +419,9 @@ public class PolygonMeshView extends Parent {
         final int pointElementSize = triangleMesh.getPointElementSize();
         final int faceElementSize = triangleMesh.getFaceElementSize();
         final boolean isWireframe = getDrawMode() == DrawMode.LINE;
-        if (DEBUG) System.out.println("UPDATE MESH -- "+(isWireframe?"WIREFRAME":"SOLID"));
+        if (DEBUG) com.neuronrobotics.sdk.common.Log.error("UPDATE MESH -- "+(isWireframe?"WIREFRAME":"SOLID"));
         final int numOfPoints = pmesh.getPoints().size() / pointElementSize;
-        if (DEBUG) System.out.println("numOfPoints = " + numOfPoints);
+        if (DEBUG) com.neuronrobotics.sdk.common.Log.error("numOfPoints = " + numOfPoints);
         
         if(isWireframe) {
             // The current triangleMesh implementation gives buggy behavior when the size of faces are shrunken
@@ -438,19 +438,19 @@ public class PolygonMeshView extends Parent {
                 int facesInd = 0;
                 int pointsInd = pmesh.getPoints().size();
                 for(int[] face: pmesh.faces) {
-                    if (DEBUG) System.out.println("face.length = " + (face.length/2)+"  -- "+Arrays.toString(face));
+                    if (DEBUG) com.neuronrobotics.sdk.common.Log.error("face.length = " + (face.length/2)+"  -- "+Arrays.toString(face));
                     int lastPointIndex = face[face.length-2];
-                    if (DEBUG) System.out.println("    lastPointIndex = " + lastPointIndex);
+                    if (DEBUG) com.neuronrobotics.sdk.common.Log.error("    lastPointIndex = " + lastPointIndex);
                     for (int p=0;p<face.length;p+=2) {
                         int pointIndex = face[p];
-                        if (DEBUG) System.out.println("        connecting point["+lastPointIndex+"] to point[" + pointIndex+"]");
+                        if (DEBUG) com.neuronrobotics.sdk.common.Log.error("        connecting point["+lastPointIndex+"] to point[" + pointIndex+"]");
                         facesArray[facesInd++] = lastPointIndex;
                         facesArray[facesInd++] = 0;
                         facesArray[facesInd++] = pointIndex;
                         facesArray[facesInd++] = 0;
                         facesArray[facesInd++] = pointsInd / pointElementSize;
                         facesArray[facesInd++] = 0;
-                        if (DEBUG) System.out.println("            facesInd = " + facesInd);
+                        if (DEBUG) com.neuronrobotics.sdk.common.Log.error("            facesInd = " + facesInd);
                         pointsInd += pointElementSize;
                         lastPointIndex = pointIndex;
                     }
@@ -512,7 +512,7 @@ public class PolygonMeshView extends Parent {
                 for(int f = 0; f < pmesh.faces.length; f++) {
                     int[] face = pmesh.faces[f];
                     int currentSmoothGroup = pmesh.getFaceSmoothingGroups().get(f);
-                    if (DEBUG) System.out.println("face.length = " + face.length+"  -- "+Arrays.toString(face));
+                    if (DEBUG) com.neuronrobotics.sdk.common.Log.error("face.length = " + face.length+"  -- "+Arrays.toString(face));
                     int firstPointIndex = face[0];
                     int firstTexIndex = face[1];
                     int lastPointIndex = face[2];
@@ -545,10 +545,10 @@ public class PolygonMeshView extends Parent {
             }
         }
         
-        if (DEBUG) System.out.println("CREATING TRIANGLE MESH");
-        if (DEBUG) System.out.println("    points    = "+Arrays.toString(((TriangleMesh) meshView.getMesh()).getPoints().toArray(null)));
-        if (DEBUG) System.out.println("    texCoords = "+Arrays.toString(((TriangleMesh) meshView.getMesh()).getTexCoords().toArray(null)));
-        if (DEBUG) System.out.println("    faces     = "+Arrays.toString(((TriangleMesh) meshView.getMesh()).getFaces().toArray(null)));
+        if (DEBUG) com.neuronrobotics.sdk.common.Log.error("CREATING TRIANGLE MESH");
+        if (DEBUG) com.neuronrobotics.sdk.common.Log.error("    points    = "+Arrays.toString(((TriangleMesh) meshView.getMesh()).getPoints().toArray(null)));
+        if (DEBUG) com.neuronrobotics.sdk.common.Log.error("    texCoords = "+Arrays.toString(((TriangleMesh) meshView.getMesh()).getTexCoords().toArray(null)));
+        if (DEBUG) com.neuronrobotics.sdk.common.Log.error("    faces     = "+Arrays.toString(((TriangleMesh) meshView.getMesh()).getFaces().toArray(null)));
     
         if (meshView.getMesh() != triangleMesh) {
             meshView.setMesh(triangleMesh);

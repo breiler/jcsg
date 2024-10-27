@@ -186,12 +186,12 @@ public class PolygonUtil {
 					poly.plane.setNormal(concave.plane.getNormal());
 					boolean b = !Extrude.isCCW(poly);
 					if (cw != b) {
-						// //System.out.println("Triangle not matching incoming");
+						// //com.neuronrobotics.sdk.common.Log.error("Triangle not matching incoming");
 						Collections.reverse(triPoints);
 						poly = new Polygon(triPoints, concave.getStorage(), true);
 						b = !Extrude.isCCW(poly);
 						if (cw != b) {
-							//System.out.println("Error, polygon is reversed!");
+							//com.neuronrobotics.sdk.common.Log.error("Error, polygon is reversed!");
 						}
 					}
 					if (debug) {
@@ -254,7 +254,7 @@ public class PolygonUtil {
 //			}
 //			concave = incoming.transformed(orentation2);
 //			normal2 = concave.plane.normal;
-//			////System.out.println("New vectors "+normal2+" "+normal);
+//			////com.neuronrobotics.sdk.common.Log.error("New vectors "+normal2+" "+normal);
 //		} else
 //			concave = incoming;
 //		if(Math.abs(concave.plane.normal.z) < 1.0-Plane.EPSILON) {
@@ -302,7 +302,7 @@ public class PolygonUtil {
 //					}
 //					Vector3d clone = normalOfPlane.clone();
 //
-//					// //System.out.println("Updating the normal to " + clone);
+//					// //com.neuronrobotics.sdk.common.Log.error("Updating the normal to " + clone);
 //					poly.plane.normal = clone;
 //					// Debug3dProvider.addObject(poly);
 //					result.add(poly);

@@ -70,7 +70,7 @@ public class MtlReader {
             log("Reading material from filename = " + mtlUrl);
             read(mtlUrl.openStream());
         } catch (FileNotFoundException ex) {
-            System.err.println("No material file found for obj. ["+fileUrl+"]");
+            com.neuronrobotics.sdk.common.Log.error("No material file found for obj. ["+fileUrl+"]");
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -87,7 +87,7 @@ public class MtlReader {
             log("Reading material from stream");
             read(stream);
         } catch (FileNotFoundException ex) {
-            System.err.println("No material file found for obj. [stream]");
+            com.neuronrobotics.sdk.common.Log.error("No material file found for obj. [stream]");
         } catch (IOException ex) {
             ex.printStackTrace();
         }

@@ -9,10 +9,10 @@ public class JavaFXInitializer {
 	}
 	private static void gointernal() {
 		if(latch.getCount()!=NUM_COUNT) {
-			//System.out.println("ERR initializer already started");
+			//com.neuronrobotics.sdk.common.Log.error("ERR initializer already started");
 			return;
 		}
-		System.out.println("Starting JavaFX initializer..."+JavaFXInitializer.class);
+		com.neuronrobotics.sdk.common.Log.error("Starting JavaFX initializer..."+JavaFXInitializer.class);
 		latch.countDown();
 		try {
 			 final javafx.embed.swing.JFXPanel fxPanel = new javafx.embed.swing.JFXPanel();
@@ -25,7 +25,7 @@ public class JavaFXInitializer {
 	}
 	public static void go() {
 		if(latch.getCount()!=NUM_COUNT) {
-			//System.out.println("ERR initializer already started");
+			//com.neuronrobotics.sdk.common.Log.error("ERR initializer already started");
 			return;
 		}
 		new Thread() {
@@ -46,7 +46,7 @@ public class JavaFXInitializer {
 		}
 		StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
 		StackTraceElement e = stacktrace[2];//maybe this number needs to be corrected
-		System.out.println("Finished JavaFX initializing! "+e);
+		com.neuronrobotics.sdk.common.Log.error("Finished JavaFX initializing! "+e);
 	}
 
 }

@@ -96,7 +96,7 @@ public class Validator {
                 throw new AssertionError("Incorrect texCoord index: " + tcIndex + ", numTexCoords = " + numTexCoords);
             }
         }
-//        System.out.println("Validation successfull of " + mesh);
+//        com.neuronrobotics.sdk.common.Log.error("Validation successfull of " + mesh);
     }
 
 }

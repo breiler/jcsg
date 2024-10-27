@@ -158,18 +158,18 @@ public class Edge {
                     filter(e -> finalEdge.p2.equals(e.p1)).findFirst().get());
 
             if (used[nextEdgeIndex]) {
-//                //System.out.println("nexIndex: " + nextEdgeIndex);
+//                //com.neuronrobotics.sdk.common.Log.error("nexIndex: " + nextEdgeIndex);
                 break;
             }
 //            System.out.print("edge: " + edge.p2.pos);
             edge = boundaryEdges.get(nextEdgeIndex);
-//            //System.out.println("-> edge: " + edge.p1.pos);
+//            //com.neuronrobotics.sdk.common.Log.error("-> edge: " + edge.p1.pos);
             used[nextEdgeIndex] = true;
         }
 
         List<Polygon> result = new ArrayList<>();
 
-        //System.out.println("#bnd-path-length: " + boundaryPath.size());
+        //com.neuronrobotics.sdk.common.Log.error("#bnd-path-length: " + boundaryPath.size());
 
         result.add(toPolygon(boundaryPath, plane));
 
@@ -428,7 +428,7 @@ public class Edge {
                         filter(e -> finalEdge.p2.equals(e.p1)).findFirst();
 
                 if (!nextEdgeResult.isPresent()) {
-//                    //System.out.println("ERROR: unclosed path:"
+//                    //com.neuronrobotics.sdk.common.Log.error("ERROR: unclosed path:"
 //                            + " no edge found with " + finalEdge.p2);
                     break;
                 }
@@ -442,7 +442,7 @@ public class Edge {
                 }
 
                 edge = nextEdge;
-//                //System.out.println("-> edge: " + edge.p1.pos);
+//                //com.neuronrobotics.sdk.common.Log.error("-> edge: " + edge.p1.pos);
                 used[nextEdgeIndex] = true;
             }
 
@@ -460,7 +460,7 @@ public class Edge {
 
         }
 //
-//        //System.out.println("paths: " + result.size());
+//        //com.neuronrobotics.sdk.common.Log.error("paths: " + result.size());
 
         return result;
     }
@@ -504,18 +504,18 @@ public class Edge {
                     filter(e -> finalEdge.p2.equals(e.p1)).findFirst().get());
 
             if (used[nextEdgeIndex]) {
-//                //System.out.println("nexIndex: " + nextEdgeIndex);
+//                //com.neuronrobotics.sdk.common.Log.error("nexIndex: " + nextEdgeIndex);
                 break;
             }
 //            System.out.print("edge: " + edge.p2.pos);
             edge = boundaryEdges.get(nextEdgeIndex);
-//            //System.out.println("-> edge: " + edge.p1.pos);
+//            //com.neuronrobotics.sdk.common.Log.error("-> edge: " + edge.p1.pos);
             used[nextEdgeIndex] = true;
         }
 
         List<Polygon> result = new ArrayList<>();
 
-        //System.out.println("#bnd-path-length: " + boundaryPath.size());
+        //com.neuronrobotics.sdk.common.Log.error("#bnd-path-length: " + boundaryPath.size());
 
         result.add(toPolygon(boundaryPath, plane));
 
@@ -806,7 +806,7 @@ public class Edge {
                         ).count() == 0).collect(Collectors.toList());
 
         //
-//        //System.out.println("#bnd-edges: " + realBndEdges.size()
+//        //com.neuronrobotics.sdk.common.Log.error("#bnd-edges: " + realBndEdges.size()
 //                + ",#edges: " + edges.size()
 //                + ", #del-bnd-edges: " + (boundaryEdges.size() - realBndEdges.size()));
         return realBndEdges;
@@ -824,7 +824,7 @@ public class Edge {
         List<Polygon> polygons = boundaryPathsWithHoles(
                 boundaryPaths(boundaryEdgesOfPlaneGroup(planeGroup)));
 
-        //System.out.println("polygons: " + polygons.size());
+        //com.neuronrobotics.sdk.common.Log.error("polygons: " + polygons.size());
 
         List<Polygon> result = new ArrayList<>(polygons.size());
 
@@ -876,7 +876,7 @@ public class Edge {
     private static List<List<Polygon>> searchPlaneGroups(List<Polygon> polygons) {
         List<List<Polygon>> planeGroups = new ArrayList<>();
         boolean[] used = new boolean[polygons.size()];
-        //System.out.println("#polys: " + polygons.size());
+        //com.neuronrobotics.sdk.common.Log.error("#polys: " + polygons.size());
         for (int pOuterI = 0; pOuterI < polygons.size(); pOuterI++) {
 
             if (used[pOuterI]) {
@@ -902,11 +902,11 @@ public class Edge {
 
                 double angle = nOuter.angle(nInner);
 
-//                //System.out.println("angle: " + angle + " between " + pOuterI+" -> " + pInnerI);
+//                //com.neuronrobotics.sdk.common.Log.error("angle: " + angle + " between " + pOuterI+" -> " + pInnerI);
                 if (angle < 0.01 /*&& abs(pOuter.plane.dist - pInner.plane.dist) < 0.1*/) {
                     otherPolysInPlane.add(pInner);
                     used[pInnerI] = true;
-                    //System.out.println("used: " + pOuterI + " -> " + pInnerI);
+                    //com.neuronrobotics.sdk.common.Log.error("used: " + pOuterI + " -> " + pInnerI);
                 }
             }
 

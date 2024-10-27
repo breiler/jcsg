@@ -117,7 +117,7 @@ public class JavaCadBuildInfo {
 			}
 		} catch (IOException e) {
 		}
-		// System.out.println("Manifest:\n"+s);
+		// com.neuronrobotics.sdk.common.Log.error("Manifest:\n"+s);
 		return "";
 	}
 

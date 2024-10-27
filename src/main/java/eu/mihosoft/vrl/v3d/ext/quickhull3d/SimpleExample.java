@@ -31,20 +31,20 @@ class SimpleExample
 	   QuickHull3D hull = new QuickHull3D();
 	   hull.build (points);
 
-	   //System.out.println ("Vertices:");
+	   //com.neuronrobotics.sdk.common.Log.error ("Vertices:");
 	   Point3d[] vertices = hull.getVertices();
 	   for (int i=0; i<vertices.length; i++)
 	    { Point3d pnt = vertices[i];
-	      //System.out.println (pnt.x + " " + pnt.y + " " + pnt.z);
+	      //com.neuronrobotics.sdk.common.Log.error (pnt.x + " " + pnt.y + " " + pnt.z);
 	    }
 
-	   //System.out.println ("Faces:");
+	   //com.neuronrobotics.sdk.common.Log.error ("Faces:");
 	   int[][] faceIndices = hull.getFaces();
 	   for (int i=0; i<vertices.length; i++)
 	    { for (int k=0; k<faceIndices[i].length; k++)
 	       { System.out.print (faceIndices[i][k] + " ");
 	       }
-	      //System.out.println ("");
+	      //com.neuronrobotics.sdk.common.Log.error ("");
 	    }
 	 }
 }

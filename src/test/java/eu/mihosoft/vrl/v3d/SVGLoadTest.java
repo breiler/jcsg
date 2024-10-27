@@ -61,7 +61,7 @@ public class SVGLoadTest {
 			HashMap<String, ArrayList<CSG>> extrudeLayerToCSG = s.extrudeLayers(depth,0.1, layerName);
 			// extrudeLayerToCSG.setColor(Color.web(SVGExporter.colorNames.get(i)));
 			for(String key:extrudeLayerToCSG.keySet()) {
-				System.out.println("Adding layer: "+key);
+				com.neuronrobotics.sdk.common.Log.error("Adding layer: "+key);
 				polys.add(CSG.unionAll(extrudeLayerToCSG.get(key)));
 //				for(CSG c:extrudeLayerToCSG.get(key)) {
 //					polys.add(c);

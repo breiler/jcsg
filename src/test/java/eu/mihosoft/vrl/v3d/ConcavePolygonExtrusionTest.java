@@ -234,8 +234,8 @@ public class ConcavePolygonExtrusionTest {
 		CSG HLetter = Extrude.points(new Vector3d(0, 0, 10), H_points);
 		CSG eLetter = Extrude.points(new Vector3d(0, 0, 10), e_points);
 
-		System.out.println("H number of polygons: " + HLetter.getPolygons().size());
-		System.out.println("e number of polygons: " + eLetter.getPolygons().size());
+		com.neuronrobotics.sdk.common.Log.error("H number of polygons: " + HLetter.getPolygons().size());
+		com.neuronrobotics.sdk.common.Log.error("e number of polygons: " + eLetter.getPolygons().size());
 
 		CSG.setDefaultOptType(CSG.OptType.CSG_BOUND);
 
@@ -243,7 +243,7 @@ public class ConcavePolygonExtrusionTest {
 
 		int numPolysExpected = HLetter.getPolygons().size() + eLetter.getPolygons().size();
 
-		System.out.println("Both number of polygons: " + simpleUnionOfNonIntersectingBodies.getPolygons().size());
+		com.neuronrobotics.sdk.common.Log.error("Both number of polygons: " + simpleUnionOfNonIntersectingBodies.getPolygons().size());
 
 		// assumption only valid if optimization is enabled! (see above)
 		// assumption is wrong for CSG.setDefaultOptType(CSG.OptType.NONE);

@@ -176,7 +176,7 @@ public class ThumbnailImage {
 					while (img == null)
 						try {
 							Thread.sleep(16);
-							// System.out.println("Waiting for image to write");
+							// com.neuronrobotics.sdk.common.Log.error("Waiting for image to write");
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();

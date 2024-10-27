@@ -136,7 +136,7 @@ final class Node {
 			this.plane = polygons.get(0).plane.clone();
 		} else if (this.plane == null && polygons.isEmpty()) {
 
-			//System.err.println("Please fix me! I don't know what to do?");
+			//com.neuronrobotics.sdk.common.Log.error("Please fix me! I don't know what to do?");
 			throw new RuntimeException("Please fix me! I don't know what to do?");
 			// return;
 		}
@@ -253,7 +253,7 @@ final class Node {
 //			throw new RuntimeException("Impossible Node depth " + depth + " with " + polygons.size() + " remaining max = "+maxDepth );
 //		}
 //		if (depth > 200) {
-//			System.out.println("Node depth " + depth + " with " + polygons.size() + " remaining ");
+//			com.neuronrobotics.sdk.common.Log.error("Node depth " + depth + " with " + polygons.size() + " remaining ");
 //			Plane.setUseDebugger(true);
 //		} else {
 //			Plane.setUseDebugger(false);

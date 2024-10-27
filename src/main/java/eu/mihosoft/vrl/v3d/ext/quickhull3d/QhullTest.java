@@ -42,14 +42,14 @@ class QhullTest
 	      hull.setFromQhull (pnts, pnts.length/3, /*triangulated=*/true);
 
 	      if (!hull.check(System.out))
-	       { //System.out.println ("failed for qhull triangulated");
+	       { //com.neuronrobotics.sdk.common.Log.error ("failed for qhull triangulated");
 	       }
 
 //	      hull = new QuickHull3D ();
 	      hull.setFromQhull (pnts, pnts.length/3, /*triangulated=*/false);
 
 	      if (!hull.check(System.out))
-	       { //System.out.println ("failed for qhull regular");
+	       { //com.neuronrobotics.sdk.common.Log.error ("failed for qhull regular");
 	       }
 
 // 	      hull = new QuickHull3D ();
@@ -57,14 +57,14 @@ class QhullTest
 	      hull.triangulate();
 
  	      if (!hull.check(System.out))
- 	       { //System.out.println ("failed for QuickHull3D triangulated");
+ 	       { //com.neuronrobotics.sdk.common.Log.error ("failed for QuickHull3D triangulated");
  	       }
 
 // 	      hull = new QuickHull3D ();
 	      hull.build (pnts, pnts.length/3);
 
  	      if (!hull.check(System.out))
- 	       { //System.out.println ("failed for QuickHull3D regular");
+ 	       { //com.neuronrobotics.sdk.common.Log.error ("failed for QuickHull3D regular");
  	       }
 	    }
 	 }

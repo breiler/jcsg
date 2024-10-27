@@ -37,7 +37,7 @@ public class STLLoader {
 //                try {
 //                        sl.parse(stlfile);
 //                } catch (RuntimeException e) {
-//                        //System.out.println("error reading " + sl.name);
+//                        //com.neuronrobotics.sdk.common.Log.error("error reading " + sl.name);
 //                        throw e;
 //                }
 //                return sl.meshes;
@@ -89,7 +89,7 @@ public ArrayList<Point3f> parse(File f) throws IOException {
 	        String line = br.readLine();
 	        String[] words = line.trim().split("\\s+");
 	        if (line.indexOf('\0') < 0 && words[0].equalsIgnoreCase("solid")) {
-	            ////System.out.println("Looks like an ASCII STL");
+	            ////com.neuronrobotics.sdk.common.Log.error("Looks like an ASCII STL");
 	            parseAscii(f);
 	            br.close();
 	            return vertices;
@@ -106,11 +106,11 @@ public ArrayList<Point3f> parse(File f) throws IOException {
         triangles = (int) (((buffer[83] & 0xff) << 24)
                 | ((buffer[82] & 0xff) << 16) | ((buffer[81] & 0xff) << 8) | (buffer[80] & 0xff));
         if (((f.length() - 84) / 50) == triangles) {
-            ////System.out.println("Looks like a binary STL");
+            ////com.neuronrobotics.sdk.common.Log.error("Looks like a binary STL");
             parseBinary(f);
             return vertices;
         }
-        System.err.println("File is not a valid STL");
+        com.neuronrobotics.sdk.common.Log.error("File is not a valid STL");
         
         return vertices;
     }
