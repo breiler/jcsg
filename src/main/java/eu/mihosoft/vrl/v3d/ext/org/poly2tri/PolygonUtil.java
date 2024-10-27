@@ -168,8 +168,6 @@ public class PolygonUtil {
 			Vector3d v = concave.vertices.get(0).pos;
 			coordinates[0] = new Coordinate(v.x, v.y, zplane);
 			// use the default factory, which gives full double-precision
-			
-
 			Geometry geom = new GeometryFactory().createPolygon(coordinates);
 			triangles =  PolygonTriangulator.triangulate(geom);
 		} catch (Exception ex) {
