@@ -80,7 +80,9 @@ public class SVGLoadTest {
 			// extrudeLayerToCSG.setColor(Color.web(SVGExporter.colorNames.get(i)));
 			for(String key:extrudeLayerToCSG.keySet()) {
 				//System.out.println("Adding layer: "+key);
-				polys.add(CSG.unionAll(extrudeLayerToCSG.get(key)));
+				ArrayList<CSG> csgs = extrudeLayerToCSG.get(key);
+				if(csgs.size()>0)
+					polys.add(CSG.unionAll(csgs));
 //				for(CSG c:extrudeLayerToCSG.get(key)) {
 //					polys.add(c);
 //				}

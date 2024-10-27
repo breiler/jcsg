@@ -2413,6 +2413,8 @@ public class CSG implements IuserAPI {
 	}
 
 	public CSG setName(String name) {
+		if(name==null)
+			throw new NullPointerException();
 		this.name = name;
 		return this;
 	}
