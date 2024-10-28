@@ -171,7 +171,7 @@ public class PolygonUtil {
 			Geometry geom = new GeometryFactory().createPolygon(coordinates);
 			triangles =  PolygonTriangulator.triangulate(geom);
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			//ex.printStackTrace();
 			throw ex;
 		}
 

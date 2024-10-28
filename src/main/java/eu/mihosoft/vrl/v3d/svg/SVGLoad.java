@@ -312,7 +312,7 @@ public class SVGLoad {
 			if (SVGOMGElement.class.isInstance(item)) {
 
 				SVGOMGElement element = (SVGOMGElement) item;
-				loadGroup(element, resolution, startingFrame, null);
+				loadGroup(element, resolution, startingFrame, "TOP");
 			}
 			if (SVGOMPathElement.class.isInstance(item) || SVGOMImageElement.class.isInstance(item)) {
 				try {
@@ -710,7 +710,7 @@ public class SVGLoad {
 					}
 					parts.add(newbit);
 				} catch (Exception ex) {
-					ex.printStackTrace();
+					//ex.printStackTrace();
 				}
 			}
 		}
