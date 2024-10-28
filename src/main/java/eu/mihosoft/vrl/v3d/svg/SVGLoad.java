@@ -623,6 +623,8 @@ public class SVGLoad {
 
 	private void loadSingle(String code, double resolution, Transform startingFrame, String encapsulatingLayer,
 			Color c) {
+		if(encapsulatingLayer==null)
+			throw new RuntimeException("Layer Name can not be null");
 		// println code
 		BezierPath path = new BezierPath();
 		path.parsePathString(code);
