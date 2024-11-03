@@ -219,5 +219,7 @@ public class CSGDatabase {
 		CSGDatabase.dbFile = dbFile;
 		loadDatabaseFromFile(dbFile);
 	}
-
+	public static void reLoadDbFile() {
+		setDbFile(dbFile);
+	}
 }
