@@ -1,49 +1,28 @@
 name: "Test Build"
 
-on: [pull_request]
+on: [ pull_request ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository and submodules
-      uses: actions/checkout@v2
-      with:
-         submodules: recursive        
-        
-    - name: List directory contents
-      run: pwd; ls -la      
-      
-    - name: start xvfb
-      run:
-        Xvfb :0 &
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v3
 
-    - name: initialize the X11 DISPLAY variable
-      run:
-        export DISPLAY=:0
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-    - name: After checkout, list directory contnts
-      run: pwd; ls -la        
-    - name: Install libraries
-      run: |
-          sudo apt update
-          sudo apt install libgtk2.0-0
-          
-    - name: Pull a JavaFX JDK
-      run: wget http://static.azul.com/zulu/bin/zulu8.33.0.1-ca-fx-jdk8.0.192-linux_x64.tar.gz
+      - name: Start xvfb
+        run:
+          Xvfb :0 &
 
-    - name: After JDK download, list directory contnts
-      run: pwd; ls -la
+      - name: Initialize the X11 DISPLAY variable
+        run:
+          export DISPLAY=:0
 
-    - name: Set Java
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-        jdkFile: ./zulu8.33.0.1-ca-fx-jdk8.0.192-linux_x64.tar.gz
-
-      
-    - name: Test with Gradle 
-      run: xvfb-run -s '-screen 0 1024x768x24' ./gradlew test     
-  
-      
+      - name: Build and test
+        run: xvfb-run -s '-screen 0 1024x768x24' mvn clean install
