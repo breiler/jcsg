@@ -110,39 +110,52 @@ public class Plane {
 	    // First attempt: Newell's method
 	    Vector3d normal = new Vector3d(0, 0, 0);
 	    int n = vertices.size();
-
 	    for (int i = 0; i < n; i++) {
 	        Vector3d current = vertices.get(i).pos;
 	        Vector3d next = vertices.get((i + 1) % n).pos;
 
-	        normal.x += (current.y - next.y) * (current.z + next.z);
-	        normal.y += (current.z - next.z) * (current.x + next.x);
-	        normal.z += (current.x - next.x) * (current.y + next.y);
-	    }
+	        double d = current.z + next.z;
+	        double e = current.z - next.z;
+			double e2 = current.y - next.y;
+			double f = current.x + next.x;
+	        double f2 = current.x - next.x;
+			double g = current.y + next.y;
 
-	    if (isValidNormal(normal, EPSILON)) {
-	        return normal.normalized();
+			normal.x += e2 * d;
+			normal.y += e * f;
+			normal.z += f2 * g;
 	    }
+        Vector3d normalized = normal.normalized();
 
-	    // Second attempt: Find three non-colinear points
-	    normal = findNormalFromNonColinearPoints(vertices);
-	    if (normal != null) {
-	        return normal;
+	    if (isValidNormal(normalized, EPSILON)) {
+			return normalized;
 	    }
-
-	    // Third attempt: Find principal direction
-	    normal = findPrincipalDirection(vertices);
-	    if (normal != null) {
-	        return normal;
-	    }
-
-	    // Final fallback: Use statistical approach
-	    return determineStatisticalNormal(vertices);
+	    throw new RuntimeException("Mesh has problems, can not work around it");
+//	    // Second attempt: Find three non-colinear points
+//	   
+//	    normal = findNormalFromNonColinearPoints(vertices);
+//	    if (normal != null) {
+//	    	 System.err.println("findNormalFromNonColinearPoints ");
+//	        return normal;
+//	    }
+//	    // Third attempt: Find principal direction
+//	    normal = findPrincipalDirection(vertices);
+//	    if (normal != null) {
+//		    System.err.println("findPrincipalDirection ");
+//
+//	        return normal;
+//	    }
+//	    System.err.println("determineStatisticalNormal ");
+//	    // Final fallback: Use statistical approach
+//	    return determineStatisticalNormal(vertices);
 	}
 
 	private static boolean isValidNormal(Vector3d normal, double epsilon) {
-	    double lengthSquared = normal.lengthSquared();
-	    return lengthSquared >= epsilon * epsilon;
+		if(Double.isFinite(normal.x)&&Double.isFinite(normal.y)&&Double.isFinite(normal.z)) {
+	    double lengthSquared = Math.abs(normal.length());
+	    return lengthSquared >=  epsilon;
+		}
+		return false;
 	}
 
 	private static Vector3d findNormalFromNonColinearPoints(List<Vertex> vertices) {
@@ -408,9 +421,9 @@ public class Plane {
 			if (b.size() >= 3) {
 				try {
 					back.add(new Polygon(b, polygon.getStorage()).setColor(polygon.getColor()));
-				} catch (NumberFormatException ex) {
-					//ex.printStackTrace();
-					// skip adding broken polygon here
+				} catch (Exception ex) {
+					// ex.printStackTrace();
+					System.err.println("Pruning bad polygon Plane::splitPolygon");
 				}
 			} else {
 				//com.neuronrobotics.sdk.common.Log.error("Back Clip Fault!");

@@ -1,7 +1,5 @@
 package eu.mihosoft.vrl.v3d.thumbnail;
 
-
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -37,9 +35,9 @@ public class ThumbnailImage {
 		Vector3d min = null;
 		Vector3d max = null;
 		for (CSG c : incoming) {
-			if(c.isHide())
+			if (c.isHide())
 				continue;
-			if(c.isInGroup())
+			if (c.isInGroup())
 				continue;
 			Vector3d min2 = c.getBounds().getMin().clone();
 			Vector3d max2 = c.getBounds().getMax().clone();
@@ -60,19 +58,19 @@ public class ThumbnailImage {
 			if (max.z < max2.z)
 				max.z = max2.z;
 		}
-		if(max==null)
-			max=new Vector3d(0,0,0);
-		if(min==null)
-			min=new Vector3d(0,0,0);
+		if (max == null)
+			max = new Vector3d(0, 0, 0);
+		if (min == null)
+			min = new Vector3d(0, 0, 0);
 		return new Bounds(min, max);
 	}
 
 	public static WritableImage get(List<CSG> c) {
-		ArrayList<CSG> csgList=new ArrayList<CSG>() ;
-		for(CSG cs:c) {
-			if(cs.getManipulator()!=null) {
+		ArrayList<CSG> csgList = new ArrayList<CSG>();
+		for (CSG cs : c) {
+			if (cs.getManipulator() != null) {
 				csgList.add(cs.transformed(TransformConverter.fromAffine(cs.getManipulator())).syncProperties(cs));
-			}else
+			} else
 				csgList.add(cs);
 		}
 		// Create a group to hold all the meshes
@@ -81,13 +79,13 @@ public class ThumbnailImage {
 		// Add all meshes to the group
 		Bounds b = getSellectedBounds(csgList);
 
-		double yOffset = (b.getMax().y-b.getMin().y)/2;
-		double xOffset =(b.getMax().x -b.getMin().x)/2;
-		double zCenter = (b.getMax().z -b.getMin().z)/2;
+		double yOffset = (b.getMax().y - b.getMin().y) / 2;
+		double xOffset = (b.getMax().x - b.getMin().x) / 2;
+		double zCenter = (b.getMax().z - b.getMin().z) / 2;
 		for (CSG csg : csgList) {
-			if(csg.isHide())
+			if (csg.isHide())
 				continue;
-			if(csg.isInGroup())
+			if (csg.isInGroup())
 				continue;
 			MeshView meshView = csg.movez(-zCenter).getMesh();
 			if (csg.isHole()) {
@@ -111,7 +109,7 @@ public class ThumbnailImage {
 
 		// Calculate camera position to fit all objects in view
 		double maxDimension = Math.max(totalx, Math.max(totaly, totalz));
-		double cameraDistance = (maxDimension / Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))*0.8 ;
+		double cameraDistance = (maxDimension / Math.tan(Math.toRadians(camera.getFieldOfView() / 2))) * 0.8;
 
 //		TransformNR camoffset = new TransformNR(xOffset, yOffset, 0);
 //		TransformNR camDist = new TransformNR(0, 0, -cameraDistance);
@@ -120,18 +118,17 @@ public class ThumbnailImage {
 //		Affine af = TransformFactory.nrToAffine(camoffset.times(rot.times(camDist)));
 		Affine camDist = new Affine();
 		camDist.setTz(-cameraDistance);
-		Rotate rot1 =new Rotate(45, Rotate.Z_AXIS);
-		Rotate rot2 =new Rotate(-150, Rotate.Y_AXIS);
+		Rotate rot1 = new Rotate(45, Rotate.Z_AXIS);
+		Rotate rot2 = new Rotate(-150, Rotate.Y_AXIS);
 		Affine camoffset = new Affine();
 		camoffset.setTx(xOffset);
 		camoffset.setTy(yOffset);
-		camera.getTransforms().add(camoffset );
-		camera.getTransforms().add(rot2 );
-		camera.getTransforms().add(rot1 );
-		camera.getTransforms().add(camDist );
+		camera.getTransforms().add(camoffset);
+		camera.getTransforms().add(rot2);
+		camera.getTransforms().add(rot1);
+		camera.getTransforms().add(camDist);
 		//
-		
-		
+
 		// Position the camera
 //	    camera.setTranslateX();
 //	    camera.setTranslateY();
@@ -154,9 +151,8 @@ public class ThumbnailImage {
 		params.setDepthBuffer(true);
 		params.setTransform(Transform.scale(1, 1));
 		// Set the near and far clip
-		camera.setNearClip(0.1);  // Set the near clip plane
-		camera.setFarClip(9000.0);  // Set the far clip plane
-
+		camera.setNearClip(0.1); // Set the near clip plane
+		camera.setFarClip(9000.0); // Set the far clip plane
 
 		// Create the WritableImage first
 		WritableImage snapshot = new WritableImage(i, i);
@@ -165,30 +161,37 @@ public class ThumbnailImage {
 
 		return snapshot;
 	}
-	
+
+	public static Thread writeImage(CSG incoming, File toPNG) {
+		ArrayList<CSG> bits = new ArrayList<CSG>();
+		bits.add(incoming);
+		return writeImage(bits, toPNG);
+	}
+
 	public static Thread writeImage(ArrayList<CSG> incoming, File toPNG) {
-		Thread t= new Thread(new Runnable() {
-			WritableImage img=null;
+		Thread t = new Thread(new Runnable() {
+			WritableImage img = null;
+
 			@Override
 			public void run() {
-					File image = toPNG;
-					javafx.application.Platform.runLater(() -> img=ThumbnailImage.get(incoming));
-					while (img == null)
-						try {
-							Thread.sleep(16);
-							// com.neuronrobotics.sdk.common.Log.error("Waiting for image to write");
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-							break;
-						}
-					BufferedImage bufferedImage = SwingFXUtils.fromFXImage(img, null);
-					
+				File image = toPNG;
+				javafx.application.Platform.runLater(() -> img = ThumbnailImage.get(incoming));
+				while (img == null)
 					try {
-						ImageIO.write(bufferedImage, "png", image);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+						Thread.sleep(16);
+						// com.neuronrobotics.sdk.common.Log.error("Waiting for image to write");
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						break;
 					}
+				BufferedImage bufferedImage = SwingFXUtils.fromFXImage(img, null);
+
+				try {
+					ImageIO.write(bufferedImage, "png", image);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		});
 		t.setUncaughtExceptionHandler((thread, throwable) -> {
