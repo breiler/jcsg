@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>jcsg</artifactId>
+        <groupId>com.breiler.jcsg</groupId>
+        <version>${revision}${changelist}</version>
+    </parent>
+
+    <name>jcsg-core</name>
+    <artifactId>jcsg-core</artifactId>
+
+    <description>A Java based CSG Cad library</description>
+    <url>https://github.com/breiler/jcsg</url>
+    <scm>
+        <url>git@github.com:breiler/jcsg.git</url>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>Apache-2.0</name>
+            <comments>The Apache License, Version 2.0</comments>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Joacim Breiler</name>
+            <email>joacim@breiler.com</email>
+        </developer>
+    </developers>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.vecmath</groupId>
+            <artifactId>vecmath</artifactId>
+            <version>${vecmath.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.locationtech.jts</groupId>
+            <artifactId>jts-core</artifactId>
+            <version>${jts.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+    </dependencies>
+</project>

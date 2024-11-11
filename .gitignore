@@ -1,4 +1,5 @@
 /build/
+/target/
 /bin/
 .project
 .classpath
@@ -33,3 +34,10 @@ html
 /SVGExportTest4.svg
 /SVGExportTest5.svg
 /box.svg.png
+/jcsg-svg/*.png
+/jcsg-svg/*.svg
+/jcsg/*.stl
+.flattened-pom.xml
+dependency-reduced-pom.xml
+target/
+build/
