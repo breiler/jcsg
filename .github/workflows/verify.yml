@@ -16,5 +16,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Start xvfb
+        run:
+          Xvfb :0 &
+
+      - name: Initialize the X11 DISPLAY variable
+        run:
+          export DISPLAY=:0
+
       - name: Build and test
-        run: mvn clean install
+        run: xvfb-run -s '-screen 0 1024x768x24' mvn clean install
