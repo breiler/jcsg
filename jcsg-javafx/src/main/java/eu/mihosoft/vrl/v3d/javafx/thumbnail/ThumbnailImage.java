@@ -1,4 +1,4 @@
-package eu.mihosoft.vrl.v3d.javafx.thumbnail;
+package eu.mihosoft.vrl.v3d.thumbnail;
 
 
 
@@ -13,7 +13,6 @@ import javax.imageio.ImageIO;
 import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Vector3d;
-import eu.mihosoft.vrl.v3d.javafx.Mesh;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
@@ -27,7 +26,9 @@ import javafx.scene.transform.Transform;
 import javafx.scene.PerspectiveCamera;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.transform.Affine;
+import javafx.scene.transform.Transform;
 import javafx.scene.transform.Rotate;
+import javafx.geometry.Rectangle2D;
 
 public class ThumbnailImage {
 	private static CullFace cullFaceValue = CullFace.BACK;
@@ -69,9 +70,8 @@ public class ThumbnailImage {
 	public static WritableImage get(List<CSG> c) {
 		ArrayList<CSG> csgList=new ArrayList<CSG>() ;
 		for(CSG cs:c) {
-			Mesh mesh = new Mesh(cs);
-			if(mesh.getManipulator()!=null) {
-				csgList.add(cs.transformed(TransformConverter.fromAffine(mesh.getManipulator())).syncProperties(cs));
+			if(cs.getManipulator()!=null) {
+				csgList.add(cs.transformed(TransformConverter.fromAffine(cs.getManipulator())).syncProperties(cs));
 			}else
 				csgList.add(cs);
 		}
@@ -89,7 +89,7 @@ public class ThumbnailImage {
 				continue;
 			if(csg.isInGroup())
 				continue;
-			MeshView meshView = new Mesh(csg.movez(-zCenter)).getMesh();
+			MeshView meshView = csg.movez(-zCenter).getMesh();
 			if (csg.isHole()) {
 				PhongMaterial material = new PhongMaterial();
 				material.setDiffuseColor(new Color(0.25, 0.25, 0.25, 0.75));
