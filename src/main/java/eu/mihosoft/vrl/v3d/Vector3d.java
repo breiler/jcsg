@@ -447,26 +447,6 @@ public class Vector3d extends javax.vecmath.Vector3d{
         return hash;
     }
 
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (obj == null) {
-//            return false;
-//        }
-//        if (getClass() != obj.getClass()) {
-//            return false;
-//        }
-//        final Vector3d other = (Vector3d) obj;
-//        if (Double.doubleToLongBits(this.x) != Double.doubleToLongBits(other.x)) {
-//            return false;
-//        }
-//        if (Double.doubleToLongBits(this.y) != Double.doubleToLongBits(other.y)) {
-//            return false;
-//        }
-//        if (Double.doubleToLongBits(this.z) != Double.doubleToLongBits(other.z)) {
-//            return false;
-//        }
-//        return true;
-//    }
     /**
  * Creates a new vector with specified {@code x}.
  *
