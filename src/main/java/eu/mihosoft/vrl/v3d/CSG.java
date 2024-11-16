@@ -2733,6 +2733,13 @@ public class CSG implements IuserAPI {
 	}
 	public static CSG text(String text, double height, double fontSize, String fontType) {
 		javafx.scene.text.Font font = new javafx.scene.text.Font(fontType,  fontSize);
+    	if(!font.getName().toLowerCase().contains(fontType.toLowerCase())) {
+    		String options = "";
+    		for(String name : javafx.scene.text.Font.getFontNames() ) {
+    			options+=name+"\n";
+    		}
+    		new Exception(options).printStackTrace();
+    	}
 		ArrayList<CSG> stuff = TextExtrude.text(height,text,font);
 		CSG back =null;
 		for(int i=0;i<stuff.size();i++) {
