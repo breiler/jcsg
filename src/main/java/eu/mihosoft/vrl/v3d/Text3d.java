@@ -45,7 +45,7 @@ import javafx.scene.text.Font;
 public class Text3d extends Primitive {
 
     private final PropertyStorage properties = new PropertyStorage();
-    ArrayList<CSG> letters;
+    private final ArrayList<CSG> letters = new ArrayList<CSG>();
     /**
      * Constructor.
      * 
@@ -76,9 +76,17 @@ public class Text3d extends Primitive {
     public Text3d(String text, String fontName, double fontSize, double depth) {
 
     	Font font = new Font(fontName,  (int) fontSize);
-    	letters = TextExtrude.text( depth,  text,  font);
-    	for (int i=0;i<letters.size();i++){
-    		letters.set(i, letters.get(i)
+    	if(!font.getName().toLowerCase().contains(fontName.toLowerCase())) {
+    		String options = "";
+    		for(String name : javafx.scene.text.Font.getFontNames() ) {
+    			options+=name+"\n";
+    		}
+    		new Exception(options).printStackTrace();
+    	}
+    	ArrayList<CSG> tmp = TextExtrude.text( depth,  text,  font);
+    	letters.clear();
+    	for (int i=0;i<tmp.size();i++){
+    		letters.add( tmp.get(i)
     				.rotx(180)
     				.toZMin()
     				);
@@ -89,7 +97,11 @@ public class Text3d extends Primitive {
 
     @Override
     public List<Polygon> toPolygons() {
-    	return letters.get(0).union(letters).getPolygons();
+    	List<Polygon> poly =new ArrayList<Polygon>();
+    	for(CSG c:letters) {
+    		poly.addAll(c.getPolygons());
+    	}
+    	return poly;
     }
 
     @Override
