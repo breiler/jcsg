@@ -54,7 +54,7 @@ public class Vector3d extends javax.vecmath.Vector3d{
 
     private static  String exportString = "%.16f";
 
-	private static  double EXPORTEPSILON =Plane.EPSILON*10;
+	private static  double EXPORTEPSILON =10;
 
 	/**
 	 * 
@@ -663,7 +663,7 @@ public class Vector3d extends javax.vecmath.Vector3d{
 	}
 
 	public static double getEXPORTEPSILON() {
-		return EXPORTEPSILON;
+		return Plane.EPSILON*EXPORTEPSILON;
 	}
 
 	public static void setEXPORTEPSILON(double eXPORTEPSILON) {
