@@ -100,7 +100,7 @@ public class Extrude {
 				Vector3d bottomV2 = polygon1.vertices.get(nexti).pos;
 				Vector3d topV2 = polygon2.vertices.get(nexti).pos;
 				double distance = bottomV1.minus(bottomV2).magnitude();
-				if(Math.abs(distance)<Plane.EPSILON) {
+				if(Math.abs(distance)<Plane.getEPSILON()) {
 					//com.neuronrobotics.sdk.common.Log.error("Skipping invalid polygon "+i+" to "+nexti);
 					continue;
 				}

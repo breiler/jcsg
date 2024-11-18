@@ -52,9 +52,9 @@ public class Plane {
 	 * 0.00000001;
 	 */
 
-	public static final double EPSILON = 1.0e-11;
-	public static final double EPSILON_Point = EPSILON;
-	public static final double EPSILON_duplicate = 1.0e-4;
+	public static double EPSILON = 1.0e-9;
+	public static double EPSILON_Point = getEPSILON();
+	public static double EPSILON_duplicate = 1.0e-4;
 	/**
 	 * XY plane.
 	 */
@@ -122,12 +122,12 @@ public class Plane {
 			normal.z += (current.x - next.x) * (current.y + next.y);
 			if (n >= 3) {
 				Vector3d normalized = normal.normalized();
-				if (isValidNormal(normalized, EPSILON / 10)) {
+				if (isValidNormal(normalized, getEPSILON() / 10)) {
 					lastValid = normalized;
 				}
 			}
 		}
-		if (isValidNormal(lastValid, EPSILON / 10)) {
+		if (isValidNormal(lastValid, getEPSILON() / 10)) {
 			return lastValid;
 		}
 		throw new RuntimeException("Mesh has problems, can not work around it");
@@ -168,7 +168,7 @@ public class Plane {
 			for (int j = i + 1; j < n; j++) {
 				Vector3d v2 = vertices.get(j).pos.minus(firstPoint);
 				Vector3d cross = v1.cross(v2);
-				if (isValidNormal(cross, EPSILON)) {
+				if (isValidNormal(cross, getEPSILON())) {
 					return cross.normalized();
 				}
 			}
@@ -339,19 +339,19 @@ public class Plane {
 //        	debugger.display(back);
 		}
 		// search for the epsilon values of the incoming plane
-		double negEpsilon = -Plane.EPSILON;
-		double posEpsilon = Plane.EPSILON;
+		double negEpsilon = -Plane.getEPSILON();
+		double posEpsilon = Plane.getEPSILON();
 		for (int i = 0; i < polygon.vertices.size(); i++) {
 			double t = polygon.plane.getNormal().dot(polygon.vertices.get(i).pos) - polygon.plane.getDist();
 			if (t > posEpsilon) {
 				// com.neuronrobotics.sdk.common.Log.error("Non flat polygon, increasing
 				// positive epsilon "+t);
-				posEpsilon = t + Plane.EPSILON;
+				posEpsilon = t + Plane.getEPSILON();
 			}
 			if (t < negEpsilon) {
 				// com.neuronrobotics.sdk.common.Log.error("Non flat polygon, decreasing
 				// negative epsilon "+t);
-				negEpsilon = t - Plane.EPSILON;
+				negEpsilon = t - Plane.getEPSILON();
 			}
 		}
 		int polygonType = 0;
@@ -476,5 +476,13 @@ public class Plane {
 			// numberFormatException.printStackTrace();
 			throw numberFormatException;
 		}
+	}
+
+	public static double getEPSILON() {
+		return EPSILON;
+	}
+
+	public static void setEPSILON(double ePSILON) {
+		EPSILON = ePSILON;
 	}
 }

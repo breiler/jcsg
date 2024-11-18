@@ -175,7 +175,7 @@ public class BezierPath {
 
 	private boolean setThePoint(Vector3d eval) {
 		for(Vector3d v:plInternal) {
-			if(Math.abs(v.minus(eval).magnitude())<Plane.EPSILON)
+			if(Math.abs(v.minus(eval).magnitude())<Plane.getEPSILON())
 				return false;
 		}
 		return plInternal.add(eval);

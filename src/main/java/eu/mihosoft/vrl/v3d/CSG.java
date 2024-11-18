@@ -161,7 +161,7 @@ public class CSG implements IuserAPI {
 	private boolean triangulated;
 	private static boolean needsDegeneratesPruned = false;
 	private static boolean useStackTraces = true;
-	private static boolean preventNonManifoldTriangles = true;
+	private static boolean preventNonManifoldTriangles = false;
 
 	private static ICSGProgress progressMoniter = new ICSGProgress() {
 		@Override
@@ -1532,7 +1532,7 @@ public class CSG implements IuserAPI {
 									continue;
 								// if the point is on the line then we have a non manifold point
 								// it needs to be inserted into the polygon between the 2 points defined in the edge
-								if (e.contains(vi.pos, Plane.EPSILON)) {
+								if (e.contains(vi.pos, Plane.getEPSILON())) {
 									// System.out.println("Inserting point "+vi);
 									vert.add(next, vi);
 									totalAdded++;
