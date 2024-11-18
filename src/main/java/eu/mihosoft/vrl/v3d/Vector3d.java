@@ -37,6 +37,8 @@ import static java.lang.Math.abs;
 import static java.lang.Math.acos;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+
+import java.math.BigDecimal;
 import java.util.Random;
 
 import com.google.gson.annotations.Expose;
@@ -50,7 +52,9 @@ import com.google.gson.annotations.Expose;
 public class Vector3d extends javax.vecmath.Vector3d{
     
 
-    /**
+    private static final double EXPORTEPSILON = 1.0e-10;
+
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1878117798187075166L;
@@ -314,11 +318,20 @@ public class Vector3d extends javax.vecmath.Vector3d{
      * @return the specified string builder
      */
     public StringBuilder toStlString(StringBuilder sb) {
-        return sb.append(this.x).append(" ").
-                append(this.y).append(" ").
-                append(this.z);
+        double ep = EXPORTEPSILON;
+		return sb.append(roundedValue(x, ep)).append(" ").
+                append(roundedValue(y, ep)).append(" ").
+                append(roundedValue(z, ep));
     }
 
+    
+    public Vector3d roundToEpsilon(double ep) {
+    	x=roundToEpsilon(x, ep);
+    	y=roundToEpsilon(y, ep);
+    	z=roundToEpsilon(z,ep);
+    	return this;
+    }
+    
     /**
      * Returns this vector in OBJ string format.
      *
@@ -335,10 +348,24 @@ public class Vector3d extends javax.vecmath.Vector3d{
      * @return the specified string builder
      */
     public StringBuilder toObjString(StringBuilder sb) {
-        return sb.append(this.x).append(" ").
-                append(this.y).append(" ").
-                append(this.z);
+        double ep = EXPORTEPSILON;
+		return sb.append(roundedValue(x, ep)).append(" ").
+                append(roundedValue(y, ep)).append(" ").
+                append(roundedValue(z, ep));
     }
+    /**
+     * Rounds a double value to the nearest multiple of epsilon.
+     * 
+     * @param value The value to round
+     * @return The rounded value
+     */
+    private double roundToEpsilon(double value,double epsilon) {
+        // Round to nearest multiple of epsilon
+        return ((double)Math.round(value / epsilon)) * epsilon;
+    }
+	private String roundedValue(double v,double ep) {
+		return String.format("%.16f", roundToEpsilon(v,ep));
+	}
 
     /**
      * Applies the specified transformation to this vector.

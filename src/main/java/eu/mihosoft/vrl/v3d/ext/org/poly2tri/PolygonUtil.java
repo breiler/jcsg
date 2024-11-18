@@ -113,14 +113,47 @@ public class PolygonUtil {
 		boolean reorent = normalOfPlane.z < 1.0 - Plane.EPSILON;
 		Transform orentationInv = null;
 		boolean debug = false;
+		Vector3d normal = concave.plane.getNormal().clone();
+
 		if (reorent) {
+			//System.err.println("\n\nIncoming polygon " + incoming);
+//			reorent=true;
+//			double degreesToRotate = Math.toDegrees(Math.atan2(normalOfPlane.x, normalOfPlane.z));
+//			Transform orentation = new Transform().roty(degreesToRotate);
+//			Transform orentation_inv = new Transform().roty(-degreesToRotate);
+//
+//			Polygon tmp = incoming.transformed(orentation);
+//			//System.err.println("StInvage 1 polygon "+tmp);
+//			Vector3d tmpNorm = tmp.plane.getNormal();
+//			double degreesToRotate2 =  Math.toDegrees(Math.atan2( tmpNorm.y,tmpNorm.z));
+//			Transform rotx = new Transform().rotx(degreesToRotate2);
+//			Transform rotx_inv= new Transform().rotx(-degreesToRotate2);
+//
+//			Transform orentation2 =rotx.apply(orentation );// th triangulation function needs
+//			// the polygon on the xy plane
+//			if (debug) {
+//				Debug3dProvider.clearScreen();
+//				Debug3dProvider.addObject(incoming);
+//			}
+//			concave = incoming.transformed(orentation2);
+//			System.err.println("NormalAdjusted polygon "+concave);
+//			if (concave.plane.getNormal().z < 0) {
+//				Transform rotx2 = new Transform().rotx(180);
+//				Transform rotx2_inv = new Transform().rotx(180);
+//
+//				orentation2 = rotx2.apply(orentation2);
+//				concave = incoming.transformed(orentation2);
+//				System.err.println("Flipping Reorenting polygon "+concave);
+//
+//			}
+//			orentationInv  =orentation2.invert();
 			double degreesToRotate = Math.toDegrees(Math.atan2(normalOfPlane.x, normalOfPlane.z));
 			Transform orentation = new Transform().roty(degreesToRotate);
 
 			Polygon tmp = incoming.transformed(orentation);
 
-			Vector3d normal = tmp.plane.getNormal();
-			double degreesToRotate2 = 90 + Math.toDegrees(Math.atan2(normal.z, normal.y));
+			Vector3d tmpnorm = tmp.plane.getNormal();
+			double degreesToRotate2 = 90 + Math.toDegrees(Math.atan2(tmpnorm.z, tmpnorm.y));
 			Transform orentation2 = orentation.rotx(degreesToRotate2);// th triangulation function needs
 			// the polygon on the xy plane
 			if (debug) {
@@ -134,12 +167,16 @@ public class PolygonUtil {
 				concave = incoming.transformed(orentation3);
 				orentationInv = orentation3.inverse();
 			}
+			//System.err.println("Re-orenting polygon " + concave);
+			Polygon transformed = concave.transformed(orentationInv);
+			//System.err.println("corrected-orenting polygon " + transformed);
+			checkForValidPolyOrentation(normal, transformed);
+
 		}
 
-		Vector3d normal = concave.plane.getNormal().clone();
-
 		boolean cw = !Extrude.isCCW(concave);
-		// concave = Extrude.toCCW(concave);
+		if (cw)
+			concave = Extrude.toCCW(concave);
 		if (debug) {
 			Debug3dProvider.clearScreen();
 			Debug3dProvider.addObject(concave);
@@ -149,30 +186,13 @@ public class PolygonUtil {
 		double zplane = concave.vertices.get(0).pos.z;
 
 		try {
-			Coordinate[] coordinates = new Coordinate[concave.vertices.size() + 1];
-			for (int i = 0; i < concave.vertices.size(); i++) {
-				Vector3d v = concave.vertices.get(i).pos;
-				coordinates[i] = new Coordinate(v.x, v.y, zplane);
-			}
-			Vector3d v = concave.vertices.get(0).pos;
-			coordinates[concave.vertices.size()] = new Coordinate(v.x, v.y, zplane);
-			// use the default factory, which gives full double-precision
-			Geometry geom = new GeometryFactory().createPolygon(coordinates);
-			triangles = ConstrainedDelaunayTriangulator.triangulate(geom);
-		} catch (java.lang.IllegalStateException e) {
-			Coordinate[] coordinates = new Coordinate[concave.vertices.size() + 1];
-			for (int i = 0; i < concave.vertices.size(); i++) {
-				Vector3d v = concave.vertices.get(i).pos;
-				coordinates[coordinates.length-i-1] = new Coordinate(v.x, v.y, zplane);
-			}
-			Vector3d v = concave.vertices.get(0).pos;
-			coordinates[0] = new Coordinate(v.x, v.y, zplane);
-			// use the default factory, which gives full double-precision
-			Geometry geom = new GeometryFactory().createPolygon(coordinates);
-			triangles =  PolygonTriangulator.triangulate(geom);
-		} catch (Exception ex) {
-			//ex.printStackTrace();
-			throw ex;
+			triangles = makeTriangles(concave, cw);
+		} catch (java.lang.IllegalStateException ex) {
+			List<Vector3d> points = concave.getPoints();
+			List<Vector3d> r = new ArrayList<>(points);
+			Collections.reverse(r);
+			concave = Polygon.fromPoints(r);
+			triangles = makeTriangles(concave, cw);
 		}
 
 		ArrayList<Vertex> triPoints = new ArrayList<>();
@@ -197,7 +217,7 @@ public class PolygonUtil {
 					poly.plane.setNormal(concave.plane.getNormal());
 					boolean b = !Extrude.isCCW(poly);
 					if (cw != b) {
-						// //com.neuronrobotics.sdk.common.Log.error("Triangle not matching incoming");
+						// System.err.println("Triangle not matching incoming");
 						Collections.reverse(triPoints);
 						poly = new Polygon(triPoints, concave.getStorage(), true);
 						b = !Extrude.isCCW(poly);
@@ -213,8 +233,10 @@ public class PolygonUtil {
 
 					if (reorent) {
 						poly = poly.transform(orentationInv);
+
+						poly=checkForValidPolyOrentation(normal, poly);
 					}
-					poly.plane.setNormal(normalOfPlane);
+					// poly.plane.setNormal(normalOfPlane);
 					poly.setColor(incoming.getColor());
 					result.add(poly);
 					counter = 0;
@@ -226,6 +248,40 @@ public class PolygonUtil {
 		}
 
 		return result;
+	}
+
+	private static Polygon checkForValidPolyOrentation(Vector3d normal, Polygon poly) {
+		Vector3d normal2 = poly.plane.getNormal();
+		Vector3d minus = normal.minus(normal2);
+		double length = minus.length();
+		double d = 1.0e-3;
+		if (length > d * 10 && length < (2 - d)) {
+			List<Vector3d> points = poly.getPoints();
+			List<Vector3d> r = new ArrayList<>(points);
+			Collections.reverse(r);
+			poly = Polygon.fromPoints(r);
+		//	throw new RuntimeException("Error, the reorentation of the polygon resulted in a different normal than the triangles produced from it");
+		}
+		return poly;
+	}
+
+	private static Geometry makeTriangles(Polygon concave, boolean cw) {
+		Geometry triangles;
+		Polygon toTri = concave;
+//	if(cw) {
+//		toTri=Extrude.toCCW(concave);
+//	}
+		Coordinate[] coordinates = new Coordinate[toTri.vertices.size() + 1];
+		for (int i = 0; i < toTri.vertices.size(); i++) {
+			Vector3d v = toTri.vertices.get(i).pos;
+			coordinates[i] = new Coordinate(v.x, v.y, v.z);
+		}
+		Vector3d v = toTri.vertices.get(0).pos;
+		coordinates[toTri.vertices.size()] = new Coordinate(v.x, v.y, v.z);
+		// use the default factory, which gives full double-precision
+		Geometry geom = new GeometryFactory().createPolygon(coordinates);
+		triangles = ConstrainedDelaunayTriangulator.triangulate(geom);
+		return triangles;
 	}
 
 //	/**

@@ -52,7 +52,7 @@ public class Plane {
 	 * 0.00000001;
 	 */
 
-	public static final double EPSILON = 1.0e-9;
+	public static final double EPSILON = 1.0e-11;
 	public static final double EPSILON_Point = EPSILON;
 	public static final double EPSILON_duplicate = 1.0e-4;
 	/**
@@ -102,35 +102,35 @@ public class Plane {
 		Vector3d n = computeNormal(vertices);
 		return new Plane(n, n.dot(a));
 	}
+
 	public static Vector3d computeNormal(List<Vertex> vertices) {
-	    if (vertices == null || vertices.size() < 3) {
-	        return new Vector3d(0, 0, 1); // Default normal for degenerate cases
-	    }
+		if (vertices == null || vertices.size() < 3) {
+			return new Vector3d(0, 0, 1); // Default normal for degenerate cases
+		}
 
-	    // First attempt: Newell's method
-	    Vector3d normal = new Vector3d(0, 0, 0);
-	    int n = vertices.size();
-	    for (int i = 0; i < n; i++) {
-	        Vector3d current = vertices.get(i).pos;
-	        Vector3d next = vertices.get((i + 1) % n).pos;
+		// First attempt: Newell's method
+		Vector3d normal = new Vector3d(0, 0, 0);
+		int n = vertices.size();
+		Vector3d lastValid = null;
+		for (int i = 0; i < n; i++) {
+			Vector3d current = vertices.get(i).pos;
+			Vector3d next = vertices.get((i + 1) % n).pos;
 
-	        double d = current.z + next.z;
-	        double e = current.z - next.z;
-			double e2 = current.y - next.y;
-			double f = current.x + next.x;
-	        double f2 = current.x - next.x;
-			double g = current.y + next.y;
-
-			normal.x += e2 * d;
-			normal.y += e * f;
-			normal.z += f2 * g;
-	    }
-        Vector3d normalized = normal.normalized();
-
-	    if (isValidNormal(normalized, EPSILON)) {
-			return normalized;
-	    }
-	    throw new RuntimeException("Mesh has problems, can not work around it");
+			// Correct Newell's Method formulas
+			normal.x += (current.y - next.y) * (current.z + next.z); // (y1-y2)(z1+z2)
+			normal.y += (current.z - next.z) * (current.x + next.x); // (z1-z2)(x1+x2)
+			normal.z += (current.x - next.x) * (current.y + next.y);
+			if (n >= 3) {
+				Vector3d normalized = normal.normalized();
+				if (isValidNormal(normalized, EPSILON / 10)) {
+					lastValid = normalized;
+				}
+			}
+		}
+		if (isValidNormal(lastValid, EPSILON / 10)) {
+			return lastValid;
+		}
+		throw new RuntimeException("Mesh has problems, can not work around it");
 //	    // Second attempt: Find three non-colinear points
 //	   
 //	    normal = findNormalFromNonColinearPoints(vertices);
@@ -151,104 +151,102 @@ public class Plane {
 	}
 
 	private static boolean isValidNormal(Vector3d normal, double epsilon) {
-		if(Double.isFinite(normal.x)&&Double.isFinite(normal.y)&&Double.isFinite(normal.z)) {
-	    double lengthSquared = Math.abs(normal.length());
-	    return lengthSquared >=  epsilon;
+		if (Double.isFinite(normal.x) && Double.isFinite(normal.y) && Double.isFinite(normal.z)) {
+			double lengthSquared = Math.abs(normal.length());
+			return lengthSquared >= epsilon;
 		}
 		return false;
 	}
 
 	private static Vector3d findNormalFromNonColinearPoints(List<Vertex> vertices) {
-	    int n = vertices.size();
-	    Vector3d firstPoint = vertices.get(0).pos;
-	    
-	    // Try to find two vectors that aren't parallel
-	    for (int i = 1; i < n; i++) {
-	        Vector3d v1 = vertices.get(i).pos.minus(firstPoint);
-	        for (int j = i + 1; j < n; j++) {
-	            Vector3d v2 = vertices.get(j).pos.minus(firstPoint);
-	            Vector3d cross = v1.cross(v2);
-	            if (isValidNormal(cross, EPSILON)) {
-	                return cross.normalized();
-	            }
-	        }
-	    }
-	    return null;
+		int n = vertices.size();
+		Vector3d firstPoint = vertices.get(0).pos;
+
+		// Try to find two vectors that aren't parallel
+		for (int i = 1; i < n; i++) {
+			Vector3d v1 = vertices.get(i).pos.minus(firstPoint);
+			for (int j = i + 1; j < n; j++) {
+				Vector3d v2 = vertices.get(j).pos.minus(firstPoint);
+				Vector3d cross = v1.cross(v2);
+				if (isValidNormal(cross, EPSILON)) {
+					return cross.normalized();
+				}
+			}
+		}
+		return null;
 	}
 
 	private static Vector3d findPrincipalDirection(List<Vertex> vertices) {
-	    // Find the direction with maximum spread
-	    double maxX = Double.NEGATIVE_INFINITY;
-	    double minX = Double.POSITIVE_INFINITY;
-	    double maxY = Double.NEGATIVE_INFINITY;
-	    double minY = Double.POSITIVE_INFINITY;
-	    double maxZ = Double.NEGATIVE_INFINITY;
-	    double minZ = Double.POSITIVE_INFINITY;
-	    
-	    for (Vertex vertex : vertices) {
-	        Vector3d pos = vertex.pos;
-	        maxX = Math.max(maxX, pos.x);
-	        minX = Math.min(minX, pos.x);
-	        maxY = Math.max(maxY, pos.y);
-	        minY = Math.min(minY, pos.y);
-	        maxZ = Math.max(maxZ, pos.z);
-	        minZ = Math.min(minZ, pos.z);
-	    }
-	    
-	    double rangeX = maxX - minX;
-	    double rangeY = maxY - minY;
-	    double rangeZ = maxZ - minZ;
-	    
-	    // Use the axis with minimum spread as normal direction
-	    if (rangeX <= rangeY && rangeX <= rangeZ) {
-	        return new Vector3d(1, 0, 0);
-	    } else if (rangeY <= rangeX && rangeY <= rangeZ) {
-	        return new Vector3d(0, 1, 0);
-	    } else {
-	        return new Vector3d(0, 0, 1);
-	    }
+		// Find the direction with maximum spread
+		double maxX = Double.NEGATIVE_INFINITY;
+		double minX = Double.POSITIVE_INFINITY;
+		double maxY = Double.NEGATIVE_INFINITY;
+		double minY = Double.POSITIVE_INFINITY;
+		double maxZ = Double.NEGATIVE_INFINITY;
+		double minZ = Double.POSITIVE_INFINITY;
+
+		for (Vertex vertex : vertices) {
+			Vector3d pos = vertex.pos;
+			maxX = Math.max(maxX, pos.x);
+			minX = Math.min(minX, pos.x);
+			maxY = Math.max(maxY, pos.y);
+			minY = Math.min(minY, pos.y);
+			maxZ = Math.max(maxZ, pos.z);
+			minZ = Math.min(minZ, pos.z);
+		}
+
+		double rangeX = maxX - minX;
+		double rangeY = maxY - minY;
+		double rangeZ = maxZ - minZ;
+
+		// Use the axis with minimum spread as normal direction
+		if (rangeX <= rangeY && rangeX <= rangeZ) {
+			return new Vector3d(1, 0, 0);
+		} else if (rangeY <= rangeX && rangeY <= rangeZ) {
+			return new Vector3d(0, 1, 0);
+		} else {
+			return new Vector3d(0, 0, 1);
+		}
 	}
 
 	private static Vector3d determineStatisticalNormal(List<Vertex> vertices) {
-	    // Calculate center of mass
-	    Vector3d center = new Vector3d(0, 0, 0);
-	    for (Vertex vertex : vertices) {
-	        center = center.plus(vertex.pos);
-	    }
-	    center = center.times(1.0 / vertices.size());
-	    
-	    // Calculate covariance matrix
-	    double[][] covariance = new double[3][3];
-	    for (Vertex vertex : vertices) {
-	        Vector3d diff = vertex.pos.minus(center);
-	        covariance[0][0] += diff.x * diff.x;
-	        covariance[0][1] += diff.x * diff.y;
-	        covariance[0][2] += diff.x * diff.z;
-	        covariance[1][1] += diff.y * diff.y;
-	        covariance[1][2] += diff.y * diff.z;
-	        covariance[2][2] += diff.z * diff.z;
-	    }
-	    covariance[1][0] = covariance[0][1];
-	    covariance[2][0] = covariance[0][2];
-	    covariance[2][1] = covariance[1][2];
-	    
-	    // Use the eigenvector corresponding to the smallest eigenvalue
-	    // For simplicity, we'll use power iteration to find it
-	    Vector3d normal = new Vector3d(1, 1, 1);
-	    for (int i = 0; i < 10; i++) {
-	        normal = multiplyMatrixVector(covariance, normal);
-	        normal = normal.normalized();
-	    }
-	    
-	    return normal;
+		// Calculate center of mass
+		Vector3d center = new Vector3d(0, 0, 0);
+		for (Vertex vertex : vertices) {
+			center = center.plus(vertex.pos);
+		}
+		center = center.times(1.0 / vertices.size());
+
+		// Calculate covariance matrix
+		double[][] covariance = new double[3][3];
+		for (Vertex vertex : vertices) {
+			Vector3d diff = vertex.pos.minus(center);
+			covariance[0][0] += diff.x * diff.x;
+			covariance[0][1] += diff.x * diff.y;
+			covariance[0][2] += diff.x * diff.z;
+			covariance[1][1] += diff.y * diff.y;
+			covariance[1][2] += diff.y * diff.z;
+			covariance[2][2] += diff.z * diff.z;
+		}
+		covariance[1][0] = covariance[0][1];
+		covariance[2][0] = covariance[0][2];
+		covariance[2][1] = covariance[1][2];
+
+		// Use the eigenvector corresponding to the smallest eigenvalue
+		// For simplicity, we'll use power iteration to find it
+		Vector3d normal = new Vector3d(1, 1, 1);
+		for (int i = 0; i < 10; i++) {
+			normal = multiplyMatrixVector(covariance, normal);
+			normal = normal.normalized();
+		}
+
+		return normal;
 	}
 
 	private static Vector3d multiplyMatrixVector(double[][] matrix, Vector3d vector) {
-	    return new Vector3d(
-	        matrix[0][0] * vector.x + matrix[0][1] * vector.y + matrix[0][2] * vector.z,
-	        matrix[1][0] * vector.x + matrix[1][1] * vector.y + matrix[1][2] * vector.z,
-	        matrix[2][0] * vector.x + matrix[2][1] * vector.y + matrix[2][2] * vector.z
-	    );
+		return new Vector3d(matrix[0][0] * vector.x + matrix[0][1] * vector.y + matrix[0][2] * vector.z,
+				matrix[1][0] * vector.x + matrix[1][1] * vector.y + matrix[1][2] * vector.z,
+				matrix[2][0] * vector.x + matrix[2][1] * vector.y + matrix[2][2] * vector.z);
 	}
 //	public static Vector3d computeNormal(List<Vertex> vertices) {
 //		Vector3d normal = new Vector3d(0, 0, 0);
@@ -346,11 +344,13 @@ public class Plane {
 		for (int i = 0; i < polygon.vertices.size(); i++) {
 			double t = polygon.plane.getNormal().dot(polygon.vertices.get(i).pos) - polygon.plane.getDist();
 			if (t > posEpsilon) {
-				// com.neuronrobotics.sdk.common.Log.error("Non flat polygon, increasing positive epsilon "+t);
+				// com.neuronrobotics.sdk.common.Log.error("Non flat polygon, increasing
+				// positive epsilon "+t);
 				posEpsilon = t + Plane.EPSILON;
 			}
 			if (t < negEpsilon) {
-				// com.neuronrobotics.sdk.common.Log.error("Non flat polygon, decreasing negative epsilon "+t);
+				// com.neuronrobotics.sdk.common.Log.error("Non flat polygon, decreasing
+				// negative epsilon "+t);
 				negEpsilon = t - Plane.EPSILON;
 			}
 		}
@@ -411,12 +411,12 @@ public class Plane {
 			if (f.size() >= 3) {
 				try {
 					front.add(new Polygon(f, polygon.getStorage()).setColor(polygon.getColor()));
-				} catch (NumberFormatException ex) {
-					//ex.printStackTrace();
+				} catch (Exception ex) {
+					System.err.println("Pruning bad polygon Plane::splitPolygon");
 					// skip adding broken polygon here
 				}
 			} else {
-				//com.neuronrobotics.sdk.common.Log.error("Front Clip Fault!");
+				// com.neuronrobotics.sdk.common.Log.error("Front Clip Fault!");
 			}
 			if (b.size() >= 3) {
 				try {
@@ -426,7 +426,7 @@ public class Plane {
 					System.err.println("Pruning bad polygon Plane::splitPolygon");
 				}
 			} else {
-				//com.neuronrobotics.sdk.common.Log.error("Back Clip Fault!");
+				// com.neuronrobotics.sdk.common.Log.error("Back Clip Fault!");
 			}
 			break;
 		}

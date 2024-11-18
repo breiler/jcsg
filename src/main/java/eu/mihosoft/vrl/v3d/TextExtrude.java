@@ -200,9 +200,8 @@ public class TextExtrude {
 	}
 
 // Below is AI slop
-	private static final double CURVE_SEGMENTS = 6; // Number of segments to approximate curves
-	private static final double POINT_EPSILON = 0.0000001; // Distance threshold for considering points equal
-	private static final double SEGMENT_MIN_LENGTH = 0.0001; // Minimum length for line segments
+	private static final double CURVE_SEGMENTS = 3; // Number of segments to approximate curves
+	private static final double POINT_EPSILON = 0.0001; // Distance threshold for considering points equal
 
 	/**
 	 * Converts a JavaFX Text object into a list of cleaned vector lists
