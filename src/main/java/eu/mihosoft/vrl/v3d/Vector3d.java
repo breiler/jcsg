@@ -52,7 +52,9 @@ import com.google.gson.annotations.Expose;
 public class Vector3d extends javax.vecmath.Vector3d{
     
 
-    private static final double EXPORTEPSILON = 1.0e-10;
+    private static final String exportString = "%.16f";
+
+	private static final double EXPORTEPSILON = 1.0e-12;
 
 	/**
 	 * 
@@ -364,7 +366,7 @@ public class Vector3d extends javax.vecmath.Vector3d{
         return ((double)Math.round(value / epsilon)) * epsilon;
     }
 	private String roundedValue(double v,double ep) {
-		return String.format("%.16f", roundToEpsilon(v,ep));
+		return String.format(exportString, roundToEpsilon(v,ep));
 	}
 
     /**

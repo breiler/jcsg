@@ -116,7 +116,7 @@ public class PolygonUtil {
 		Vector3d normal = concave.plane.getNormal().clone();
 
 		if (reorent) {
-			//System.err.println("\n\nIncoming polygon " + incoming);
+			// System.err.println("\n\nIncoming polygon " + incoming);
 //			reorent=true;
 //			double degreesToRotate = Math.toDegrees(Math.atan2(normalOfPlane.x, normalOfPlane.z));
 //			Transform orentation = new Transform().roty(degreesToRotate);
@@ -167,9 +167,9 @@ public class PolygonUtil {
 				concave = incoming.transformed(orentation3);
 				orentationInv = orentation3.inverse();
 			}
-			//System.err.println("Re-orenting polygon " + concave);
+			// System.err.println("Re-orenting polygon " + concave);
 			Polygon transformed = concave.transformed(orentationInv);
-			//System.err.println("corrected-orenting polygon " + transformed);
+			// System.err.println("corrected-orenting polygon " + transformed);
 			checkForValidPolyOrentation(normal, transformed);
 
 		}
@@ -234,7 +234,7 @@ public class PolygonUtil {
 					if (reorent) {
 						poly = poly.transform(orentationInv);
 
-						poly=checkForValidPolyOrentation(normal, poly);
+						poly = checkForValidPolyOrentation(normal, poly);
 					}
 					// poly.plane.setNormal(normalOfPlane);
 					poly.setColor(incoming.getColor());
@@ -259,8 +259,15 @@ public class PolygonUtil {
 			List<Vector3d> points = poly.getPoints();
 			List<Vector3d> r = new ArrayList<>(points);
 			Collections.reverse(r);
-			poly = Polygon.fromPoints(r);
-		//	throw new RuntimeException("Error, the reorentation of the polygon resulted in a different normal than the triangles produced from it");
+			Polygon fromPoints = Polygon.fromPoints(r);
+			double l = normal.minus( fromPoints.plane.getNormal()).length();
+			if (l > d * 10 && l < (2 - d)) {
+//				throw new RuntimeException(
+//				"Error, the reorentation of the polygon resulted in a different normal than the triangles produced from it");
+			}else {
+				poly=fromPoints;
+
+			}
 		}
 		return poly;
 	}

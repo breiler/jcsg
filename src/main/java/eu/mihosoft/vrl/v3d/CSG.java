@@ -1663,8 +1663,8 @@ public class CSG implements IuserAPI {
 					toAdd.add(poly);
 				}
 			} catch (Throwable ex) {
-				ex.printStackTrace();
-				System.err.println("Pruning bad polygon CSG::updatePolygons "+p);
+				//ex.printStackTrace();
+				progressMoniter.progressUpdate(1,1,"Pruning bad polygon CSG::updatePolygons "+p,null);
 //				try {PolygonUtil.concaveToConvex(p);} catch (Throwable ex2) {
 //					ex2.printStackTrace();
 //				}

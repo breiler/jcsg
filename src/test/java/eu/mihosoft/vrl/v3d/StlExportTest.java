@@ -28,7 +28,7 @@ public class StlExportTest {
 		CSG loaded = STL.file(file.toPath());
 		System.out.println("Perform difference");
 		badExport=loaded.scaleToMeasurmentX(160).scaleToMeasurmentY(30);
-		badExport=new Cube(180,40,10).toCSG().toZMin().toXMin().toYMin().movey(-5).difference(badExport);
+		badExport=new Cube(180,40,10).toCSG().toZMin().toXMin().toYMin().movey(-5).difference(badExport).rotx(35).roty(45);
 		FileUtil.write(Paths.get("TextStl2.stl"),
 				badExport.toStlString());
 	}
