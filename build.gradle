@@ -110,6 +110,8 @@ dependencies {
 	
 	implementation 'com.google.code.gson:gson:2.5'
 	
+	implementation 'com.aparapi:aparapi:3.0.2'
+	
 }
 
 Date buildTimeAndDate = new Date()
