@@ -110,7 +110,7 @@ public class PolygonUtil {
 			return result;
 		Polygon concave = incoming;
 		Vector3d normalOfPlane = incoming.plane.getNormal();
-		boolean reorent = normalOfPlane.z < 1.0 - Plane.EPSILON;
+		boolean reorent = normalOfPlane.z < 1.0 - Plane.getEPSILON();
 		Transform orentationInv = null;
 		boolean debug = false;
 		Vector3d normal = concave.plane.getNormal().clone();

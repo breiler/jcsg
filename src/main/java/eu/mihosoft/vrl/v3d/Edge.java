@@ -596,7 +596,7 @@ public class Edge {
      * segment; <code>false</code> otherwise
      */
     public boolean contains(Vector3d p) {
-        return contains(p, Plane.EPSILON);
+        return contains(p, Plane.getEPSILON());
     }
 
     /* (non-Javadoc)
@@ -674,7 +674,7 @@ public class Edge {
         double cos = ourDir.dot(e.getDirection());
         double n = 1 - cos * cos;
 
-        if (n < Plane.EPSILON) {
+        if (n < Plane.getEPSILON()) {
             // the lines are parallel
             return Optional.empty();
         }

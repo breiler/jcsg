@@ -52,9 +52,9 @@ import com.google.gson.annotations.Expose;
 public class Vector3d extends javax.vecmath.Vector3d{
     
 
-    private static final String exportString = "%.16f";
+    private static  String exportString = "%.16f";
 
-	private static final double EXPORTEPSILON = 1.0e-12;
+	private static  double EXPORTEPSILON =10;
 
 	/**
 	 * 
@@ -320,7 +320,7 @@ public class Vector3d extends javax.vecmath.Vector3d{
      * @return the specified string builder
      */
     public StringBuilder toStlString(StringBuilder sb) {
-        double ep = EXPORTEPSILON;
+        double ep = getEXPORTEPSILON();
 		return sb.append(roundedValue(x, ep)).append(" ").
                 append(roundedValue(y, ep)).append(" ").
                 append(roundedValue(z, ep));
@@ -350,7 +350,7 @@ public class Vector3d extends javax.vecmath.Vector3d{
      * @return the specified string builder
      */
     public StringBuilder toObjString(StringBuilder sb) {
-        double ep = EXPORTEPSILON;
+        double ep = getEXPORTEPSILON();
 		return sb.append(roundedValue(x, ep)).append(" ").
                 append(roundedValue(y, ep)).append(" ").
                 append(roundedValue(z, ep));
@@ -366,7 +366,7 @@ public class Vector3d extends javax.vecmath.Vector3d{
         return ((double)Math.round(value / epsilon)) * epsilon;
     }
 	private String roundedValue(double v,double ep) {
-		return String.format(exportString, roundToEpsilon(v,ep));
+		return String.format(getExportString(), roundToEpsilon(v,ep));
 	}
 
     /**
@@ -653,5 +653,21 @@ public class Vector3d extends javax.vecmath.Vector3d{
 //		// TODO Auto-generated method stub
 //		return z;
 //	}
+
+	public static String getExportString() {
+		return exportString;
+	}
+
+	public static void setExportString(String exportString) {
+		Vector3d.exportString = exportString;
+	}
+
+	public static double getEXPORTEPSILON() {
+		return Plane.EPSILON*EXPORTEPSILON;
+	}
+
+	public static void setEXPORTEPSILON(double eXPORTEPSILON) {
+		EXPORTEPSILON = eXPORTEPSILON;
+	}
 
 }
