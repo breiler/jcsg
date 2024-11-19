@@ -52,6 +52,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.aparapi.Kernel;
+import com.aparapi.Range;
+import com.aparapi.device.Device;
 import com.neuronrobotics.interaction.CadInteractionEvent;
 
 import javafx.scene.paint.Color;
@@ -162,6 +165,7 @@ public class CSG implements IuserAPI {
 	private static boolean needsDegeneratesPruned = false;
 	private static boolean useStackTraces = true;
 	private static boolean preventNonManifoldTriangles = false;
+	private static boolean useGPU = false;
 
 	private static ICSGProgress progressMoniter = new ICSGProgress() {
 		@Override
@@ -1503,44 +1507,10 @@ public class CSG implements IuserAPI {
 		IDebug3dProvider start = Debug3dProvider.provider;
 		Debug3dProvider.setProvider(null);
 		if (preventNonManifoldTriangles) {
-			System.err.println("Cleaning up the mesh by adding coincident points to the polygons they touch");
-			int totalAdded = 0;
-			for (int j = 0; j < polygons.size(); j++) {
-				// Test every polygon
-				Polygon i = polygons.get(j);
-				if (j % 500 == 0 || j == polygons.size() - 1) {
-					// System.err.println("Checking "+j+" of "+polygons.size());
-					progressMoniter.progressUpdate(j, polygons.size(),
-							"STL Processing Polygons for Manifold Vertex, #" + totalAdded + " added so far", this);
-				}
-				for (Vertex vi : i.vertices) {
-					// each point in each polygon
-					for (Polygon ii : polygons) {
-						if (i != ii) {
-							// every other polygon besides this one being tested
-							ArrayList<Vertex> vert = ii.vertices;
-							for (int iii = 0; iii < vert.size(); iii++) {
-								// each point in the checking polygon
-								int now = iii;
-								int next = iii + 1;
-								if (next == vert.size())
-									next = 0;
-								// take the 2 points of this section of polygon to make an edge
-								Edge e = new Edge(vert.get(now), vert.get(next));
-								// if they are coincident, move along
-								if (e.isThisPointOneOfMine(vi))
-									continue;
-								// if the point is on the line then we have a non manifold point
-								// it needs to be inserted into the polygon between the 2 points defined in the edge
-								if (e.contains(vi.pos, Plane.getEPSILON())) {
-									// System.out.println("Inserting point "+vi);
-									vert.add(next, vi);
-									totalAdded++;
-								}
-							}
-						}
-					}
-				}
+			if (isUseGPU()) {
+				runGPUMakeManifold();
+			} else {
+				runCPUMakeManifold();
 			}
 		}
 		try {
@@ -1584,6 +1554,121 @@ public class CSG implements IuserAPI {
 		}
 		Debug3dProvider.setProvider(start);
 		return this;
+	}
+
+	private void runCPUMakeManifold() {
+		System.err.println("Cleaning up the mesh by adding coincident points to the polygons they touch");
+		int totalAdded = 0;
+		for (int j = 0; j < polygons.size(); j++) {
+			// Test every polygon
+			Polygon i = polygons.get(j);
+			if (j % 500 == 0 || j == polygons.size() - 1) {
+				// System.err.println("Checking "+j+" of "+polygons.size());
+				progressMoniter.progressUpdate(j, polygons.size(),
+						"STL Processing Polygons for Manifold Vertex, #" + totalAdded + " added so far", this);
+			}
+			ArrayList<Vertex> vertices = i.vertices;
+			
+			for (int k = 0; k < vertices.size(); k++) {
+				Vertex vi = vertices.get(k);
+				// each point in each polygon
+				// each point in the checking polygon
+				int now = k;
+				int next = k + 1;
+				if (next == vertices.size())
+					next = 0;
+				// take the 2 points of this section of polygon to make an edge
+				Edge e = new Edge(vertices.get(now), vertices.get(next));
+				for (Polygon ii : polygons) {
+					if (i != ii) {
+						// every other polygon besides this one being tested
+						ArrayList<Vertex> vert = ii.vertices;
+						for (int iii = 0; iii < vert.size(); iii++) {
+							Vertex viii = vertices.get(k);
+
+							// if they are coincident, move along
+							if (e.isThisPointOneOfMine(viii))
+								continue;
+							// if the point is on the line then we have a non manifold point
+							// it needs to be inserted into the polygon between the 2 points defined in the
+							// edge
+							if (e.contains(viii.pos, Plane.getEPSILON())) {
+								// System.out.println("Inserting point "+vi);
+								vertices.add(next, viii);
+								next++;
+								totalAdded++;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private void runGPUMakeManifold() {
+		int numberOfPoints = 0;
+		int roomForMore = 10;
+		int size = polygons.size();
+		for (int i = 0; i < size; i++) {
+			numberOfPoints += (polygons.get(i).vertices.size());
+		}
+		float[] pointData = new float[numberOfPoints * 3];
+		int[] startIndex = new int[size];
+		int[] sizes = new int[size];
+		int[] insertions = new int[size * 2 * roomForMore];
+		int runningPointIndex = 0;
+		for (int i = 0; i < insertions.length; i++) {
+			insertions[i] = -1;
+		}
+		for (int polyIndex = 0; polyIndex < size; polyIndex++) {
+			sizes[polyIndex] = polygons.get(polyIndex).vertices.size();
+			startIndex[polyIndex] = runningPointIndex;
+			for (int ii = 0; ii < sizes[polyIndex]; ii++) {
+				Vector3d pos = polygons.get(polyIndex).vertices.get(ii).pos.clone()
+						.roundToEpsilon(Vector3d.getEXPORTEPSILON());
+				pointData[startIndex[polyIndex] + 0 + ii] = (float) pos.x;
+				pointData[startIndex[polyIndex] + 1 + ii] = (float) pos.y;
+				pointData[startIndex[polyIndex] + 2 + ii] = (float) pos.z;
+			}
+			runningPointIndex += (sizes[polyIndex]) * 3;
+		}
+		System.out.println("Data loaded!");
+		Kernel kernel = new Kernel() {
+			@Override
+			public void run() {
+				int i = getGlobalId();
+				int size = sizes[i];
+				int myStartIndex = startIndex[i];
+
+				for (int mypolyIndex = myStartIndex; mypolyIndex < size; mypolyIndex++) {
+					float x = pointData[myStartIndex + 0 + mypolyIndex];
+					float y = pointData[myStartIndex + 1 + mypolyIndex];
+					float z = pointData[myStartIndex + 2 + mypolyIndex];
+					for (int polyIndex = 0; polyIndex < sizes.length; polyIndex++) {
+						for (int ii = 0; ii < sizes[polyIndex]; ii++) {
+							float xSub = pointData[startIndex[polyIndex] + 0 + ii];
+							float ySub = pointData[startIndex[polyIndex] + 1 + ii];
+							float zSub = pointData[startIndex[polyIndex] + 2 + ii];
+							insertions[i] = 1;
+						}
+					}
+				}
+			}
+		};
+
+		Device device = Device.best();
+		System.out.println("Dev " + device.getShortDescription());
+		Range range = device.createRange(size);
+		kernel.execute(range);
+		while (kernel.isExecuting()) {
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		System.out.println("Data processed!");
 	}
 
 	private CSG fixDegenerates(ArrayList<Polygon> toAdd, Polygon p) {
@@ -1663,8 +1748,8 @@ public class CSG implements IuserAPI {
 					toAdd.add(poly);
 				}
 			} catch (Throwable ex) {
-				//ex.printStackTrace();
-				progressMoniter.progressUpdate(1,1,"Pruning bad polygon CSG::updatePolygons "+p,null);
+				// ex.printStackTrace();
+				progressMoniter.progressUpdate(1, 1, "Pruning bad polygon CSG::updatePolygons " + p, null);
 //				try {PolygonUtil.concaveToConvex(p);} catch (Throwable ex2) {
 //					ex2.printStackTrace();
 //				}
@@ -3302,8 +3387,17 @@ public class CSG implements IuserAPI {
 	}
 
 	public static void setPreventNonManifoldTriangles(boolean preventNonManifoldTriangles) {
-		if(!preventNonManifoldTriangles)
-			System.err.println("WARNING:This will make STL's incompatible with low quality slicing engines like Slice3r and PrusaSlicer");
+		if (!preventNonManifoldTriangles)
+			System.err.println(
+					"WARNING:This will make STL's incompatible with low quality slicing engines like Slice3r and PrusaSlicer");
 		CSG.preventNonManifoldTriangles = preventNonManifoldTriangles;
+	}
+
+	public static boolean isUseGPU() {
+		return useGPU;
+	}
+
+	public static void setUseGPU(boolean useGPU) {
+		CSG.useGPU = useGPU;
 	}
 }

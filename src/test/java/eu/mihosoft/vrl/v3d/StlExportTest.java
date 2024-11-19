@@ -12,6 +12,8 @@ public class StlExportTest {
 
 	@Test
 	public void makeBadSTL() throws IOException {
+		CSG.setUseGPU(false);
+		CSG.setPreventNonManifoldTriangles(true);
 		CSG badExport2 = CSG.text(" A QUICK BROWN FOX JUMPS OVER THE LAZY DOG", 10,30,"Serif Regular").movey(30);
 		System.out.println("First text loaded");
 		CSG badExport = CSG.text("THis is some text a quick brown fox jumps over the lazy dog.", 10);
