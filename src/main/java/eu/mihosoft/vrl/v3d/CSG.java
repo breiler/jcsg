@@ -1592,7 +1592,6 @@ public class CSG implements IuserAPI {
 							if (e.contains(vi.pos, 1.0e-11)) {
 								// System.out.println("Inserting point "+vi);
 								vert.add(next, vi);
-								iii++;
 								totalAdded++;
 							}
 						}
