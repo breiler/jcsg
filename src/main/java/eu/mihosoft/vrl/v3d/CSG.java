@@ -1572,7 +1572,7 @@ public class CSG implements IuserAPI {
 				Vertex vi = vertices.get(k);
 				for (int l = 0; l < polygons.size(); l++) {
 					Polygon ii = polygons.get(l);
-					if (i != ii) {
+					if (j!=l) {
 						// every other polygon besides this one being tested
 						ArrayList<Vertex> vert = ii.vertices;
 						for (int iii = 0; iii < vert.size(); iii++) {
