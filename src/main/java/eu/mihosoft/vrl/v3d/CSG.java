@@ -1568,34 +1568,31 @@ public class CSG implements IuserAPI {
 						"STL Processing Polygons for Manifold Vertex, #" + totalAdded + " added so far", this);
 			}
 			ArrayList<Vertex> vertices = i.vertices;
-			
 			for (int k = 0; k < vertices.size(); k++) {
 				Vertex vi = vertices.get(k);
-				// each point in each polygon
-				// each point in the checking polygon
-				int now = k;
-				int next = k + 1;
-				if (next == vertices.size())
-					next = 0;
-				// take the 2 points of this section of polygon to make an edge
-				Edge e = new Edge(vertices.get(now), vertices.get(next));
-				for (Polygon ii : polygons) {
+				for (int l = 0; l < polygons.size(); l++) {
+					Polygon ii = polygons.get(l);
 					if (i != ii) {
 						// every other polygon besides this one being tested
 						ArrayList<Vertex> vert = ii.vertices;
 						for (int iii = 0; iii < vert.size(); iii++) {
-							Vertex viii = vertices.get(k);
-
+							// each point in the checking polygon
+							int now = iii;
+							int next = iii + 1;
+							if (next == vert.size())
+								next = 0;
+							// take the 2 points of this section of polygon to make an edge
+							Edge e = new Edge(vert.get(now), vert.get(next));
 							// if they are coincident, move along
-							if (e.isThisPointOneOfMine(viii))
+							if (e.isThisPointOneOfMine(vi))
 								continue;
 							// if the point is on the line then we have a non manifold point
 							// it needs to be inserted into the polygon between the 2 points defined in the
 							// edge
-							if (e.contains(viii.pos, Plane.getEPSILON())) {
+							if (e.contains(vi.pos, 1.0e-11)) {
 								// System.out.println("Inserting point "+vi);
-								vertices.add(next, viii);
-								next++;
+								vert.add(next, vi);
+								iii++;
 								totalAdded++;
 							}
 						}
