@@ -1557,48 +1557,73 @@ public class CSG implements IuserAPI {
 	}
 
 	private void runCPUMakeManifold() {
+		long start = System.currentTimeMillis();
 		System.err.println("Cleaning up the mesh by adding coincident points to the polygons they touch");
 		int totalAdded = 0;
+
+		ArrayList<Thread> threads =  new ArrayList<Thread>();
 		for (int j = 0; j < polygons.size(); j++) {
-			// Test every polygon
-			Polygon i = polygons.get(j);
-			if (j % 500 == 0 || j == polygons.size() - 1) {
-				// System.err.println("Checking "+j+" of "+polygons.size());
-				progressMoniter.progressUpdate(j, polygons.size(),
-						"STL Processing Polygons for Manifold Vertex, #" + totalAdded + " added so far", this);
-			}
-			ArrayList<Vertex> vertices = i.vertices;
-			for (int k = 0; k < vertices.size(); k++) {
-				Vertex vi = vertices.get(k);
-				for (int l = 0; l < polygons.size(); l++) {
-					Polygon ii = polygons.get(l);
-					if (j!=l) {
-						// every other polygon besides this one being tested
-						ArrayList<Vertex> vert = ii.vertices;
-						for (int iii = 0; iii < vert.size(); iii++) {
-							// each point in the checking polygon
-							int now = iii;
-							int next = iii + 1;
-							if (next == vert.size())
-								next = 0;
-							// take the 2 points of this section of polygon to make an edge
-							Edge e = new Edge(vert.get(now), vert.get(next));
-							// if they are coincident, move along
-							if (e.isThisPointOneOfMine(vi))
-								continue;
-							// if the point is on the line then we have a non manifold point
-							// it needs to be inserted into the polygon between the 2 points defined in the
-							// edge
-							if (e.contains(vi.pos, 1.0e-11)) {
-								// System.out.println("Inserting point "+vi);
-								vert.add(next, vi);
-								totalAdded++;
+			int threadIndex = j;
+			Thread t=new Thread(()->{
+				Edge e=null ;
+				// Test every polygon
+				Polygon i = polygons.get(threadIndex);
+//				if (threadIndex % 500 == 0 || j == polygons.size() - 1) {
+//					// System.err.println("Checking "+j+" of "+polygons.size());
+//					progressMoniter.progressUpdate(j, polygons.size(),
+//							"STL Processing Polygons for Manifold Vertex, #" + totalAdded + " added so far", this);
+//				}
+				ArrayList<Vertex> vertices = i.vertices;
+				for (int k = 0; k < vertices.size(); k++) {
+					// each point in the checking polygon
+					int now = k;
+					int next = k + 1;
+					if (next == vertices.size())
+						next = 0;
+					// take the 2 points of this section of polygon to make an edge
+					Vertex p1 = vertices.get(now);
+					Vertex p2 = vertices.get(next);
+					if(e==null)
+						e = new Edge(p1, p2);
+					else {
+						e.setP1(p1);
+						e.setP2(p2);
+					}
+					for (int l = 0; l < polygons.size(); l++) {
+						Polygon ii = polygons.get(l);
+						if (threadIndex!=l) {
+							// every other polygon besides this one being tested
+							ArrayList<Vertex> vert = ii.vertices;
+							for (int iii = 0; iii < vert.size(); iii++) {
+								Vertex vi = vert.get(iii);
+								// if they are coincident, move along
+								if (e.isThisPointOneOfMine(vi))
+									continue;
+								// if the point is on the line then we have a non manifold point
+								// it needs to be inserted into the polygon between the 2 points defined in the
+								// edge
+								if (e.contains(vi.pos, 1.0e-11)) {
+									// System.out.println("Inserting point "+vi);
+									vertices.add(next, vi);
+									e.setP2(vi);
+									//totalAdded++;
+								}
 							}
 						}
 					}
 				}
-			}
+			});
+			threads.add(t);
+			t.start();
 		}
+		for(Thread t:threads)
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		System.err.println("Manifold fix took "+(System.currentTimeMillis()-start));
 	}
 
 	private void runGPUMakeManifold() {
@@ -1744,7 +1769,7 @@ public class CSG implements IuserAPI {
 					toAdd.add(poly);
 				}
 			} catch (Throwable ex) {
-				// ex.printStackTrace();
+				ex.printStackTrace();
 				progressMoniter.progressUpdate(1, 1, "Pruning bad polygon CSG::updatePolygons " + p, null);
 //				try {PolygonUtil.concaveToConvex(p);} catch (Throwable ex2) {
 //					ex2.printStackTrace();
