@@ -646,8 +646,8 @@ public class Edge {
 		return true;
 	}
 
-	public boolean isThisPointOneOfMine(Vertex test) {
-		return p1.pos.test(test.pos, Plane.EPSILON_Point) || p2.pos.test(test.pos, Plane.EPSILON_Point);
+	public boolean isThisPointOneOfMine(Vertex test, double epsilon) {
+		return p1.pos.test(test.pos, epsilon) || p2.pos.test(test.pos, epsilon);
 	}
 
 	@Override

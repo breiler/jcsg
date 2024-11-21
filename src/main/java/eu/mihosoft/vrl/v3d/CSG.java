@@ -1507,6 +1507,7 @@ public class CSG implements IuserAPI {
 		IDebug3dProvider start = Debug3dProvider.provider;
 		Debug3dProvider.setProvider(null);
 		if (preventNonManifoldTriangles) {
+			for(int i=0;i<2;i++)
 			if (isUseGPU()) {
 				runGPUMakeManifold();
 			} else {
@@ -1560,6 +1561,7 @@ public class CSG implements IuserAPI {
 		long start = System.currentTimeMillis();
 		System.err.println("Cleaning up the mesh by adding coincident points to the polygons they touch");
 		int totalAdded = 0;
+		double tOL =1.0e-11;
 
 		ArrayList<Thread> threads =  new ArrayList<Thread>();
 		for (int j = 0; j < polygons.size(); j++) {
@@ -1597,12 +1599,12 @@ public class CSG implements IuserAPI {
 							for (int iii = 0; iii < vert.size(); iii++) {
 								Vertex vi = vert.get(iii);
 								// if they are coincident, move along
-								if (e.isThisPointOneOfMine(vi))
+								if (e.isThisPointOneOfMine(vi,tOL))
 									continue;
 								// if the point is on the line then we have a non manifold point
 								// it needs to be inserted into the polygon between the 2 points defined in the
 								// edge
-								if (e.contains(vi.pos, 1.0e-11)) {
+								if (e.contains(vi.pos, tOL)) {
 									// System.out.println("Inserting point "+vi);
 									vertices.add(next, vi);
 									e.setP2(vi);
@@ -1613,6 +1615,17 @@ public class CSG implements IuserAPI {
 					}
 				}
 			});
+			if(threads.size()>32) {
+				for(Thread tr:threads)
+					try {
+						tr.join();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				threads.clear();
+			}
+				
 			threads.add(t);
 			t.start();
 		}
@@ -1716,7 +1729,7 @@ public class CSG implements IuserAPI {
 					ArrayList<Vertex> newpoints = new ArrayList<Vertex>();
 					for (Vertex v : ptoA.vertices) {
 						newpoints.add(v);
-						if (e.isThisPointOneOfMine(v)) {
+						if (e.isThisPointOneOfMine(v,Plane.EPSILON_Point)) {
 							for (Vertex v2 : degen)
 								newpoints.add(v2);
 						}
@@ -1771,9 +1784,9 @@ public class CSG implements IuserAPI {
 			} catch (Throwable ex) {
 				ex.printStackTrace();
 				progressMoniter.progressUpdate(1, 1, "Pruning bad polygon CSG::updatePolygons " + p, null);
-				try {PolygonUtil.concaveToConvex(p);} catch (Throwable ex2) {
-					ex2.printStackTrace();
-				}
+//				try {PolygonUtil.concaveToConvex(p);} catch (Throwable ex2) {
+//					ex2.printStackTrace();
+//				}
 //				Debug3dProvider.setProvider(providerOf3d);
 //				//ex.printStackTrace();
 //				Debug3dProvider.clearScreen();
