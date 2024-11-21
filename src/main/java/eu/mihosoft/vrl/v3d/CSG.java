@@ -1771,9 +1771,9 @@ public class CSG implements IuserAPI {
 			} catch (Throwable ex) {
 				ex.printStackTrace();
 				progressMoniter.progressUpdate(1, 1, "Pruning bad polygon CSG::updatePolygons " + p, null);
-//				try {PolygonUtil.concaveToConvex(p);} catch (Throwable ex2) {
-//					ex2.printStackTrace();
-//				}
+				try {PolygonUtil.concaveToConvex(p);} catch (Throwable ex2) {
+					ex2.printStackTrace();
+				}
 //				Debug3dProvider.setProvider(providerOf3d);
 //				//ex.printStackTrace();
 //				Debug3dProvider.clearScreen();

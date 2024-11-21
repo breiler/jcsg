@@ -231,9 +231,8 @@ public class Optimizer {
                 double p = (a + b + c) / 2;
                 double sqarea = p * (p - a) * (p - b) * (p - c);
 
-                final float DEAD_FACE = 1.f/1024/1024/1024/1024; // taken from MeshNormal code
+                final double  DEAD_FACE = 1.0/1024/1024/1024/1024; // taken from MeshNormal code
 
-                if (sqarea < DEAD_FACE) {
                     smallArea++;
 //                    System.out.printf("a = %e, b = %e, c = %e, sqarea = %e\n"
 //                            + "p1 = %s\np2 = %s\np3 = %s\n", a, b, c, sqarea, p1.toString(), p2.toString(), p3.toString());
@@ -284,9 +283,9 @@ public class Optimizer {
             reindex.resize(os);
 
             for (int i = 0, oi = 0, ni = 0; i < points.size(); i += pointElementSize, oi++) {
-                float x = points.get(i);
-                float y = points.get(i + 1);
-                float z = points.get(i + 2);
+                double  x = points.get(i);
+                double  y = points.get(i + 1);
+                double  z = points.get(i + 2);
                 Point3D p = new Point3D(x, y, z);
                 Integer index = pp.get(p);
                 if (index == null) {
@@ -346,8 +345,8 @@ public class Optimizer {
             reindex.resize(os);
 
             for (int i = 0, oi = 0, ni = 0; i < texcoords.size(); i += texcoordElementSize, oi++) {
-                float x = texcoords.get(i);
-                float y = texcoords.get(i + 1);
+                double  x = texcoords.get(i);
+                double  y = texcoords.get(i + 1);
                 Point2D p = new Point2D(x, y);
                 Integer index = pp.get(p);
                 if (index == null) {

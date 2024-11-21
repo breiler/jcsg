@@ -55,7 +55,7 @@ public class BezierPath {
 			} else {
 				tokens.addFirst(curToken);
 			}
-			float x, y;
+			double  x, y;
 			switch (curCmd) {
 			case 'M':
 				x = nextFloat(tokens);
@@ -181,7 +181,7 @@ public class BezierPath {
 		return plInternal.add(eval);
 	}
 
-	static protected float nextFloat(LinkedList<String> l) {
+	static protected double  nextFloat(LinkedList<String> l) {
 		String s = l.removeFirst();
 		return Float.parseFloat(s);
 	}
@@ -190,12 +190,12 @@ public class BezierPath {
 	 * Evaluates this animation element for the passed interpolation time. Interp
 	 * must be on [0..1].
 	 */
-	public Vector3d eval(float interp) {
+	public Vector3d eval(double  interp) {
 		Vector3d point = new Vector3d(0, 0);// = new Vector3d();
 		if (interp < 0.001)
-			interp = (float) 0.001;
+			interp = (double ) 0.001;
 		if (interp > 0.9999)
-			interp = (float) 0.9999;
+			interp = (double ) 0.9999;
 
 		double curLength = path.curveLength * interp;
 		for (Iterator<Bezier> it = path.bezierSegs.iterator(); it.hasNext();) {

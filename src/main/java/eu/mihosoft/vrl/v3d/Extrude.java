@@ -461,7 +461,7 @@ public class Extrude {
 		Vector3d pointBStart = pathB.eval(0);
 		double x = pointAStart.x, y = pointAStart.y, z = pointBStart.y;
 		double lastx = x, lasty = y, lastz = z;
-		// float min = (float) 0.0001;
+		// double  min = (double ) 0.0001;
 		int startIndex = 0;
 		if (controlA != null) {
 			startIndex = 1;
@@ -490,7 +490,7 @@ public class Extrude {
 		double rotz;
 		double roty;
 		for (int i = startIndex; i < iterations - 1; i++) {
-			float pathFunction = (float) (((float) i) / ((float) (iterations - 1)));
+			double  pathFunction = (double ) (((double ) i) / ((double ) (iterations - 1)));
 
 			Vector3d pointA = pathA.eval(pathFunction);
 			Vector3d pointB = pathB.eval(pathFunction);
@@ -504,8 +504,8 @@ public class Extrude {
 			t.translateY(y);
 			t.translateZ(z);
 
-			Vector3d pointAEst = pathA.eval((float) (pathFunction + d));
-			Vector3d pointBEst = pathB.eval((float) (pathFunction + d));
+			Vector3d pointAEst = pathA.eval((double ) (pathFunction + d));
+			Vector3d pointBEst = pathB.eval((double ) (pathFunction + d));
 			double xest = pointAEst.x;
 			double yest = pointAEst.y;
 			double zest = pointBEst.y;
@@ -531,8 +531,8 @@ public class Extrude {
 			lastz = z;
 		}
 
-		Vector3d pointA = pathA.eval((float) 1);
-		Vector3d pointB = pathB.eval((float) 1);
+		Vector3d pointA = pathA.eval((double ) 1);
+		Vector3d pointB = pathB.eval((double ) 1);
 
 		x = pointA.x;
 		y = pointA.y;
@@ -726,7 +726,7 @@ public class Extrude {
 	}
 
 	public static ArrayList<CSG> moveBezier(CSG slice, BezierPath pathA, int numSlices) {
-		Vector3d pointA = pathA.eval((float) 1.0);
+		Vector3d pointA = pathA.eval((double ) 1.0);
 		String zpath = "C 0,0 " + pointA.x + "," + pointA.y + " " + pointA.x + "," + pointA.y;
 		BezierPath pathB = new BezierPath();
 		pathB.parsePathString(zpath);
