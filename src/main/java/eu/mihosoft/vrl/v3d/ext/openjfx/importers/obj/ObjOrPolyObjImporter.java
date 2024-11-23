@@ -39,7 +39,7 @@ import javafx.scene.Group;
 /**
  * object loader.
  */
-public class ObjOrPolyObjImporter extends Importer {
+public class ;l extends Importer {
 
     /** The res. */
     final Group res = new Group();

@@ -1560,7 +1560,6 @@ public class CSG implements IuserAPI {
 	private void runCPUMakeManifold() {
 		long start = System.currentTimeMillis();
 		System.err.println("Cleaning up the mesh by adding coincident points to the polygons they touch");
-		int totalAdded = 0;
 		double tOL =1.0e-11;
 
 		ArrayList<Thread> threads =  new ArrayList<Thread>();
@@ -1570,11 +1569,6 @@ public class CSG implements IuserAPI {
 				Edge e=null ;
 				// Test every polygon
 				Polygon i = polygons.get(threadIndex);
-//				if (threadIndex % 500 == 0 || j == polygons.size() - 1) {
-//					// System.err.println("Checking "+j+" of "+polygons.size());
-//					progressMoniter.progressUpdate(j, polygons.size(),
-//							"STL Processing Polygons for Manifold Vertex, #" + totalAdded + " added so far", this);
-//				}
 				ArrayList<Vertex> vertices = i.vertices;
 				for (int k = 0; k < vertices.size(); k++) {
 					// each point in the checking polygon
