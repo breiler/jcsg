@@ -1507,12 +1507,12 @@ public class CSG implements IuserAPI {
 		IDebug3dProvider start = Debug3dProvider.provider;
 		Debug3dProvider.setProvider(null);
 		if (preventNonManifoldTriangles) {
-			for(int i=0;i<2;i++)
-			if (isUseGPU()) {
-				runGPUMakeManifold();
-			} else {
-				runCPUMakeManifold();
-			}
+			for (int i = 0; i < 2; i++)
+				if (isUseGPU()) {
+					runGPUMakeManifold();
+				} else {
+					runCPUMakeManifold();
+				}
 		}
 		try {
 			Stream<Polygon> polygonStream;
@@ -1561,19 +1561,18 @@ public class CSG implements IuserAPI {
 		long start = System.currentTimeMillis();
 		System.err.println("Cleaning up the mesh by adding coincident points to the polygons they touch");
 		int totalAdded = 0;
-		double tOL =1.0e-11;
+		double tOL = 1.0e-11;
 
-		ArrayList<Thread> threads =  new ArrayList<Thread>();
+		ArrayList<Thread> threads = new ArrayList<Thread>();
 		for (int j = 0; j < polygons.size(); j++) {
 			int threadIndex = j;
-			Thread t=new Thread(()->{
-				Edge e=null ;
+			Thread t = new Thread(() -> {
+				Edge e = null;
 				// Test every polygon
 				Polygon i = polygons.get(threadIndex);
 //				if (threadIndex % 500 == 0 || j == polygons.size() - 1) {
 //					// System.err.println("Checking "+j+" of "+polygons.size());
-//					progressMoniter.progressUpdate(j, polygons.size(),
-//							"STL Processing Polygons for Manifold Vertex, #" + totalAdded + " added so far", this);
+
 //				}
 				ArrayList<Vertex> vertices = i.vertices;
 				for (int k = 0; k < vertices.size(); k++) {
@@ -1585,7 +1584,7 @@ public class CSG implements IuserAPI {
 					// take the 2 points of this section of polygon to make an edge
 					Vertex p1 = vertices.get(now);
 					Vertex p2 = vertices.get(next);
-					if(e==null)
+					if (e == null)
 						e = new Edge(p1, p2);
 					else {
 						e.setP1(p1);
@@ -1593,13 +1592,13 @@ public class CSG implements IuserAPI {
 					}
 					for (int l = 0; l < polygons.size(); l++) {
 						Polygon ii = polygons.get(l);
-						if (threadIndex!=l) {
+						if (threadIndex != l) {
 							// every other polygon besides this one being tested
 							ArrayList<Vertex> vert = ii.vertices;
 							for (int iii = 0; iii < vert.size(); iii++) {
 								Vertex vi = vert.get(iii);
 								// if they are coincident, move along
-								if (e.isThisPointOneOfMine(vi,tOL))
+								if (e.isThisPointOneOfMine(vi, tOL))
 									continue;
 								// if the point is on the line then we have a non manifold point
 								// it needs to be inserted into the polygon between the 2 points defined in the
@@ -1608,35 +1607,40 @@ public class CSG implements IuserAPI {
 									// System.out.println("Inserting point "+vi);
 									vertices.add(next, vi);
 									e.setP2(vi);
-									//totalAdded++;
+									// totalAdded++;
 								}
 							}
 						}
 					}
 				}
 			});
-			if(threads.size()>32) {
-				for(Thread tr:threads)
+			if (threads.size() > 32) {
+				for (Thread tr : threads)
 					try {
 						tr.join();
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+				totalAdded += 32;
 				threads.clear();
+				if (threadIndex/32 % 50 == 0 || j == polygons.size() - 1) {
+					progressMoniter.progressUpdate(j, polygons.size(),
+							"STL Processing Polygons for Manifold Vertex, #" + totalAdded + " added so far", this);
+				}
 			}
-				
+
 			threads.add(t);
 			t.start();
 		}
-		for(Thread t:threads)
+		for (Thread t : threads)
 			try {
 				t.join();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		System.err.println("Manifold fix took "+(System.currentTimeMillis()-start));
+		progressMoniter.progressUpdate(polygons.size(),polygons.size(),"Manifold fix took " + (System.currentTimeMillis() - start),this);
 	}
 
 	private void runGPUMakeManifold() {
@@ -1729,7 +1733,7 @@ public class CSG implements IuserAPI {
 					ArrayList<Vertex> newpoints = new ArrayList<Vertex>();
 					for (Vertex v : ptoA.vertices) {
 						newpoints.add(v);
-						if (e.isThisPointOneOfMine(v,Plane.EPSILON_Point)) {
+						if (e.isThisPointOneOfMine(v, Plane.EPSILON_Point)) {
 							for (Vertex v2 : degen)
 								newpoints.add(v2);
 						}
@@ -1782,7 +1786,7 @@ public class CSG implements IuserAPI {
 					toAdd.add(poly);
 				}
 			} catch (Throwable ex) {
-				ex.printStackTrace();
+				//ex.printStackTrace();
 				progressMoniter.progressUpdate(1, 1, "Pruning bad polygon CSG::updatePolygons " + p, null);
 //				try {PolygonUtil.concaveToConvex(p);} catch (Throwable ex2) {
 //					ex2.printStackTrace();
