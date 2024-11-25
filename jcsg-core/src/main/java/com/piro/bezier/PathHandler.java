@@ -46,7 +46,7 @@ public interface PathHandler {
      * @param y the relative y coordinate for the end point
      * @exception ParseException if an error occured while processing the path
      */
-    void movetoRel(float x, float y) throws ParseException;
+    void movetoRel(double  x, double  y) throws ParseException;
 
     /**
      * Invoked when an absolute moveto command has been parsed.
@@ -55,7 +55,7 @@ public interface PathHandler {
      * @param y the absolute y coordinate for the end point
      * @exception ParseException if an error occured while processing the path
      */
-    void movetoAbs(float x, float y) throws ParseException;
+    void movetoAbs(double  x, double  y) throws ParseException;
 
     /**
      * Invoked when a closepath has been parsed.
@@ -71,7 +71,7 @@ public interface PathHandler {
      * @param y the relative y coordinates for the end point
      * @exception ParseException if an error occured while processing the path
      */
-    void linetoRel(float x, float y) throws ParseException;
+    void linetoRel(double  x, double  y) throws ParseException;
 
     /**
      * Invoked when an absolute line command has been parsed.
@@ -80,7 +80,7 @@ public interface PathHandler {
      * @param y the absolute y coordinate for the end point
      * @exception ParseException if an error occured while processing the path
      */
-    void linetoAbs(float x, float y) throws ParseException;
+    void linetoAbs(double  x, double  y) throws ParseException;
 
     /**
      * Invoked when an horizontal relative line command has been parsed.
@@ -88,7 +88,7 @@ public interface PathHandler {
      * @param x the relative X coordinate of the end point
      * @exception ParseException if an error occured while processing the path
      */
-    void linetoHorizontalRel(float x) throws ParseException;
+    void linetoHorizontalRel(double  x) throws ParseException;
 
     /**
      * Invoked when an horizontal absolute line command has been parsed.
@@ -96,7 +96,7 @@ public interface PathHandler {
      * @param x the absolute X coordinate of the end point
      * @exception ParseException if an error occured while processing the path
      */
-    void linetoHorizontalAbs(float x) throws ParseException;
+    void linetoHorizontalAbs(double  x) throws ParseException;
 
     /**
      * Invoked when a vertical relative line command has been parsed.
@@ -104,7 +104,7 @@ public interface PathHandler {
      * @param y the relative Y coordinate of the end point
      * @exception ParseException if an error occured while processing the path
      */
-    void linetoVerticalRel(float y) throws ParseException;
+    void linetoVerticalRel(double  y) throws ParseException;
 
     /**
      * Invoked when a vertical absolute line command has been parsed.
@@ -112,7 +112,7 @@ public interface PathHandler {
      * @param y the absolute Y coordinate of the end point
      * @exception ParseException if an error occured while processing the path
      */
-    void linetoVerticalAbs(float y) throws ParseException;
+    void linetoVerticalAbs(double  y) throws ParseException;
 
     /**
      * Invoked when a relative cubic bezier curve command has been parsed.
@@ -125,9 +125,9 @@ public interface PathHandler {
      * @param y the relative y coordinate for the end point
      * @exception ParseException if an error occured while processing the path
      */
-    void curvetoCubicRel(float x1, float y1, 
-                         float x2, float y2, 
-                         float x, float y) throws ParseException;
+    void curvetoCubicRel(double  x1, double  y1, 
+                         double  x2, double  y2, 
+                         double  x, double  y) throws ParseException;
 
 
     /**
@@ -141,9 +141,9 @@ public interface PathHandler {
      * @param y the absolute y coordinate for the end point
      * @exception ParseException if an error occured while processing the path
      */
-    void curvetoCubicAbs(float x1, float y1, 
-                         float x2, float y2, 
-                         float x, float y) throws ParseException;
+    void curvetoCubicAbs(double  x1, double  y1, 
+                         double  x2, double  y2, 
+                         double  x, double  y) throws ParseException;
 
     /**
      * Invoked when a relative smooth cubic bezier curve command has
@@ -157,8 +157,8 @@ public interface PathHandler {
      * @param y the relative y coordinate for the end point
      * @exception ParseException if an error occured while processing the path
      */
-    void curvetoCubicSmoothRel(float x2, float y2, 
-                               float x, float y) throws ParseException;
+    void curvetoCubicSmoothRel(double  x2, double  y2, 
+                               double  x, double  y) throws ParseException;
 
     /**
      * Invoked when an absolute smooth cubic bezier curve command has
@@ -172,8 +172,8 @@ public interface PathHandler {
      * @param y the absolute y coordinate for the end point
      * @exception ParseException if an error occured while processing the path
      */
-    void curvetoCubicSmoothAbs(float x2, float y2, 
-                               float x, float y) throws ParseException;
+    void curvetoCubicSmoothAbs(double  x2, double  y2, 
+                               double  x, double  y) throws ParseException;
 
     /**
      * Invoked when a relative quadratic bezier curve command has been parsed.
@@ -184,8 +184,8 @@ public interface PathHandler {
      * @param y the relative x coordinate for the end point
      * @exception ParseException if an error occured while processing the path
      */
-    void curvetoQuadraticRel(float x1, float y1, 
-                             float x, float y) throws ParseException;
+    void curvetoQuadraticRel(double  x1, double  y1, 
+                             double  x, double  y) throws ParseException;
 
     /**
      * Invoked when an absolute quadratic bezier curve command has been parsed.
@@ -196,8 +196,8 @@ public interface PathHandler {
      * @param y the absolute x coordinate for the end point
      * @exception ParseException if an error occured while processing the path
      */
-    void curvetoQuadraticAbs(float x1, float y1, 
-                             float x, float y) throws ParseException;
+    void curvetoQuadraticAbs(double  x1, double  y1, 
+                             double  x, double  y) throws ParseException;
 
     /**
      * Invoked when a relative smooth quadratic bezier curve command
@@ -209,7 +209,7 @@ public interface PathHandler {
      * @param y the relative y coordinate for the end point 
      * @exception ParseException if an error occured while processing the path
      */
-    void curvetoQuadraticSmoothRel(float x, float y) throws ParseException;
+    void curvetoQuadraticSmoothRel(double  x, double  y) throws ParseException;
 
     /**
      * Invoked when an absolute smooth quadratic bezier curve command
@@ -221,7 +221,7 @@ public interface PathHandler {
      * @param y the absolute y coordinate for the end point 
      * @exception ParseException if an error occured while processing the path
      */
-    void curvetoQuadraticSmoothAbs(float x, float y) throws ParseException;
+    void curvetoQuadraticSmoothAbs(double  x, double  y) throws ParseException;
 
     /**
      * Invoked when a relative elliptical arc command has been parsed. 
@@ -236,10 +236,10 @@ public interface PathHandler {
      * @param y the relative y coordinate for the end point 
      * @exception ParseException if an error occured while processing the path
      */
-    void arcRel(float rx, float ry, 
-                float xAxisRotation, 
+    void arcRel(double  rx, double  ry, 
+                double  xAxisRotation, 
                 boolean largeArcFlag, boolean sweepFlag, 
-                float x, float y) throws ParseException;
+                double  x, double  y) throws ParseException;
 
 
     /**
@@ -255,8 +255,8 @@ public interface PathHandler {
      * @param y the absolute y coordinate for the end point 
      * @exception ParseException if an error occured while processing the path
      */
-    void arcAbs(float rx, float ry, 
-                float xAxisRotation, 
+    void arcAbs(double  rx, double  ry, 
+                double  xAxisRotation, 
                 boolean largeArcFlag, boolean sweepFlag, 
-                float x, float y) throws ParseException;
+                double  x, double  y) throws ParseException;
 }

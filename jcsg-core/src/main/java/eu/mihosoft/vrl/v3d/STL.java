@@ -85,13 +85,14 @@ public class STL {
 
 		List<Polygon> polygons = new ArrayList<>();
 		List<Vector3d> vertices = new ArrayList<>();
-		for (Point3f p : loader.parse(path.toFile())) {
-			vertices.add(new Vector3d(p.x, p.y, p.z));
+		for (Vector3d p : loader.parse(path.toFile())) {
+			vertices.add(p);
 			if (vertices.size() == 3) {
 				try {
 					polygons.add(Polygon.fromPointsAllowDegenerate(vertices));
 				} catch (RuntimeException ex) {
-					ex.printStackTrace();
+					//ex.printStackTrace();
+					System.err.println("Pruning polygon loading STL::file");
 				}
 				vertices = new ArrayList<>();
 			}

@@ -37,6 +37,8 @@ import static java.lang.Math.abs;
 import static java.lang.Math.acos;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+
+import java.math.BigDecimal;
 import java.util.Random;
 
 // TODO: Auto-generated Javadoc
@@ -48,7 +50,11 @@ import java.util.Random;
 public class Vector3d extends javax.vecmath.Vector3d{
     
 
-    /**
+    private static  String exportString = "%.16f";
+
+	private static  double EXPORTEPSILON =1.0e-10;
+
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1878117798187075166L;
@@ -312,11 +318,20 @@ public class Vector3d extends javax.vecmath.Vector3d{
      * @return the specified string builder
      */
     public StringBuilder toStlString(StringBuilder sb) {
-        return sb.append(this.x).append(" ").
-                append(this.y).append(" ").
-                append(this.z);
+        double ep = getEXPORTEPSILON();
+		return sb.append(roundedValue(x, ep)).append(" ").
+                append(roundedValue(y, ep)).append(" ").
+                append(roundedValue(z, ep));
     }
 
+    
+    public Vector3d roundToEpsilon(double ep) {
+    	x=roundToEpsilon(x, ep);
+    	y=roundToEpsilon(y, ep);
+    	z=roundToEpsilon(z,ep);
+    	return this;
+    }
+    
     /**
      * Returns this vector in OBJ string format.
      *
@@ -333,10 +348,24 @@ public class Vector3d extends javax.vecmath.Vector3d{
      * @return the specified string builder
      */
     public StringBuilder toObjString(StringBuilder sb) {
-        return sb.append(this.x).append(" ").
-                append(this.y).append(" ").
-                append(this.z);
+        double ep = getEXPORTEPSILON();
+		return sb.append(roundedValue(x, ep)).append(" ").
+                append(roundedValue(y, ep)).append(" ").
+                append(roundedValue(z, ep));
     }
+    /**
+     * Rounds a double value to the nearest multiple of epsilon.
+     * 
+     * @param value The value to round
+     * @return The rounded value
+     */
+    private double roundToEpsilon(double value,double epsilon) {
+        // Round to nearest multiple of epsilon
+        return ((double)Math.round(value / epsilon)) * epsilon;
+    }
+	private String roundedValue(double v,double ep) {
+		return String.format(getExportString(), roundToEpsilon(v,ep));
+	}
 
     /**
      * Applies the specified transformation to this vector.
@@ -445,26 +474,6 @@ public class Vector3d extends javax.vecmath.Vector3d{
         return hash;
     }
 
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (obj == null) {
-//            return false;
-//        }
-//        if (getClass() != obj.getClass()) {
-//            return false;
-//        }
-//        final Vector3d other = (Vector3d) obj;
-//        if (Double.doubleToLongBits(this.x) != Double.doubleToLongBits(other.x)) {
-//            return false;
-//        }
-//        if (Double.doubleToLongBits(this.y) != Double.doubleToLongBits(other.y)) {
-//            return false;
-//        }
-//        if (Double.doubleToLongBits(this.z) != Double.doubleToLongBits(other.z)) {
-//            return false;
-//        }
-//        return true;
-//    }
     /**
  * Creates a new vector with specified {@code x}.
  *
@@ -642,5 +651,22 @@ public class Vector3d extends javax.vecmath.Vector3d{
 //		// TODO Auto-generated method stub
 //		return z;
 //	}
+
+	public static String getExportString() {
+		return exportString;
+	}
+
+	public static void setExportString(String exportString) {
+		Vector3d.exportString = exportString;
+	}
+
+	public static double getEXPORTEPSILON() {
+		return EXPORTEPSILON;
+	}
+
+	public static void setEXPORTEPSILON(double eXPORTEPSILON) {
+		if(eXPORTEPSILON<1.0e-5)
+			EXPORTEPSILON = eXPORTEPSILON;
+	}
 
 }

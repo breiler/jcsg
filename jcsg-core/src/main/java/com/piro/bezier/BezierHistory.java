@@ -13,17 +13,17 @@ public class BezierHistory
     {
     }
     
-    public void setStartPoint(float x, float y)
+    public void setStartPoint(double  x, double  y)
     {
         startPoint.set(x, y);
     }
     
-    public void setLastPoint(float x, float y)
+    public void setLastPoint(double  x, double  y)
     {
         lastPoint.set(x, y);
     }
     
-    public void setLastKnot(float x, float y)
+    public void setLastKnot(double  x, double  y)
     {
         lastKnot.set(x, y);
     }

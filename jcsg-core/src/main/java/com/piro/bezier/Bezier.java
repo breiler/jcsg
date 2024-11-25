@@ -9,17 +9,17 @@ import eu.mihosoft.vrl.v3d.Vector3d;
  */
 public class Bezier
 {
-    float length;
-    float[] coord;
+    double  length;
+    double [] coord;
 
-    public Bezier(float sx, float sy, float[] coords, int numCoords)
+    public Bezier(double  sx, double  sy, double [] coords, int numCoords)
     {
         setCoords(sx, sy, coords, numCoords);
     }
     
-    public void setCoords(float sx, float sy, float[] coords, int numCoords)
+    public void setCoords(double  sx, double  sy, double [] coords, int numCoords)
     {
-        coord = new float[numCoords * 2 + 2];
+        coord = new double [numCoords * 2 + 2];
         coord[0] = sx;
         coord[1] = sy;
         for (int i = 0; i < numCoords; i++)
@@ -34,7 +34,7 @@ public class Bezier
     /**
      * Retuns aproximation of the length of the bezier
      */
-    public float getLength()
+    public double  getLength()
     {
         return length;
     }
@@ -48,10 +48,10 @@ public class Bezier
         }
     }
     
-    private float lineLength(float x1, float y1, float x2, float y2)
+    private double  lineLength(double  x1, double  y1, double  x2, double  y2)
     {
-        float dx = x2 - x1, dy = y2 - y1;
-        return (float) Math.sqrt(dx * dx + dy * dy);
+        double  dx = x2 - x1, dy = y2 - y1;
+        return (double ) Math.sqrt(dx * dx + dy * dy);
     }
     
     public Vector2 getFinalPoint(Vector2 point)

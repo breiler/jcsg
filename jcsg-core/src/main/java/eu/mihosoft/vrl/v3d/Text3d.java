@@ -33,8 +33,7 @@
  */
 package eu.mihosoft.vrl.v3d;
 
-import java.awt.*;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 /**

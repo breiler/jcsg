@@ -51,7 +51,7 @@ import eu.mihosoft.vrl.v3d.ext.org.poly2tri.PolygonUtil;
 public final class Polygon {
 
     /** Polygon vertices. */
-    public final List<Vertex> vertices;
+    public final ArrayList<Vertex> vertices;
     /**
      * Shared property (can be used for shared color etc.).
      */
@@ -110,15 +110,9 @@ public final class Polygon {
     public Polygon(List<Vertex> vertices, PropertyStorage shared, boolean allowDegenerate) {
         this.vertices = pruneDuplicatePoints(vertices);
         this.shared = shared;
-//        try {
-	        this.plane = Plane.createFromPoints(
+	    this.plane = Plane.createFromPoints(
 	                vertices);
-//        }catch(java.lang.NumberFormatException nf) {
-//        	com.neuronrobotics.sdk.common.Log.error("plane failed to load");
-//        	nf.printStackTrace();
-//	        this.plane = Plane.createFromPoints(
-//	                vertices);
-//        }
+
         validateAndInit(allowDegenerate);
     }
     /**
@@ -144,16 +138,13 @@ public final class Polygon {
      * @param vertices polygon vertices
      */
     public Polygon(List<Vertex> vertices) {
-        this.vertices = pruneDuplicatePoints(vertices);
-        this.plane = Plane.createFromPoints(
-                vertices);
-        validateAndInit(true);
+    	this(vertices,new PropertyStorage(),true);
     }
-    public static List<Vertex> pruneDuplicatePoints(List<Vertex> incoming) {
-    	return incoming;
-//		ArrayList<Vertex> newPoints = new ArrayList<Vertex>();
-//		for (int i = 0; i < incoming.size(); i++) {
-//			Vertex v = incoming.get(i);
+    public static ArrayList<Vertex> pruneDuplicatePoints(List<Vertex> incoming) {
+    	//return incoming;
+		ArrayList<Vertex> newPoints = new ArrayList<Vertex>();
+		for (int i = 0; i < incoming.size(); i++) {
+			Vertex v = incoming.get(i);
 //			boolean duplicate = false;
 //			for (Vertex vx : newPoints) {
 //				if (vx.pos.test(v.pos,	1.0e-4)) {
@@ -161,19 +152,21 @@ public final class Polygon {
 //				}
 //			}
 //			if (!duplicate) {
-//				newPoints.add(v);
-//			}
-//
-//		}
-//		try {
-//			return newPoints;
-//		} catch (java.lang.IndexOutOfBoundsException ex) {
-//			return null;
-//		}
+				//v.pos.roundToEpsilon();
+				newPoints.add(v);
+			//}
+
+		}
+		try {
+			return newPoints;
+		} catch (java.lang.IndexOutOfBoundsException ex) {
+			return null;
+		}
 	}
 	private void validateAndInit( boolean allowDegenerate) {
 		for (Vertex v : vertices) {
 			v.normal = plane.getNormal();
+			//v.pos.roundToEpsilon();
 		}
 		setDegenerate(true);
 		if (Vector3d.ZERO.equals(plane.getNormal())) {
@@ -277,20 +270,14 @@ public final class Polygon {
             // STL requires triangular polygons.
             // If our polygon has more vertices, create
             // multiple triangles:
-            String firstVertexStl = this.vertices.get(0).toStlString();
-            for (int i = 0; i < this.vertices.size() - 2; i++) {
-                sb.
-                        append("  facet normal ").append(
-                                this.plane.getNormal().toStlString()).append("\n").
-                        append("    outer loop\n").
-                        append("      ").append(firstVertexStl).append("\n").
-                        append("      ");
-                this.vertices.get(i + 1).toStlString(sb).append("\n").
-                        append("      ");
-                this.vertices.get(i + 2).toStlString(sb).append("\n").
-                        append("    endloop\n").
-                        append("  endfacet\n");
-            }
+			String firstVertexStl = this.vertices.get(0).toStlString();
+
+			sb.append("  facet normal ").append(this.plane.getNormal().toStlString()).append("\n")
+					.append("    outer loop\n").append("      ").append(firstVertexStl).append("\n").append("      ");
+			this.vertices.get( 1).toStlString(sb).append("\n").append("      ");
+			this.vertices.get(2).toStlString(sb).append("\n")
+			.append("    endloop\n").append("  endfacet\n");
+
         }else {
         	throw new RuntimeException("Polygon must be a triangle before STL can be made "+vertices.size());
         }
@@ -750,6 +737,14 @@ public final class Polygon {
 	}
 	public Color getColor() {
 		return this.color;
+	}
+	@Override
+	public String toString() {
+		String ret="# points="+vertices.size()+" normal="+plane.getNormal().toStlString()+" [ ";
+		for(Vertex v:vertices) {
+			ret+=" "+v.pos.toStlString()+" , ";
+		}
+		return ret+" ] ";
 	}
 
 }

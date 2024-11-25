@@ -58,7 +58,7 @@ public class ImageTracer{
 		for(int j=0; j<arr.length; j++ ){ if(arr[j].toLowerCase().equals(str)){ return j; } } return -1;
 	}
 
-	public static float parsenext(String [] arr, int i){
+	public static double  parsenext(String [] arr, int i){
 		if(i<(arr.length-1)){ try{ return Float.parseFloat(arr[i+1]); }catch(Exception e){} } return -1;
 	}
 
@@ -209,7 +209,7 @@ public class ImageTracer{
 	// 1. Color quantization repeated "cycles" times, based on K-means clustering
 	// https://en.wikipedia.org/wiki/Color_quantization    https://en.wikipedia.org/wiki/K-means_clustering
 	public static IndexedImage colorquantization (ImageData imgd, byte [][] palette, HashMap<String,Float> options){
-		int numberofcolors = (int)Math.floor(options.get("numberofcolors")); float minratio = options.get("mincolorratio"); int cycles = (int)Math.floor(options.get("colorquantcycles"));
+		int numberofcolors = (int)Math.floor(options.get("numberofcolors")); double  minratio = options.get("mincolorratio"); int cycles = (int)Math.floor(options.get("colorquantcycles"));
 		// Creating indexed color array arr which has a boundary filled with -1 in every direction
 		int [][] arr = new int[imgd.height+2][imgd.width+2];
 		for(int j=0; j<(imgd.height+2); j++){ arr[j][0] = -1; arr[j][imgd.width+1 ] = -1; }
@@ -237,7 +237,7 @@ public class ImageTracer{
 			// Average colors from the second iteration
 			if(cnt>0){
 				// averaging paletteacc for palette
-				float ratio;
+				double  ratio;
 				for(int k=0;k<palette.length;k++){
 					// averaging
 					if(paletteacc[k][3]>0){
@@ -410,7 +410,7 @@ public class ImageTracer{
 	// ░░  ░░  ░░  ░░  ░▓  ░▓  ░▓  ░▓  ▓░  ▓░  ▓░  ▓░  ▓▓  ▓▓  ▓▓  ▓▓
 	// 0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15
 	//
-	public static ArrayList<ArrayList<Integer[]>> pathscan (int [][] arr,float pathomit){
+	public static ArrayList<ArrayList<Integer[]>> pathscan (int [][] arr,double  pathomit){
 		ArrayList<ArrayList<Integer[]>> paths = new ArrayList<ArrayList<Integer[]>>();
 		ArrayList<Integer[]> thispath;
 		int px=0,py=0,w=arr[0].length,h=arr.length,dir=0;
@@ -602,7 +602,7 @@ public class ImageTracer{
 
 
 	// 3. Batch pathscan
-	public static ArrayList<ArrayList<ArrayList<Integer[]>>> batchpathscan (int [][][] layers, float pathomit){
+	public static ArrayList<ArrayList<ArrayList<Integer[]>>> batchpathscan (int [][][] layers, double  pathomit){
 		ArrayList<ArrayList<ArrayList<Integer[]>>> bpaths = new ArrayList<ArrayList<ArrayList<Integer[]>>>();
 		for (int[][] layer : layers) {
 			bpaths.add(pathscan(layer,pathomit));
@@ -688,7 +688,7 @@ public class ImageTracer{
 	//
 	// path type is discarded, no check for path.size < 3 , which should not happen
 
-	public static ArrayList<Double[]> tracepath (ArrayList<Double[]> path, float ltreshold, float qtreshold){
+	public static ArrayList<Double[]> tracepath (ArrayList<Double[]> path, double  ltreshold, double  qtreshold){
 		int pcnt=0, seqend=0; double segtype1, segtype2;
 		ArrayList<Double[]> smp = new ArrayList<Double[]>();
 		//Double [] thissegment;
@@ -720,7 +720,7 @@ public class ImageTracer{
 
 	// 5.2. - 5.6. recursively fitting a straight or quadratic line segment on this sequence of path nodes,
 	// called from tracepath()
-	public static ArrayList<Double[]> fitseq (ArrayList<Double[]> path, float ltreshold, float qtreshold, int seqstart, int seqend){
+	public static ArrayList<Double[]> fitseq (ArrayList<Double[]> path, double  ltreshold, double  qtreshold, int seqstart, int seqend){
 		ArrayList<Double[]> segment = new ArrayList<Double[]>();
 		Double [] thissegment;
 		int pathlength = path.size();
@@ -811,7 +811,7 @@ public class ImageTracer{
 	}// End of fitseq()
 
 	// 5. Batch tracing paths
-	public static ArrayList<ArrayList<Double[]>> batchtracepaths(ArrayList<ArrayList<Double[]>> internodepaths, float ltres,float qtres){
+	public static ArrayList<ArrayList<Double[]>> batchtracepaths(ArrayList<ArrayList<Double[]>> internodepaths, double  ltres,double  qtres){
 		ArrayList<ArrayList<Double[]>> btracedpaths = new ArrayList<ArrayList<Double[]>>();
 		for(int k=0;k<internodepaths.size();k++){
 			btracedpaths.add(tracepath(internodepaths.get(k),ltres,qtres) );
@@ -820,7 +820,7 @@ public class ImageTracer{
 	}
 
 	// 5. Batch tracing layers
-	public static ArrayList<ArrayList<ArrayList<Double[]>>> batchtracelayers(ArrayList<ArrayList<ArrayList<Double[]>>> binternodes, float ltres, float qtres){
+	public static ArrayList<ArrayList<ArrayList<Double[]>>> batchtracelayers(ArrayList<ArrayList<ArrayList<Double[]>>> binternodes, double  ltres, double  qtres){
 		ArrayList<ArrayList<ArrayList<Double[]>>> btbis = new ArrayList<ArrayList<ArrayList<Double[]>>>();
 		for(int k=0; k<binternodes.size(); k++){
 			btbis.add( batchtracepaths( binternodes.get(k),ltres,qtres) );
@@ -834,16 +834,16 @@ public class ImageTracer{
 	//
 	////////////////////////////////////////////////////////////
 
-	public static float roundtodec(float val, float places){
-		return (float)(Math.round(val*Math.pow(10,places))/Math.pow(10,places));
+	public static double  roundtodec(double  val, double  places){
+		return (double )(Math.round(val*Math.pow(10,places))/Math.pow(10,places));
 	}
 
 	// Getting SVG path element string from a traced path
 	public static void svgpathstring(StringBuilder sb, String desc, ArrayList<Double[]> segments, String colorstr, HashMap<String,Float> options){
-		float scale = options.get("scale");
-		float lcpr = options.get("lcpr");
-		float qcpr = options.get("qcpr");
-		float roundcoords = (float) Math.floor(options.get("roundcoords"));
+		double  scale = options.get("scale");
+		double  lcpr = options.get("lcpr");
+		double  qcpr = options.get("qcpr");
+		double  roundcoords = (double ) Math.floor(options.get("roundcoords"));
 		// Path
 		sb
 		.append("<path ")
@@ -883,18 +883,18 @@ public class ImageTracer{
 				if(segments.get(pcnt)[0]==1.0){
 					sb
 					.append("L ")
-					.append(roundtodec((float)(segments.get(pcnt)[3]*scale),roundcoords))
+					.append(roundtodec((double )(segments.get(pcnt)[3]*scale),roundcoords))
 					.append(" ")
-					.append(roundtodec((float)(segments.get(pcnt)[4]*scale),roundcoords))
+					.append(roundtodec((double )(segments.get(pcnt)[4]*scale),roundcoords))
 					.append(" ");
 				}else{
 					sb
 					.append("Q ")
-					.append(roundtodec((float)(segments.get(pcnt)[3]*scale),roundcoords))
+					.append(roundtodec((double )(segments.get(pcnt)[3]*scale),roundcoords))
 					.append(" ")
-					.append(roundtodec((float)(segments.get(pcnt)[4]*scale),roundcoords)).append(" ")
-					.append(roundtodec((float)(segments.get(pcnt)[5]*scale),roundcoords)).append(" ")
-					.append(roundtodec((float)(segments.get(pcnt)[6]*scale),roundcoords)).append(" ");
+					.append(roundtodec((double )(segments.get(pcnt)[4]*scale),roundcoords)).append(" ")
+					.append(roundtodec((double )(segments.get(pcnt)[5]*scale),roundcoords)).append(" ")
+					.append(roundtodec((double )(segments.get(pcnt)[6]*scale),roundcoords)).append(" ");
 				}
 			}
 		}// End of roundcoords check
@@ -1030,7 +1030,7 @@ public class ImageTracer{
 			{0.063327,0.093095,0.122589,0.144599,0.152781,0.144599,0.122589,0.093095,0.063327}, {0.049692,0.069304,0.089767,0.107988,0.120651,0.125194,0.120651,0.107988,0.089767,0.069304,0.049692} };
 
 	// Selective Gaussian blur for preprocessing
-	static ImageData blur(ImageData imgd, float rad, float del){
+	static ImageData blur(ImageData imgd, double  rad, double  del){
 		int i,j,k,d,idx;
 		double racc,gacc,bacc,aacc,wacc;
 		ImageData imgd2 = new ImageData(imgd.width,imgd.height,new byte[imgd.width*imgd.height*4]);

@@ -53,6 +53,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.aparapi.Kernel;
+import com.aparapi.Range;
+import com.aparapi.device.Device;
 import com.neuronrobotics.interaction.CadInteractionEvent;
 
 /**
@@ -60,8 +63,9 @@ import com.neuronrobotics.interaction.CadInteractionEvent;
  * <p>
  * This implementation is a Java port of
  * <p>
- * <a href="https://github.com/evanw/csg.js/">https://github.com/evanw/csg.js/</a>
- * with some additional features like polygon extrude, transformations etc. Thanks to
+ * <a href=
+ * "https://github.com/evanw/csg.js/">https://github.com/evanw/csg.js/</a> with
+ * some additional features like polygon extrude, transformations etc. Thanks to
  * the author for creating the CSG.js library.<br>
  * <p>
  * <b>Implementation Details</b>
@@ -74,11 +78,15 @@ import com.neuronrobotics.interaction.CadInteractionEvent;
  * {@code b} inside {@code a}, then combine polygons from {@code a} and
  * {@code b} into one solid:
  * <p>
- * <blockquote><pre>
- *     a.clipTo(b);
- *     b.clipTo(a);
- *     a.build(b.allPolygons());
- * </pre></blockquote>
+ * <blockquote>
+ *
+ * <pre>
+ * a.clipTo(b);
+ * b.clipTo(a);
+ * a.build(b.allPolygons());
+ * </pre>
+ *
+ * </blockquote>
  * <p>
  * The only tricky part is handling overlapping coplanar polygons in both trees.
  * The code above keeps both copies, but we need to keep them in one tree and
@@ -86,14 +94,18 @@ import com.neuronrobotics.interaction.CadInteractionEvent;
  * inverse of {@code b} against {@code a}. The code for union now looks like
  * this:
  * <p>
- * <blockquote><pre>
- *     a.clipTo(b);
- *     b.clipTo(a);
- *     b.invert();
- *     b.clipTo(a);
- *     b.invert();
- *     a.build(b.allPolygons());
- * </pre></blockquote>
+ * <blockquote>
+ *
+ * <pre>
+ * a.clipTo(b);
+ * b.clipTo(a);
+ * b.invert();
+ * b.clipTo(a);
+ * b.invert();
+ * a.build(b.allPolygons());
+ * </pre>
+ *
+ * </blockquote>
  * <p>
  * Subtraction and intersection naturally follow from set operations. If union
  * is {@code A | B}, differenceion is {@code A - B = ~(~A | B)} and intersection
@@ -133,7 +145,8 @@ public class CSG implements IuserAPI {
 	private ArrayList<String> groovyFileLines = new ArrayList<>();
 	private PrepForManufacturing manufactuing = null;
 	private HashMap<String, IParametric> mapOfparametrics = null;
-
+	private IRegenerate regenerate = null;
+	private boolean markForRegeneration = false;
 	private String name = "";
 	private ArrayList<Transform> slicePlanes = null;
 	private ArrayList<String> exportFormats = null;
@@ -141,6 +154,8 @@ public class CSG implements IuserAPI {
 	private boolean triangulated;
 	private static boolean needsDegeneratesPruned=false;
 	private static boolean useStackTraces = true;
+	private static boolean preventNonManifoldTriangles = false;
+	private static boolean useGPU = false;
 
 	private static ICSGProgress progressMoniter = new ICSGProgress() {
 		@Override
@@ -198,7 +213,7 @@ public class CSG implements IuserAPI {
 	 */
 	public CSG setColor(Color color) {
 		this.color = color;
-		for(Polygon p:polygons)
+		for (Polygon p : polygons)
 			p.setColor(color);
 		return this;
 	}
@@ -420,7 +435,7 @@ public class CSG implements IuserAPI {
 	/**
 	 * mirror about y axis.
 	 *
-	 *
+	 * 
 	 * @return the csg
 	 */
 	// Helper/wrapper functions for movement
@@ -515,9 +530,10 @@ public class CSG implements IuserAPI {
 	public CSG scalex(Number scaleValue) {
 		return this.transformed(new Transform().scaleX(scaleValue.doubleValue()));
 	}
+
 	// Scale function, scales the object
 	public CSG scaleToMeasurmentZ(Number measurment) {
-		Number scaleValue = measurment.doubleValue()/ getTotalZ();
+		Number scaleValue = measurment.doubleValue() / getTotalZ();
 
 		return this.transformed(new Transform().scaleZ(scaleValue.doubleValue()));
 	}
@@ -529,7 +545,7 @@ public class CSG implements IuserAPI {
 	 * @return the csg
 	 */
 	public CSG scaleToMeasurmentY(Number measurment) {
-		Number scaleValue = measurment.doubleValue()/ getTotalY();
+		Number scaleValue = measurment.doubleValue() / getTotalY();
 
 		return this.transformed(new Transform().scaleY(scaleValue.doubleValue()));
 	}
@@ -541,9 +557,10 @@ public class CSG implements IuserAPI {
 	 * @return the csg
 	 */
 	public CSG scaleToMeasurmentX(Number measurment) {
-		Number scaleValue = measurment.doubleValue()/ getTotalX();
+		Number scaleValue = measurment.doubleValue() / getTotalX();
 		return this.transformed(new Transform().scaleX(scaleValue.doubleValue()));
 	}
+
 	/**
 	 * Scale.
 	 *
@@ -610,7 +627,7 @@ public class CSG implements IuserAPI {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
@@ -650,7 +667,9 @@ public class CSG implements IuserAPI {
 	 * <p>
 	 * <b>Note:</b> Neither this csg nor the specified csg are weighted.
 	 * <p>
-	 * <blockquote><pre>
+	 * <blockquote>
+	 *
+	 * <pre>
 	 *    A.union(B)
 	 *
 	 *    +-------+            +-------+
@@ -661,7 +680,9 @@ public class CSG implements IuserAPI {
 	 *         |   B   |            |       |
 	 *         |       |            |       |
 	 *         +-------+            +-------+
-	 * </pre></blockquote>
+	 * </pre>
+	 *
+	 * </blockquote>
 	 *
 	 * @param csg other csg
 	 *
@@ -687,15 +708,15 @@ public class CSG implements IuserAPI {
 	 * The purpose of this method is to allow fast union operations for objects that
 	 * do not intersect.
 	 * <p>
-	 * <b>WARNING:</b> this method does not apply the csg algorithms. Therefore, please
-	 * ensure that this csg and the specified csg do not intersect.
-	 *
+	 * <b>WARNING:</b> this method does not apply the csg algorithms. Therefore,
+	 * please ensure that this csg and the specified csg do not intersect.
+	 * 
 	 * @param csg csg
-	 *
+	 * 
 	 * @return a csg consisting of the polygons of this csg and the specified csg
 	 */
 	public CSG dumbUnion(CSG csg) {
-		boolean tri = triangulated&&csg.triangulated;
+		boolean tri = triangulated && csg.triangulated;
 		CSG result = this.clone();
 		CSG other = csg.clone();
 
@@ -711,7 +732,9 @@ public class CSG implements IuserAPI {
 	 * <p>
 	 * <b>Note:</b> Neither this csg nor the specified csg are weighted.
 	 * <p>
-	 * <blockquote><pre>
+	 * <blockquote>
+	 *
+	 * <pre>
 	 *    A.union(B)
 	 *
 	 *    +-------+            +-------+
@@ -722,7 +745,9 @@ public class CSG implements IuserAPI {
 	 *         |   B   |            |       |
 	 *         |       |            |       |
 	 *         +-------+            +-------+
-	 * </pre></blockquote>
+	 * </pre>
+	 *
+	 * </blockquote>
 	 *
 	 * @param csgs other csgs
 	 *
@@ -771,7 +796,9 @@ public class CSG implements IuserAPI {
 	 * <p>
 	 * <b>Note:</b> Neither this csg nor the specified csg are weighted.
 	 * <p>
-	 * <blockquote><pre>
+	 * <blockquote>
+	 *
+	 * <pre>
 	 *    A.union(B)
 	 *
 	 *    +-------+            +-------+
@@ -782,7 +809,9 @@ public class CSG implements IuserAPI {
 	 *         |   B   |            |       |
 	 *         |       |            |       |
 	 *         +-------+            +-------+
-	 * </pre></blockquote>
+	 * </pre>
+	 *
+	 * </blockquote>
 	 *
 	 * @param csgs other csgs
 	 *
@@ -908,7 +937,7 @@ public class CSG implements IuserAPI {
 		bounds = null;
 		CSG back = CSG.fromPolygons(allPolygons).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			back.setName(name );
+			back.setName(name);
 		}
 		return back;
 	}
@@ -943,7 +972,7 @@ public class CSG implements IuserAPI {
 		}
 		CSG back = CSG.fromPolygons(allPolygons).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			back.setName(name );
+			back.setName(name);
 		}
 		return back;
 	}
@@ -965,7 +994,7 @@ public class CSG implements IuserAPI {
 		a.build(b.allPolygons());
 		CSG back = CSG.fromPolygons(a.allPolygons()).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			back.setName(name );
+			back.setName(name);
 		}
 		return back;
 	}
@@ -976,7 +1005,9 @@ public class CSG implements IuserAPI {
 	 * <p>
 	 * <b>Note:</b> Neither this csg nor the specified csgs are weighted.
 	 * <p>
-	 * <blockquote><pre>
+	 * <blockquote>
+	 *
+	 * <pre>
 	 * A.difference(B)
 	 *
 	 * +-------+            +-------+
@@ -987,7 +1018,9 @@ public class CSG implements IuserAPI {
 	 *      |   B   |
 	 *      |       |
 	 *      +-------+
-	 * </pre></blockquote>
+	 * </pre>
+	 *
+	 * </blockquote>
 	 *
 	 * @param csgs other csgs
 	 * @return difference of this csg and the specified csgs
@@ -1017,7 +1050,9 @@ public class CSG implements IuserAPI {
 	 * <p>
 	 * <b>Note:</b> Neither this csg nor the specified csgs are weighted.
 	 * <p>
-	 * <blockquote><pre>
+	 * <blockquote>
+	 *
+	 * <pre>
 	 * A.difference(B)
 	 *
 	 * +-------+            +-------+
@@ -1028,7 +1063,9 @@ public class CSG implements IuserAPI {
 	 *      |   B   |
 	 *      |       |
 	 *      +-------+
-	 * </pre></blockquote>
+	 * </pre>
+	 *
+	 * </blockquote>
 	 *
 	 * @param csgs other csgs
 	 * @return difference of this csg and the specified csgs
@@ -1044,7 +1081,9 @@ public class CSG implements IuserAPI {
 	 * <p>
 	 * <b>Note:</b> Neither this csg nor the specified csg are weighted.
 	 * <p>
-	 * <blockquote><pre>
+	 * <blockquote>
+	 *
+	 * <pre>
 	 * A.difference(B)
 	 *
 	 * +-------+            +-------+
@@ -1055,7 +1094,9 @@ public class CSG implements IuserAPI {
 	 *      |   B   |
 	 *      |       |
 	 *      +-------+
-	 * </pre></blockquote>
+	 * </pre>
+	 *
+	 * </blockquote>
 	 *
 	 * @param csg other csg
 	 * @return difference of this csg and the specified csg
@@ -1081,7 +1122,8 @@ public class CSG implements IuserAPI {
 		} catch (Exception ex) {
 			// ex.printStackTrace();
 			try {
-				// com.neuronrobotics.sdk.common.Log.error("CSG difference failed, performing workaround");
+				// com.neuronrobotics.sdk.common.Log.error("CSG difference failed, performing
+				// workaround");
 				// ex.printStackTrace();
 				CSG intersectingParts = csg.intersect(this);
 
@@ -1117,9 +1159,9 @@ public class CSG implements IuserAPI {
 		CSG a2 = this.intersect(csg.getBounds().toCSG());
 		CSG result = a2._differenceNoOpt(csg)._unionIntersectOpt(a1).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			result.setName( name);
+			result.setName(name);
 		}
-		result.color=color;
+		result.color = color;
 		return result;
 	}
 
@@ -1150,7 +1192,7 @@ public class CSG implements IuserAPI {
 		allPolygons.addAll(innerCSG._differenceNoOpt(csg).getPolygons());
 		CSG BACK = CSG.fromPolygons(allPolygons).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			BACK.setName( name);
+			BACK.setName(name);
 		}
 		return BACK;
 	}
@@ -1177,7 +1219,7 @@ public class CSG implements IuserAPI {
 
 		CSG csgA = CSG.fromPolygons(a.allPolygons()).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			csgA.setName( name);
+			csgA.setName(name);
 		}
 		return csgA;
 	}
@@ -1188,7 +1230,9 @@ public class CSG implements IuserAPI {
 	 * <p>
 	 * <b>Note:</b> Neither this csg nor the specified csg are weighted.
 	 * <p>
-	 * <blockquote><pre>
+	 * <blockquote>
+	 *
+	 * <pre>
 	 *     A.intersect(B)
 	 *
 	 *     +-------+
@@ -1200,7 +1244,9 @@ public class CSG implements IuserAPI {
 	 *          |       |
 	 *          +-------+
 	 * }
-	 * </pre></blockquote>
+	 * </pre>
+	 *
+	 * </blockquote>
 	 *
 	 * @param csg other csg
 	 * @return intersection of this csg and the specified csg
@@ -1217,10 +1263,9 @@ public class CSG implements IuserAPI {
 		b.clipTo(a);
 		a.build(b.allPolygons());
 		a.invert();
-		CSG back = CSG.fromPolygons(a.allPolygons()).optimization(getOptType()).historySync(csg)
-				.historySync(this);
+		CSG back = CSG.fromPolygons(a.allPolygons()).optimization(getOptType()).historySync(csg).historySync(this);
 		if (getName().length() != 0 && csg.getName().length() != 0) {
-			back.setName( name);
+			back.setName(name);
 		}
 		return back;
 	}
@@ -1231,7 +1276,9 @@ public class CSG implements IuserAPI {
 	 * <p>
 	 * <b>Note:</b> Neither this csg nor the specified csgs are weighted.
 	 * <p>
-	 * <blockquote><pre>
+	 * <blockquote>
+	 *
+	 * <pre>
 	 *     A.intersect(B)
 	 *
 	 *     +-------+
@@ -1243,7 +1290,9 @@ public class CSG implements IuserAPI {
 	 *          |       |
 	 *          +-------+
 	 * }
-	 * </pre></blockquote>
+	 * </pre>
+	 *
+	 * </blockquote>
 	 *
 	 * @param csgs other csgs
 	 * @return intersection of this csg and the specified csgs
@@ -1273,7 +1322,9 @@ public class CSG implements IuserAPI {
 	 * <p>
 	 * <b>Note:</b> Neither this csg nor the specified csgs are weighted.
 	 * <p>
-	 * <blockquote><pre>
+	 * <blockquote>
+	 *
+	 * <pre>
 	 *     A.intersect(B)
 	 *
 	 *     +-------+
@@ -1285,7 +1336,9 @@ public class CSG implements IuserAPI {
 	 *          |       |
 	 *          +-------+
 	 * }
-	 * </pre></blockquote>
+	 * </pre>
+	 *
+	 * </blockquote>
 	 *
 	 * @param csgs other csgs
 	 * @return intersection of this csg and the specified csgs
@@ -1317,8 +1370,13 @@ public class CSG implements IuserAPI {
 		triangulate(false);
 		try {
 			sb.append("solid v3d.csg\n");
-			for(Polygon p:getPolygons()) {
-				p.toStlString(sb);
+			for (Polygon p : getPolygons()) {
+				try {
+					Plane.computeNormal(p.vertices);
+					p.toStlString(sb);
+				} catch (Exception ex) {
+					System.out.println("Prune Polygon on export");
+				}
 			}
 			sb.append("endsolid v3d.csg\n");
 			return sb;
@@ -1327,26 +1385,37 @@ public class CSG implements IuserAPI {
 			throw new RuntimeException(t);
 		}
 	}
+
 	public CSG triangulate() {
 		return triangulate(false);
 	}
+
 	public CSG triangulate(boolean fix) {
-		if(fix && needsDegeneratesPruned)
-			triangulated=false;
-		if(triangulated)
+		if (fix && needsDegeneratesPruned)
+			triangulated = false;
+		if (triangulated)
 			return this;
 
-		////com.neuronrobotics.sdk.common.Log.error("CSG triangulating for " + name+"..");
+		//// com.neuronrobotics.sdk.common.Log.error("CSG triangulating for " +
+		//// name+"..");
 		ArrayList<Polygon> toAdd = new ArrayList<Polygon>();
 		ArrayList<Polygon> degenerates = new ArrayList<Polygon>();
 		if (providerOf3d == null && Debug3dProvider.provider != null)
 			providerOf3d = Debug3dProvider.provider;
 		IDebug3dProvider start = Debug3dProvider.provider;
 		Debug3dProvider.setProvider(null);
+		if (preventNonManifoldTriangles) {
+			for (int i = 0; i < 2; i++)
+				if (isUseGPU()) {
+					runGPUMakeManifold();
+				} else {
+					runCPUMakeManifold();
+				}
+		}
 		try {
 			Stream<Polygon> polygonStream;
- 			polygonStream =polygons.stream();
- 			// TODO this should work in paralell but throws immpossible NPE's instead.
+			polygonStream = polygons.stream();
+			// TODO this should work in paralell but throws immpossible NPE's instead.
 //			if (getPolygons().size() > 200) {
 //				polygonStream = polygons.parallelStream();
 //			}
@@ -1356,19 +1425,20 @@ public class CSG implements IuserAPI {
 //				updatePolygons(toAdd, degenerates, p);
 //			}
 
-
-			if(degenerates.size()>0) {
+			if (degenerates.size() > 0) {
 				//
-				//Debug3dProvider.setProvider(providerOf3d);
+				// Debug3dProvider.setProvider(providerOf3d);
 
-				if(fix) {
+				if (fix) {
 					Debug3dProvider.clearScreen();
 					Stream<Polygon> degenStreeam;
-					degenStreeam =polygons.stream(); // this operation is read-modify-write and can not be done in parallel
-					//com.neuronrobotics.sdk.common.Log.error("Found "+degenerates.size()+" degenerate triangles, Attempting to fix");
+					degenStreeam = polygons.stream(); // this operation is read-modify-write and can not be done in
+														// parallel
+					// com.neuronrobotics.sdk.common.Log.error("Found "+degenerates.size()+"
+					// degenerate triangles, Attempting to fix");
 					degenStreeam.forEach(p -> fixDegenerates(toAdd, p));
-				}else {
-					needsDegeneratesPruned=true;
+				} else {
+					needsDegeneratesPruned = true;
 					toAdd.addAll(degenerates);
 				}
 			}
@@ -1376,7 +1446,7 @@ public class CSG implements IuserAPI {
 				setPolygons(toAdd);
 			}
 			// now all polygons are definantly triangles
-			triangulated=true;
+			triangulated = true;
 		} catch (Throwable t) {
 			t.printStackTrace();
 
@@ -1385,55 +1455,205 @@ public class CSG implements IuserAPI {
 		return this;
 	}
 
+	private void runCPUMakeManifold() {
+		long start = System.currentTimeMillis();
+		System.err.println("Cleaning up the mesh by adding coincident points to the polygons they touch");
+
+		int totalAdded = 0;
+		double tOL = 1.0e-11;
+
+		ArrayList<Thread> threads = new ArrayList<Thread>();
+		for (int j = 0; j < polygons.size(); j++) {
+			int threadIndex = j;
+			Thread t = new Thread(() -> {
+				Edge e = null;
+				// Test every polygon
+				Polygon i = polygons.get(threadIndex);
+				ArrayList<Vertex> vertices = i.vertices;
+				for (int k = 0; k < vertices.size(); k++) {
+					// each point in the checking polygon
+					int now = k;
+					int next = k + 1;
+					if (next == vertices.size())
+						next = 0;
+					// take the 2 points of this section of polygon to make an edge
+					Vertex p1 = vertices.get(now);
+					Vertex p2 = vertices.get(next);
+					if (e == null)
+						e = new Edge(p1, p2);
+					else {
+						e.setP1(p1);
+						e.setP2(p2);
+					}
+					for (int l = 0; l < polygons.size(); l++) {
+						Polygon ii = polygons.get(l);
+						if (threadIndex != l) {
+							// every other polygon besides this one being tested
+							ArrayList<Vertex> vert = ii.vertices;
+							for (int iii = 0; iii < vert.size(); iii++) {
+								Vertex vi = vert.get(iii);
+								// if they are coincident, move along
+								if (e.isThisPointOneOfMine(vi, tOL))
+									continue;
+								// if the point is on the line then we have a non manifold point
+								// it needs to be inserted into the polygon between the 2 points defined in the
+								// edge
+								if (e.contains(vi.pos, tOL)) {
+									// System.out.println("Inserting point "+vi);
+									vertices.add(next, vi);
+									e.setP2(vi);
+									// totalAdded++;
+								}
+							}
+						}
+					}
+				}
+			});
+			if (threads.size() > 32) {
+				for (Thread tr : threads)
+					try {
+						tr.join();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				totalAdded += 32;
+				threads.clear();
+				if (threadIndex/32 % 50 == 0 || j == polygons.size() - 1) {
+					progressMoniter.progressUpdate(j, polygons.size(),
+							"STL Processing Polygons for Manifold Vertex, #" + totalAdded + " added so far", this);
+				}
+			}
+
+			threads.add(t);
+			t.start();
+		}
+		for (Thread t : threads)
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		progressMoniter.progressUpdate(polygons.size(),polygons.size(),"Manifold fix took " + (System.currentTimeMillis() - start),this);
+	}
+
+	private void runGPUMakeManifold() {
+		int numberOfPoints = 0;
+		int roomForMore = 10;
+		int size = polygons.size();
+		for (int i = 0; i < size; i++) {
+			numberOfPoints += (polygons.get(i).vertices.size());
+		}
+		float[] pointData = new float[numberOfPoints * 3];
+		int[] startIndex = new int[size];
+		int[] sizes = new int[size];
+		int[] insertions = new int[size * 2 * roomForMore];
+		int runningPointIndex = 0;
+		for (int i = 0; i < insertions.length; i++) {
+			insertions[i] = -1;
+		}
+		for (int polyIndex = 0; polyIndex < size; polyIndex++) {
+			sizes[polyIndex] = polygons.get(polyIndex).vertices.size();
+			startIndex[polyIndex] = runningPointIndex;
+			for (int ii = 0; ii < sizes[polyIndex]; ii++) {
+				Vector3d pos = polygons.get(polyIndex).vertices.get(ii).pos.clone()
+						.roundToEpsilon(Vector3d.getEXPORTEPSILON());
+				pointData[startIndex[polyIndex] + 0 + ii] = (float) pos.x;
+				pointData[startIndex[polyIndex] + 1 + ii] = (float) pos.y;
+				pointData[startIndex[polyIndex] + 2 + ii] = (float) pos.z;
+			}
+			runningPointIndex += (sizes[polyIndex]) * 3;
+		}
+		System.out.println("Data loaded!");
+		Kernel kernel = new Kernel() {
+			@Override
+			public void run() {
+				int i = getGlobalId();
+				int size = sizes[i];
+				int myStartIndex = startIndex[i];
+
+				for (int mypolyIndex = myStartIndex; mypolyIndex < size; mypolyIndex++) {
+					float x = pointData[myStartIndex + 0 + mypolyIndex];
+					float y = pointData[myStartIndex + 1 + mypolyIndex];
+					float z = pointData[myStartIndex + 2 + mypolyIndex];
+					for (int polyIndex = 0; polyIndex < sizes.length; polyIndex++) {
+						for (int ii = 0; ii < sizes[polyIndex]; ii++) {
+							float xSub = pointData[startIndex[polyIndex] + 0 + ii];
+							float ySub = pointData[startIndex[polyIndex] + 1 + ii];
+							float zSub = pointData[startIndex[polyIndex] + 2 + ii];
+							insertions[i] = 1;
+						}
+					}
+				}
+			}
+		};
+
+		Device device = Device.best();
+		System.out.println("Dev " + device.getShortDescription());
+		Range range = device.createRange(size);
+		kernel.execute(range);
+		while (kernel.isExecuting()) {
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		System.out.println("Data processed!");
+	}
+
 	private CSG fixDegenerates(ArrayList<Polygon> toAdd, Polygon p) {
 		Debug3dProvider.clearScreen();
 		Debug3dProvider.addObject(p);
-		ArrayList<Vertex> degen =p.getDegeneratePoints();
+		ArrayList<Vertex> degen = p.getDegeneratePoints();
 		Edge longEdge = p.getLongEdge();
 		ArrayList<Polygon> polygonsSharing = new ArrayList<Polygon>();
 		ArrayList<Polygon> polygonsSharingFixed = new ArrayList<Polygon>();
 
-		for(Polygon ptoA:toAdd) {
+		for (Polygon ptoA : toAdd) {
 			ArrayList<Edge> edges = ptoA.edges();
-			for(Edge e :edges) {
-				if(e.equals(longEdge)) {
-					////com.neuronrobotics.sdk.common.Log.error("Degenerate Mate Found!");
+			for (Edge e : edges) {
+				if (e.equals(longEdge)) {
+					//// com.neuronrobotics.sdk.common.Log.error("Degenerate Mate Found!");
 					polygonsSharing.add(ptoA);
 					Debug3dProvider.addObject(ptoA);
 					// TODO inject the points into the found edge
 					// upstream reparirs to mesh generation made this code effectivly unreachable
-					// in  case that turns out to be false, pick up here
+					// in case that turns out to be false, pick up here
 					// the points in degen need to be inserted into the matching polygons
 					// both list of points should be right hand, but since they are other polygons,
 					// that may not be the case, so sorting needs to take place
 					ArrayList<Vertex> newpoints = new ArrayList<Vertex>();
-					for(Vertex v:ptoA.vertices) {
+					for (Vertex v : ptoA.vertices) {
 						newpoints.add(v);
-						if(e.isThisPointOneOfMine(v)) {
-							for(Vertex v2:degen)
+						if (e.isThisPointOneOfMine(v, Plane.EPSILON_Point)) {
+							for (Vertex v2 : degen)
 								newpoints.add(v2);
 						}
 					}
 					Polygon e2 = new Polygon(newpoints, ptoA.getStorage());
 					try {
 						List<Polygon> t = PolygonUtil.concaveToConvex(e2);
-						for(Polygon poly :t) {
-							if(!poly.isDegenerate()) {
+						for (Polygon poly : t) {
+							if (!poly.isDegenerate()) {
 								polygonsSharingFixed.add(poly);
 							}
 
 						}
-					}catch(Exception ex) {
+					} catch (Exception ex) {
 						ex.printStackTrace();
 						// retriangulation failed, ok, whatever man, moving on...
 					}
 				}
 			}
 		}
-		if(polygonsSharing.size()==0) {
-			////com.neuronrobotics.sdk.common.Log.error("Error! Degenerate triangle does not share edge with any triangle");
+		if (polygonsSharing.size() == 0) {
+			//// com.neuronrobotics.sdk.common.Log.error("Error! Degenerate triangle does
+			//// not share edge with any triangle");
 		}
-		if(polygonsSharingFixed.size()>0) {
+		if (polygonsSharingFixed.size() > 0) {
 			toAdd.removeAll(polygonsSharing);
 			toAdd.addAll(polygonsSharingFixed);
 		}
@@ -1441,8 +1661,8 @@ public class CSG implements IuserAPI {
 	}
 
 	private CSG updatePolygons(ArrayList<Polygon> toAdd, ArrayList<Polygon> degenerates, Polygon p) {
-		//p=PolygonUtil.pruneDuplicatePoints(p);
-		if(p==null)
+		// p=PolygonUtil.pruneDuplicatePoints(p);
+		if (p == null)
 			return this;
 //		if(p.isDegenerate()) {
 //			degenerates.add(p);
@@ -1451,20 +1671,21 @@ public class CSG implements IuserAPI {
 
 		if (p.vertices.size() == 3) {
 			toAdd.add(p);
-		}else{
-			// //com.neuronrobotics.sdk.common.Log.error("Fixing error in STL " + name + " polygon# " + i + "
+		} else {
+			// //com.neuronrobotics.sdk.common.Log.error("Fixing error in STL " + name + "
+			// polygon# " + i + "
 			// number of vertices " + p.vertices.size());
 			try {
 				List<Polygon> triangles = PolygonUtil.concaveToConvex(p);
-				for(Polygon poly :triangles) {
-					if(poly.isDegenerate()) {
-						degenerates.add(poly);
-					}else
-						toAdd.add(poly);
+				for (Polygon poly : triangles) {
+					toAdd.add(poly);
 				}
 			} catch (Throwable ex) {
-				System.err.println("Pruning bad polygon CSG::updatePolygons");
-
+				//ex.printStackTrace();
+				progressMoniter.progressUpdate(1, 1, "Pruning bad polygon CSG::updatePolygons " + p, null);
+//				try {PolygonUtil.concaveToConvex(p);} catch (Throwable ex2) {
+//					ex2.printStackTrace();
+//				}
 //				Debug3dProvider.setProvider(providerOf3d);
 //				//ex.printStackTrace();
 //				Debug3dProvider.clearScreen();
@@ -1623,7 +1844,7 @@ public class CSG implements IuserAPI {
 		// csg.setStorage(storage);
 
 		if (getName().length() != 0) {
-			csg.setName(name );
+			csg.setName(name);
 		}
 
 		return csg.historySync(this);
@@ -1691,7 +1912,7 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Helper function wrapping bounding box values
-	 *
+	 * 
 	 * @return CenterX
 	 */
 	public double getCenterX() {
@@ -1700,7 +1921,7 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Helper function wrapping bounding box values
-	 *
+	 * 
 	 * @return CenterY
 	 */
 	public double getCenterY() {
@@ -1709,7 +1930,7 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Helper function wrapping bounding box values
-	 *
+	 * 
 	 * @return CenterZ
 	 */
 	public double getCenterZ() {
@@ -1718,7 +1939,7 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Helper function wrapping bounding box values
-	 *
+	 * 
 	 * @return MaxX
 	 */
 	public double getMaxX() {
@@ -1727,7 +1948,7 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Helper function wrapping bounding box values
-	 *
+	 * 
 	 * @return MaxY
 	 */
 	public double getMaxY() {
@@ -1736,7 +1957,7 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Helper function wrapping bounding box values
-	 *
+	 * 
 	 * @return MaxZ
 	 */
 	public double getMaxZ() {
@@ -1745,7 +1966,7 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Helper function wrapping bounding box values
-	 *
+	 * 
 	 * @return MinX
 	 */
 	public double getMinX() {
@@ -1754,7 +1975,7 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Helper function wrapping bounding box values
-	 *
+	 * 
 	 * @return MinY
 	 */
 	public double getMinY() {
@@ -1763,7 +1984,7 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Helper function wrapping bounding box values
-	 *
+	 * 
 	 * @return tMinZ
 	 */
 	public double getMinZ() {
@@ -1772,7 +1993,7 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Helper function wrapping bounding box values
-	 *
+	 * 
 	 * @return MinX
 	 */
 	public double getTotalX() {
@@ -1781,7 +2002,7 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Helper function wrapping bounding box values
-	 *
+	 * 
 	 * @return MinY
 	 */
 	public double getTotalY() {
@@ -1790,7 +2011,7 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Helper function wrapping bounding box values
-	 *
+	 * 
 	 * @return tMinZ
 	 */
 	public double getTotalZ() {
@@ -1832,7 +2053,7 @@ public class CSG implements IuserAPI {
 	 */
 	public CSG setPolygons(List<Polygon> polygons) {
 		bounds = null;
-		triangulated=false;
+		triangulated = false;
 		this.polygons = polygons;
 		return this;
 	}
@@ -1854,19 +2075,19 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Hail Zeon! In case you forget the name of minkowski and are a Gundam fan
-	 *
+	 * 
 	 * @param travelingShape
 	 * @return
 	 */
 	@Deprecated
 	public ArrayList<CSG> minovsky(CSG travelingShape) {
-		//com.neuronrobotics.sdk.common.Log.error("Hail Zeon!");
+		// com.neuronrobotics.sdk.common.Log.error("Hail Zeon!");
 		return minkowski(travelingShape);
 	}
 
 	/**
 	 * Shortened name In case you forget the name of minkowski
-	 *
+	 * 
 	 * @param travelingShape
 	 * @return
 	 */
@@ -1880,7 +2101,7 @@ public class CSG implements IuserAPI {
 	 * each point on a polygon, and the result is convex hulled together. This
 	 * collection is returned. To make a normal insets, difference this collection
 	 * To make an outset by the normals, union this collection with this object.
-	 *
+	 * 
 	 * @param travelingShape a shape to sweep around
 	 * @return
 	 */
@@ -1907,7 +2128,7 @@ public class CSG implements IuserAPI {
 	 * each point on a polygon, and the result is convex hulled together. This
 	 * collection is returned. To make a normal insets, difference this collection
 	 * To make an outset by the normals, union this collection with this object.
-	 *
+	 * 
 	 * @param travelingShape a shape to sweep around
 	 * @return
 	 */
@@ -1928,7 +2149,7 @@ public class CSG implements IuserAPI {
 	 * them to fit with a specific tolerance as described as the distance from he
 	 * normal of the surface, then this function will effectinatly compute that
 	 * value.
-	 *
+	 * 
 	 * @param itemToDifference the object that needs to fit
 	 * @param minkowskiObject  the object to represent the offset
 	 * @return
@@ -1951,7 +2172,7 @@ public class CSG implements IuserAPI {
 	 * them to fit with a specific tolerance as described as the distance from the
 	 * normal of the surface, then this function will effectinatly compute that
 	 * value.
-	 *
+	 * 
 	 * @param itemToDifference the object that needs to fit
 	 * @param tolerance        the tolerance distance
 	 * @return
@@ -2069,7 +2290,7 @@ public class CSG implements IuserAPI {
 		}
 		if (getName().length() == 0)
 			setName(dyingCSG.getName());
-		color=dyingCSG.getColor();
+		color = dyingCSG.getColor();
 		return this;
 	}
 
@@ -2179,6 +2400,7 @@ public class CSG implements IuserAPI {
 	}
 
 	public Set<String> getParameters() {
+
 		return getMapOfparametrics().keySet();
 	}
 
@@ -2193,7 +2415,7 @@ public class CSG implements IuserAPI {
 	 * A test to see if 2 CSG's are touching. The fast-return is a bounding box
 	 * check If bounding boxes overlap, then an intersection is performed and the
 	 * existance of an interscting object is returned
-	 *
+	 * 
 	 * @param incoming
 	 * @return
 	 */
@@ -2231,13 +2453,13 @@ public class CSG implements IuserAPI {
 
 	/**
 	 * Get Bounding box
-	 *
+	 * 
 	 * @return A CSG that completely encapsulates the base CSG, centered around it
 	 */
 	public CSG getBoundingBox() {
 		return new Cube((-this.getMinX() + this.getMaxX()), (-this.getMinY() + this.getMaxY()),
 				(-this.getMinZ() + this.getMaxZ())).toCSG().toXMax().movex(this.getMaxX()).toYMax()
-						.movey(this.getMaxY()).toZMax().movez(this.getMaxZ());
+				.movey(this.getMaxY()).toZMax().movez(this.getMaxZ());
 	}
 
 	public String getName() {
@@ -2245,7 +2467,7 @@ public class CSG implements IuserAPI {
 	}
 
 	public CSG setName(String name) {
-		if(name==null)
+		if (name == null)
 			throw new NullPointerException();
 		this.name = name;
 		return this;
@@ -2350,7 +2572,7 @@ public class CSG implements IuserAPI {
 	 * Example usage: // Create a temporary copy of the target object, without any
 	 * tabs CSG boardTemp = board
 	 * <p>
-	 * // Instantiate a bucket to hold fastener CSG objects in ArrayList&lt;CSG&gt;
+	 * // Instantiate a bucket to hold fastener CSG objects in ArrayList<CSG>
 	 * fasteners = []
 	 * <p>
 	 * // Define the direction of the edge to be tabbed using a Vector3d object, in
@@ -2362,7 +2584,7 @@ public class CSG implements IuserAPI {
 	 * LengthParameter("Screw Hole Diameter (mm)", 3, [0, 20])
 	 * <p>
 	 * // Add tabs to the temporary object using the edgeDirection and screwDiameter
-	 * parameters ArrayList&lt;CSG&gt; returned = boardTemp.addTabs(edgeDirection,
+	 * parameters ArrayList<CSG> returned = boardTemp.addTabs(edgeDirection,
 	 * screwDiameter);
 	 * <p>
 	 * // Combine the modified temporary object with the original object, to add the
@@ -2534,12 +2756,15 @@ public class CSG implements IuserAPI {
 			return 0;
 		return (int) getStorage().getValue("printBedIndex").get();
 	}
+
 	public static CSG text(String text, double height, double fontSize) {
 		return text( text,  height,  fontSize, "Arial");
 	}
+
 	public static CSG text(String text, double height) {
 		return text( text,  height,  30);
 	}
+
 	public static CSG text(String text, double height, double fontSize, String fontType) {
 		List<CSG> stuff = TextExtrude.text(height,text, new Font(fontType, Font.PLAIN, (int)fontSize));
 		CSG back =null;
@@ -2550,82 +2775,80 @@ public class CSG implements IuserAPI {
 				back=back.dumbUnion(stuff.get(i));
 			}
 		}
-		if(back== null) {
-			back = CSG.fromPolygons();
-		}
-
-		back=back.rotx(180)
-			    .toZMin();
+		back = back.rotx(180).toZMin();
 		return back;
 	}
 	/**
 	 * Extrude text to a specific bounding box size
 	 * @param text the text to be extruded
-	 * @param x the total final X
-	 * @param y the total final Y
-	 * @param z the total final Z
-	 * @return The given input text, scaled to the exact sizes provided, with Y=0 line as the bottom line of the text
+	 * @param x    the total final X
+	 * @param y    the total final Y
+	 * @param z    the total final Z
+	 * @return The given input text, scaled to the exact sizes provided, with Y=0
+	 *         line as the bottom line of the text
 	 */
 	public static CSG textToSize(String text, double x, double y, double z) {
-		CSG startText = CSG.text( text, z) ;
-		double scalex = x/startText.getTotalX();
-		double scaley = y/startText.getTotalY();
-		return startText
-				.scalex(scalex)
-				.scaley(scaley)
-				.toXMin();
+		CSG startText = CSG.text(text, z);
+		double scalex = x / startText.getTotalX();
+		double scaley = y / startText.getTotalY();
+		return startText.scalex(scalex).scaley(scaley).toXMin();
 	}
+
 	public boolean hasMassSet() {
 		return getStorage().getValue("massKg").isPresent();
 	}
+
 	public CSG setMassKG(double mass) {
 		getStorage().set("massKg", mass);
 		return this;
 	}
+
 	public double getMassKG(double mass) {
-		Optional o =getStorage().getValue("massKg");
-		if(o.isPresent())
+		Optional o = getStorage().getValue("massKg");
+		if (o.isPresent())
 			return (double) o.get();
 		return mass;
 	}
+
 	public CSG setCenterOfMass(Transform com) {
 		Bounds b = getBounds();
-		if(b.contains(com))
+		if (b.contains(com))
 			getStorage().set("massCentroid", com);
 		return this;
 	}
+
 	public CSG setCenterOfMass(double x, double y, double z) {
-		Transform com = new Transform()
-				.movex(x)
-				.movey(y)
-				.movez(z);
+		Transform com = new Transform().movex(x).movey(y).movez(z);
 		return setCenterOfMass(com);
 	}
+
 	public Transform getCenterOfMass() {
-		Optional o =getStorage().getValue("massCentroid");
-		if(o.isPresent())
+		Optional o = getStorage().getValue("massCentroid");
+		if (o.isPresent())
 			return (Transform) o.get();
 		return new Transform().move(getCenter());
 	}
 
 	public CSG addGroupMembership(String groupID) {
-		if( !getStorage().getValue("groupMembership").isPresent()) {
+		if (!getStorage().getValue("groupMembership").isPresent()) {
 			getStorage().set("groupMembership", new HashSet<String>());
 		}
-		((HashSet<String>)getStorage().getValue("groupMembership").get()).add(groupID);
+		((HashSet<String>) getStorage().getValue("groupMembership").get()).add(groupID);
 		return this;
 	}
+
 	public CSG removeGroupMembership(String groupID) {
-		if( !getStorage().getValue("groupMembership").isPresent()) {
+		if (!getStorage().getValue("groupMembership").isPresent()) {
 			getStorage().set("groupMembership", new HashSet<String>());
 		}
-		((HashSet<String>)getStorage().getValue("groupMembership").get()).remove(groupID);
+		((HashSet<String>) getStorage().getValue("groupMembership").get()).remove(groupID);
 		return this;
 	}
+
 	public boolean isInGroup() {
 		Optional<HashSet<String>> value = getStorage().getValue("groupMembership");
-		if( value.isPresent()) {
-			if(value.get().size()>0) {
+		if (value.isPresent()) {
+			if (value.get().size() > 0) {
 				return true;
 			}
 		}
@@ -2635,8 +2858,8 @@ public class CSG implements IuserAPI {
 	public boolean checkGroupMembership(String groupName) {
 		Optional<HashSet<String>> o = getStorage().getValue("groupMembership");
 		if (o.isPresent())
-			for(String s:o.get()) {
-				if(s.contentEquals(groupName))
+			for (String s : o.get()) {
+				if (s.contentEquals(groupName))
 					return true;
 			}
 		return false;
@@ -2647,23 +2870,25 @@ public class CSG implements IuserAPI {
 //		return this;
 //	}
 	public CSG addIsGroupResult(String res) {
-		if( !getStorage().getValue("GroupResult").isPresent()) {
+		if (!getStorage().getValue("GroupResult").isPresent()) {
 			getStorage().set("GroupResult", new HashSet<String>());
 		}
-		((HashSet<String>)getStorage().getValue("GroupResult").get()).add(res);
+		((HashSet<String>) getStorage().getValue("GroupResult").get()).add(res);
 		return this;
 	}
+
 	public CSG removeIsGroupResult(String res) {
-		if( !getStorage().getValue("GroupResult").isPresent()) {
+		if (!getStorage().getValue("GroupResult").isPresent()) {
 			getStorage().set("GroupResult", new HashSet<String>());
 		}
-		((HashSet<String>)getStorage().getValue("GroupResult").get()).remove(res);
+		((HashSet<String>) getStorage().getValue("GroupResult").get()).remove(res);
 		return this;
 	}
+
 	public boolean isGroupResult() {
 		Optional<HashSet<String>> o = getStorage().getValue("GroupResult");
 		if (o.isPresent())
-			return o.get().size()>0;
+			return o.get().size() > 0;
 		return false;
 	}
 
@@ -2679,6 +2904,7 @@ public class CSG implements IuserAPI {
 			return o.get();
 		return false;
 	}
+
 	// Hole
 	public CSG setIsHide(boolean Hide) {
 		getStorage().set("isHide", Hide);
@@ -2691,6 +2917,7 @@ public class CSG implements IuserAPI {
 			return o.get();
 		return false;
 	}
+
 	// Hole
 	public CSG setIsHole(boolean hole) {
 		getStorage().set("isHole", hole);
@@ -2710,15 +2937,16 @@ public class CSG implements IuserAPI {
 	}
 
 	/**
-	 * Tessellates a given CSG object into a 3D grid with specified steps and grid spacing, including offsets for odd rows, columns, and layers.
+	 * Tessellates a given CSG object into a 3D grid with specified steps and grid
+	 * spacing, including offsets for odd rows, columns, and layers.
 	 *
-	 * @param incoming The CSG object to be tessellated.
-	 * @param xSteps Number of steps (iterations) in the x-direction.
-	 * @param ySteps Number of steps (iterations) in the y-direction.
-	 * @param zSteps Number of steps (iterations) in the z-direction.
-	 * @param xGrid Distance between iterations in the x-direction.
-	 * @param yGrid Distance between iterations in the y-direction.
-	 * @param zGrid Distance between iterations in the z-direction.
+	 * @param incoming      The CSG object to be tessellated.
+	 * @param xSteps        Number of steps (iterations) in the x-direction.
+	 * @param ySteps        Number of steps (iterations) in the y-direction.
+	 * @param zSteps        Number of steps (iterations) in the z-direction.
+	 * @param xGrid         Distance between iterations in the x-direction.
+	 * @param yGrid         Distance between iterations in the y-direction.
+	 * @param zGrid         Distance between iterations in the z-direction.
 	 * @param oddRowXOffset X offset for odd rows.
 	 * @param oddRowYOffset Y offset for odd rows.
 	 * @param oddRowZOffset Z offset for odd rows.
@@ -2730,90 +2958,101 @@ public class CSG implements IuserAPI {
 	 * @param oddLayZOffset Z offset for odd layers.
 	 * @return A list of tessellated CSG objects.
 	 */
-	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double xGrid, double yGrid, double zGrid, double oddRowXOffset, double oddRowYOffset, double oddRowZOffset, double oddColXOffset, double oddColYOffset, double oddColZOffset, double oddLayXOffset, double oddLayYOffset, double oddLayZOffset) {
-	    ArrayList<CSG> back = new ArrayList<CSG>();
-	    for (int i = 0; i < xSteps; i++) {
-	        for (int j = 0; j < ySteps; j++) {
-	            for (int k = 0; k < zSteps; k++) {
+	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double xGrid, double yGrid,
+			double zGrid, double oddRowXOffset, double oddRowYOffset, double oddRowZOffset, double oddColXOffset,
+			double oddColYOffset, double oddColZOffset, double oddLayXOffset, double oddLayYOffset,
+			double oddLayZOffset) {
+		ArrayList<CSG> back = new ArrayList<CSG>();
+		for (int i = 0; i < xSteps; i++) {
+			for (int j = 0; j < ySteps; j++) {
+				for (int k = 0; k < zSteps; k++) {
 
-	                double xoff = 0;
-	                double yoff = 0;
-	                double zoff = 0;
+					double xoff = 0;
+					double yoff = 0;
+					double zoff = 0;
 
-	                if (i % 2 != 0) {
-	                    xoff += oddRowXOffset;
-	                    yoff += oddRowYOffset;
-	                    zoff += oddRowZOffset;
-	                }
+					if (i % 2 != 0) {
+						xoff += oddRowXOffset;
+						yoff += oddRowYOffset;
+						zoff += oddRowZOffset;
+					}
 
-	                if (j % 2 != 0) {
-	                    xoff += oddColXOffset;
-	                    yoff += oddColYOffset;
-	                    zoff += oddColZOffset;
-	                }
+					if (j % 2 != 0) {
+						xoff += oddColXOffset;
+						yoff += oddColYOffset;
+						zoff += oddColZOffset;
+					}
 
-	                if (k % 2 != 0) {
-	                    xoff += oddLayXOffset;
-	                    yoff += oddLayYOffset;
-	                    zoff += oddLayZOffset;
-	                }
+					if (k % 2 != 0) {
+						xoff += oddLayXOffset;
+						yoff += oddLayYOffset;
+						zoff += oddLayZOffset;
+					}
 
-	                back.add(incoming.move(xoff + (i * xGrid), yoff + (j * yGrid), zoff + (k * zGrid)));
-	            }
-	        }
-	    }
-	    return back;
+					back.add(incoming.move(xoff + (i * xGrid), yoff + (j * yGrid), zoff + (k * zGrid)));
+				}
+			}
+		}
+		return back;
 	}
 
 	/**
-	 * Tessellates a given CSG object into a 3D grid with specified steps, grid spacing, and a 3D array of offsets for odd rows, columns, and layers.
+	 * Tessellates a given CSG object into a 3D grid with specified steps, grid
+	 * spacing, and a 3D array of offsets for odd rows, columns, and layers.
 	 *
 	 * @param incoming The CSG object to be tessellated.
-	 * @param xSteps Number of steps (iterations) in the x-direction.
-	 * @param ySteps Number of steps (iterations) in the y-direction.
-	 * @param zSteps Number of steps (iterations) in the z-direction.
-	 * @param xGrid Distance between iterations in the x-direction.
-	 * @param yGrid Distance between iterations in the y-direction.
-	 * @param zGrid Distance between iterations in the z-direction.
-	 * @param offsets 3D array of offsets for odd rows, columns, and layers.
+	 * @param xSteps   Number of steps (iterations) in the x-direction.
+	 * @param ySteps   Number of steps (iterations) in the y-direction.
+	 * @param zSteps   Number of steps (iterations) in the z-direction.
+	 * @param xGrid    Distance between iterations in the x-direction.
+	 * @param yGrid    Distance between iterations in the y-direction.
+	 * @param zGrid    Distance between iterations in the z-direction.
+	 * @param offsets  3D array of offsets for odd rows, columns, and layers.
 	 * @return A list of tessellated CSG objects.
 	 */
-	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double xGrid, double yGrid, double zGrid, double[][] offsets) {
-	    double oddRowXOffset = offsets[0][0];
-	    double oddRowYOffset = offsets[0][1];
-	    double oddRowZOffset = offsets[0][2];
+	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double xGrid, double yGrid,
+			double zGrid, double[][] offsets) {
+		double oddRowXOffset = offsets[0][0];
+		double oddRowYOffset = offsets[0][1];
+		double oddRowZOffset = offsets[0][2];
 
-	    double oddColXOffset = offsets[1][0];
-	    double oddColYOffset = offsets[1][1];
-	    double oddColZOffset = offsets[1][2];
+		double oddColXOffset = offsets[1][0];
+		double oddColYOffset = offsets[1][1];
+		double oddColZOffset = offsets[1][2];
 
-	    double oddLayXOffset = offsets[2][0];
-	    double oddLayYOffset = offsets[2][1];
-	    double oddLayZOffset = offsets[2][2];
+		double oddLayXOffset = offsets[2][0];
+		double oddLayYOffset = offsets[2][1];
+		double oddLayZOffset = offsets[2][2];
 
-	    return tessellate(incoming, xSteps, ySteps, zSteps, xGrid, yGrid, zGrid, oddRowXOffset, oddRowYOffset, oddRowZOffset, oddColXOffset, oddColYOffset, oddColZOffset, oddLayXOffset, oddLayYOffset, oddLayZOffset);
+		return tessellate(incoming, xSteps, ySteps, zSteps, xGrid, yGrid, zGrid, oddRowXOffset, oddRowYOffset,
+				oddRowZOffset, oddColXOffset, oddColYOffset, oddColZOffset, oddLayXOffset, oddLayYOffset,
+				oddLayZOffset);
 	}
 
 	/**
-	 * Tessellates a given CSG object into a 3D grid with specified steps. The grid spacing is determined by the dimensions of the incoming CSG object.
+	 * Tessellates a given CSG object into a 3D grid with specified steps. The grid
+	 * spacing is determined by the dimensions of the incoming CSG object.
 	 *
 	 * @param incoming The CSG object to be tessellated.
-	 * @param xSteps Number of steps (iterations) in the x-direction.
-	 * @param ySteps Number of steps (iterations) in the y-direction.
-	 * @param zSteps Number of steps (iterations) in the z-direction.
+	 * @param xSteps   Number of steps (iterations) in the x-direction.
+	 * @param ySteps   Number of steps (iterations) in the y-direction.
+	 * @param zSteps   Number of steps (iterations) in the z-direction.
 	 * @return A list of tessellated CSG objects.
 	 */
 	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps) {
-	    return tessellate(incoming, xSteps, ySteps, zSteps, incoming.getTotalX(), incoming.getTotalY(), incoming.getTotalZ(), 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		return tessellate(incoming, xSteps, ySteps, zSteps, incoming.getTotalX(), incoming.getTotalY(),
+				incoming.getTotalZ(), 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 
 	/**
-	 * Tessellates a given CSG object into a 3D grid with specified steps and offsets for odd rows, columns, and layers. The grid spacing is determined by the dimensions of the incoming CSG object.
+	 * Tessellates a given CSG object into a 3D grid with specified steps and
+	 * offsets for odd rows, columns, and layers. The grid spacing is determined by
+	 * the dimensions of the incoming CSG object.
 	 *
-	 * @param incoming The CSG object to be tessellated.
-	 * @param xSteps Number of steps (iterations) in the x-direction.
-	 * @param ySteps Number of steps (iterations) in the y-direction.
-	 * @param zSteps Number of steps (iterations) in the z-direction.
+	 * @param incoming      The CSG object to be tessellated.
+	 * @param xSteps        Number of steps (iterations) in the x-direction.
+	 * @param ySteps        Number of steps (iterations) in the y-direction.
+	 * @param zSteps        Number of steps (iterations) in the z-direction.
 	 * @param oddRowXOffset X offset for odd rows.
 	 * @param oddRowYOffset Y offset for odd rows.
 	 * @param oddRowZOffset Z offset for odd rows.
@@ -2825,125 +3064,155 @@ public class CSG implements IuserAPI {
 	 * @param oddLayZOffset Z offset for odd layers.
 	 * @return A list of tessellated CSG objects.
 	 */
-	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double oddRowXOffset, double oddRowYOffset, double oddRowZOffset, double oddColXOffset, double oddColYOffset, double oddColZOffset, double oddLayXOffset, double oddLayYOffset, double oddLayZOffset) {
-	    double[][] offsets = {
-	        {oddRowXOffset, oddRowYOffset, oddRowZOffset},
-	        {oddColXOffset, oddColYOffset, oddColZOffset},
-	        {oddLayXOffset, oddLayYOffset, oddLayZOffset}
-	    };
-	    return tessellate(incoming, xSteps, ySteps, zSteps, incoming.getTotalX(), incoming.getTotalY(), incoming.getTotalZ(), offsets);
+	public static List<CSG> tessellate(CSG incoming, int xSteps, int ySteps, int zSteps, double oddRowXOffset,
+			double oddRowYOffset, double oddRowZOffset, double oddColXOffset, double oddColYOffset,
+			double oddColZOffset, double oddLayXOffset, double oddLayYOffset, double oddLayZOffset) {
+		double[][] offsets = { { oddRowXOffset, oddRowYOffset, oddRowZOffset },
+				{ oddColXOffset, oddColYOffset, oddColZOffset }, { oddLayXOffset, oddLayYOffset, oddLayZOffset } };
+		return tessellate(incoming, xSteps, ySteps, zSteps, incoming.getTotalX(), incoming.getTotalY(),
+				incoming.getTotalZ(), offsets);
 	}
 
 	/**
-	 * Tessellates a given CSG object into a 3D grid with specified steps and uniform grid spacing.
+	 * Tessellates a given CSG object into a 3D grid with specified steps and
+	 * uniform grid spacing.
 	 *
-	 * @param incoming The CSG object to be tessellated.
-	 * @param steps Number of steps (iterations) in each direction (x, y, z).
+	 * @param incoming    The CSG object to be tessellated.
+	 * @param steps       Number of steps (iterations) in each direction (x, y, z).
 	 * @param gridSpacing Distance between iterations in all directions (x, y, z).
 	 * @return A list of tessellated CSG objects.
 	 */
 	public static List<CSG> tessellate(CSG incoming, int steps, double gridSpacing) {
-	    return tessellate(incoming, steps, steps, steps, gridSpacing, gridSpacing, gridSpacing, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		return tessellate(incoming, steps, steps, steps, gridSpacing, gridSpacing, gridSpacing, 0, 0, 0, 0, 0, 0, 0, 0,
+				0);
 	}
 
 	/**
-	 * Tessellates a given CSG object into a 3D grid with specified steps. The grid spacing is determined by the dimensions of the incoming CSG object.
+	 * Tessellates a given CSG object into a 3D grid with specified steps. The grid
+	 * spacing is determined by the dimensions of the incoming CSG object.
 	 *
 	 * @param incoming The CSG object to be tessellated.
-	 * @param steps Number of steps (iterations) in each direction (x, y, z).
+	 * @param steps    Number of steps (iterations) in each direction (x, y, z).
 	 * @return A list of tessellated CSG objects.
 	 */
 	public static List<CSG> tessellate(CSG incoming, int steps) {
-	    return tessellate(incoming, steps, steps, steps, incoming.getTotalX(), incoming.getTotalY(), incoming.getTotalZ(), 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		return tessellate(incoming, steps, steps, steps, incoming.getTotalX(), incoming.getTotalY(),
+				incoming.getTotalZ(), 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 
 	/**
-	 * Tessellates a given CSG object into a 2D grid with specified steps and grid spacing, including offsets for odd rows and columns.
+	 * Tessellates a given CSG object into a 2D grid with specified steps and grid
+	 * spacing, including offsets for odd rows and columns.
 	 *
-	 * @param incoming The CSG object to be tessellated.
-	 * @param xSteps Number of steps (iterations) in the x-direction.
-	 * @param ySteps Number of steps (iterations) in the y-direction.
-	 * @param xGrid Distance between iterations in the x-direction.
-	 * @param yGrid Distance between iterations in the y-direction.
+	 * @param incoming      The CSG object to be tessellated.
+	 * @param xSteps        Number of steps (iterations) in the x-direction.
+	 * @param ySteps        Number of steps (iterations) in the y-direction.
+	 * @param xGrid         Distance between iterations in the x-direction.
+	 * @param yGrid         Distance between iterations in the y-direction.
 	 * @param oddRowXOffset X offset for odd rows.
 	 * @param oddRowYOffset Y offset for odd rows.
 	 * @param oddColXOffset X offset for odd columns.
 	 * @param oddColYOffset Y offset for odd columns.
 	 * @return A list of tessellated CSG objects.
 	 */
-	public static List<CSG> tessellateXY(CSG incoming, int xSteps, int ySteps, double xGrid, double yGrid, double oddRowXOffset, double oddRowYOffset, double oddColXOffset, double oddColYOffset) {
-	    return tessellate(incoming, xSteps, ySteps, 1, xGrid, yGrid, 0, oddRowXOffset, oddRowYOffset, 0, oddColXOffset, oddColYOffset, 0, 0, 0, 0);
+	public static List<CSG> tessellateXY(CSG incoming, int xSteps, int ySteps, double xGrid, double yGrid,
+			double oddRowXOffset, double oddRowYOffset, double oddColXOffset, double oddColYOffset) {
+		return tessellate(incoming, xSteps, ySteps, 1, xGrid, yGrid, 0, oddRowXOffset, oddRowYOffset, 0, oddColXOffset,
+				oddColYOffset, 0, 0, 0, 0);
 	}
 
 	/**
-	 * Tessellates a given CSG object into a 2D grid with specified steps, grid spacing, and a 2D array of offsets for odd rows and columns.
+	 * Tessellates a given CSG object into a 2D grid with specified steps, grid
+	 * spacing, and a 2D array of offsets for odd rows and columns.
 	 *
 	 * @param incoming The CSG object to be tessellated.
-	 * @param xSteps Number of steps (iterations) in the x-direction.
-	 * @param ySteps Number of steps (iterations) in the y-direction.
-	 * @param xGrid Distance between iterations in the x-direction.
-	 * @param yGrid Distance between iterations in the y-direction.
-	 * @param offsets 2D array of offsets for odd rows and columns.
+	 * @param xSteps   Number of steps (iterations) in the x-direction.
+	 * @param ySteps   Number of steps (iterations) in the y-direction.
+	 * @param xGrid    Distance between iterations in the x-direction.
+	 * @param yGrid    Distance between iterations in the y-direction.
+	 * @param offsets  2D array of offsets for odd rows and columns.
 	 * @return A list of tessellated CSG objects.
 	 */
-	public static List<CSG> tessellateXY(CSG incoming, int xSteps, int ySteps, double xGrid, double yGrid, double[][] offsets) {
-	    double oddRowXOffset = offsets[0][0];
-	    double oddRowYOffset = offsets[0][1];
-	    double oddColXOffset = offsets[1][0];
-	    double oddColYOffset = offsets[1][1];
+	public static List<CSG> tessellateXY(CSG incoming, int xSteps, int ySteps, double xGrid, double yGrid,
+			double[][] offsets) {
+		double oddRowXOffset = offsets[0][0];
+		double oddRowYOffset = offsets[0][1];
+		double oddColXOffset = offsets[1][0];
+		double oddColYOffset = offsets[1][1];
 
-	    return tessellate(incoming, xSteps, ySteps, 1, xGrid, yGrid, 0, oddRowXOffset, oddRowYOffset, 0, oddColXOffset, oddColYOffset, 0, 0, 0, 0);
+		return tessellate(incoming, xSteps, ySteps, 1, xGrid, yGrid, 0, oddRowXOffset, oddRowYOffset, 0, oddColXOffset,
+				oddColYOffset, 0, 0, 0, 0);
 	}
 
 	/**
-	 * Tessellates a given CSG object into a 2D grid with specified steps. The grid spacing is determined by the dimensions of the incoming CSG object.
+	 * Tessellates a given CSG object into a 2D grid with specified steps. The grid
+	 * spacing is determined by the dimensions of the incoming CSG object.
 	 *
 	 * @param incoming The CSG object to be tessellated.
-	 * @param xSteps Number of steps (iterations) in the x-direction.
-	 * @param ySteps Number of steps (iterations) in the y-direction.
+	 * @param xSteps   Number of steps (iterations) in the x-direction.
+	 * @param ySteps   Number of steps (iterations) in the y-direction.
 	 * @return A list of tessellated CSG objects.
 	 */
 	public static List<CSG> tessellateXY(CSG incoming, int xSteps, int ySteps) {
-	    return tessellateXY(incoming, xSteps, ySteps, incoming.getTotalX(), incoming.getTotalY(), 0, 0, 0, 0);
+		return tessellateXY(incoming, xSteps, ySteps, incoming.getTotalX(), incoming.getTotalY(), 0, 0, 0, 0);
 	}
 
 	/**
-	 * Tessellates a given CSG object into a 2D grid with specified steps and grid spacing.
+	 * Tessellates a given CSG object into a 2D grid with specified steps and grid
+	 * spacing.
 	 *
 	 * @param incoming The CSG object to be tessellated.
-	 * @param xSteps Number of steps (iterations) in the x-direction.
-	 * @param ySteps Number of steps (iterations) in the y-direction.
-	 * @param xGrid Distance between iterations in the x-direction.
-	 * @param yGrid Distance between iterations in the y-direction.
+	 * @param xSteps   Number of steps (iterations) in the x-direction.
+	 * @param ySteps   Number of steps (iterations) in the y-direction.
+	 * @param xGrid    Distance between iterations in the x-direction.
+	 * @param yGrid    Distance between iterations in the y-direction.
 	 * @return A list of tessellated CSG objects.
 	 */
 	public static List<CSG> tessellateXY(CSG incoming, int xSteps, int ySteps, double xGrid, double yGrid) {
-	    return tessellateXY(incoming, xSteps, ySteps, xGrid, yGrid, 0, 0, 0, 0);
+		return tessellateXY(incoming, xSteps, ySteps, xGrid, yGrid, 0, 0, 0, 0);
 	}
 
-
-
 	/**
-	 *
-	 * @param incoming Hexagon (with flats such that Y total is flat to flat distance)
-	 * @param xSteps number of steps in X
-	 * @param ySteps number of steps in Y
-	 * @param spacing the amount of space between each hexagon
+	 * 
+	 * @param incoming Hexagon (with flats such that Y total is flat to flat
+	 *                 distance)
+	 * @param xSteps   number of steps in X
+	 * @param ySteps   number of steps in Y
+	 * @param spacing  the amount of space between each hexagon
 	 * @return a list of spaced hexagons
 	 */
-	List<CSG> tessellateHex(CSG incoming,int xSteps, int ySteps, double spacing){
-		double y= incoming.getTotalY()+spacing;
-		double x =(((y/Math.sqrt(3))))*(3/2);
-		return tessellateXY(incoming,xSteps,ySteps,x,y,0,0,0,y/2);
+	List<CSG> tessellateHex(CSG incoming, int xSteps, int ySteps, double spacing) {
+		double y = incoming.getTotalY() + spacing;
+		double x = (((y / Math.sqrt(3)))) * (3 / 2);
+		return tessellateXY(incoming, xSteps, ySteps, x, y, 0, 0, 0, y / 2);
 	}
 	/**
-	 *
+	 * 
 	 * @param incoming Hexagon (with flats such that Y total is flat to flat distance)
-	 * @param xSteps number of steps in X
+	 * @param xSteps number of steps in X 
 	 * @param ySteps number of steps in Y
 	 * @return a list of spaced hexagons
 	 */
-	List<CSG> tessellateHex(CSG incoming,int xSteps, int ySteps){
+	List<CSG> tessellateHex(CSG incoming, int xSteps, int ySteps) {
 		return tessellateHex(incoming, xSteps, ySteps, 0);
+	}
+
+	public static boolean isPreventNonManifoldTriangles() {
+		return preventNonManifoldTriangles;
+	}
+
+	public static void setPreventNonManifoldTriangles(boolean preventNonManifoldTriangles) {
+		if (!preventNonManifoldTriangles)
+			System.err.println(
+					"WARNING:This will make STL's incompatible with low quality slicing engines like Slice3r and PrusaSlicer");
+		CSG.preventNonManifoldTriangles = preventNonManifoldTriangles;
+	}
+
+	public static boolean isUseGPU() {
+		return useGPU;
+	}
+
+	public static void setUseGPU(boolean useGPU) {
+		CSG.useGPU = useGPU;
 	}
 }
