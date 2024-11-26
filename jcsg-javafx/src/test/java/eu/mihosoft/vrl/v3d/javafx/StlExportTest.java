@@ -8,13 +8,9 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.STL;
-import jdk.nashorn.internal.ir.annotations.Ignore;
-import org.junit.jupiter.api.Test;
 
 public class StlExportTest {
 
-	@Test
-	@Ignore
 	public void makeBadSTL() throws IOException {
 		//Plane.setEPSILON(1.0e-11);
 		//Vector3d.setEXPORTEPSILON(10);
