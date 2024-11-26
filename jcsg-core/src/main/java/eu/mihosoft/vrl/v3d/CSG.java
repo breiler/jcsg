@@ -2561,7 +2561,7 @@ public class CSG implements IuserAPI {
 	 * Example usage: // Create a temporary copy of the target object, without any
 	 * tabs CSG boardTemp = board
 	 * <p>
-	 * // Instantiate a bucket to hold fastener CSG objects in ArrayList<CSG>
+	 * // Instantiate a bucket to hold fastener CSG objects in ArrayList&lt;CSG&gt;
 	 * fasteners = []
 	 * <p>
 	 * // Define the direction of the edge to be tabbed using a Vector3d object, in
@@ -2573,7 +2573,7 @@ public class CSG implements IuserAPI {
 	 * LengthParameter("Screw Hole Diameter (mm)", 3, [0, 20])
 	 * <p>
 	 * // Add tabs to the temporary object using the edgeDirection and screwDiameter
-	 * parameters ArrayList<CSG> returned = boardTemp.addTabs(edgeDirection,
+	 * parameters ArrayList&lt;CSG&gt; returned = boardTemp.addTabs(edgeDirection,
 	 * screwDiameter);
 	 * <p>
 	 * // Combine the modified temporary object with the original object, to add the
