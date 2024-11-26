@@ -139,14 +139,9 @@ public class CSG implements IuserAPI {
 	private Color color = getDefaultColor();
 
 	private Bounds bounds;
-	public static final int INDEX_OF_PARAMETRIC_DEFAULT = 0;
-	public static final int INDEX_OF_PARAMETRIC_LOWER = 1;
-	public static final int INDEX_OF_PARAMETRIC_UPPER = 2;
 	private ArrayList<String> groovyFileLines = new ArrayList<>();
 	private PrepForManufacturing manufactuing = null;
 	private HashMap<String, IParametric> mapOfparametrics = null;
-	private IRegenerate regenerate = null;
-	private boolean markForRegeneration = false;
 	private String name = "";
 	private ArrayList<Transform> slicePlanes = null;
 	private ArrayList<String> exportFormats = null;
@@ -1102,8 +1097,6 @@ public class CSG implements IuserAPI {
 	 * @return difference of this csg and the specified csg
 	 */
 	public CSG difference(CSG csg) {
-//		triangulate();
-//		csg.triangulate();
 		try {
 			// Check to see if a CSG operation is attempting to difference with
 			// no
@@ -1120,11 +1113,7 @@ public class CSG implements IuserAPI {
 			} else
 				return this;
 		} catch (Exception ex) {
-			// ex.printStackTrace();
 			try {
-				// com.neuronrobotics.sdk.common.Log.error("CSG difference failed, performing
-				// workaround");
-				// ex.printStackTrace();
 				CSG intersectingParts = csg.intersect(this);
 
 				if (intersectingParts.getPolygons().size() > 0) {

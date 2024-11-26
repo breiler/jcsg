@@ -79,7 +79,6 @@ public class TextExtrude {
             for (CSG h : holes) {
                 try {
                     if (sections.get(i).touching(h)) {
-                        // println "Hole found "
                         CSG nl = sections.get(i).difference(h);
 
                         sections.set(i, nl);
@@ -119,9 +118,7 @@ public class TextExtrude {
     }
 
     private void loadPoints() {
-        if (points.size() > 4) {
-            points.remove(points.size() - 1);
-            //points.remove(points.size() - 1);
+        if (points.size() >= 3) {
             boolean hole = !Extrude.isCCW(Polygon.fromPoints(points));
             CSG newLetter = Extrude.points(new Vector3d(0, 0, dir), points);
 

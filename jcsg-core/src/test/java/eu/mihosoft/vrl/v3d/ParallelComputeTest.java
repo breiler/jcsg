@@ -1,12 +1,9 @@
 package eu.mihosoft.vrl.v3d;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
 import com.aparapi.Kernel;
 import com.aparapi.Range;
 import com.aparapi.device.Device;
+import org.junit.jupiter.api.Test;
 
 public class ParallelComputeTest {
 

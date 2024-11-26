@@ -1,12 +1,14 @@
-package eu.mihosoft.vrl.v3d;
-
-import static org.junit.Assert.*;
+package eu.mihosoft.vrl.v3d.javafx;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-import org.junit.Test;
+import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Cube;
+import eu.mihosoft.vrl.v3d.FileUtil;
+import eu.mihosoft.vrl.v3d.STL;
+import org.junit.jupiter.api.Test;
 
 public class StlExportTest {
 

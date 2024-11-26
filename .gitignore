@@ -42,3 +42,7 @@ html
 dependency-reduced-pom.xml
 target/
 build/
+/jcsg-javafx/brokenSTL.STL.png
+/jcsg-core/exampleText.stl
+/jcsg-javafx/TextStl.stl
+/jcsg-javafx/TextStl2.stl

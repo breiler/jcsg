@@ -3,8 +3,13 @@ package eu.mihosoft.vrl.v3d;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class CSGTest {
@@ -164,6 +169,30 @@ public class CSGTest {
             } else {
                 fail("Unknown face with center" + center);
             }
+        });
+    }
+
+    @Test
+    public void difference_ShouldContainEnoughPolygonsForEachFace() throws IOException {
+        CSG cube1 = new Cube(10).toCSG()
+                .move(0, 0, 0)
+                .triangulate(false);
+
+        CSG cube2 = new Cube(10).toCSG()
+                .move(1, 0, 0)
+                .triangulate(false);
+
+        CSG difference = cube1.difference(cube2);
+
+        assertTrue(difference.getPolygons().size() >= 6, "Must contain at least 12 polygons (one for each face) but was " + difference.getPolygons().size() );
+        List<Vector3d> points = difference.getPolygons().stream().flatMap(polygon -> polygon.getPoints().stream()).collect(Collectors.toList());
+        points.forEach(point -> {
+            assertTrue(point.getX() <= -3.99, "Expected X to be smaller " + point);
+            assertTrue(point.getX() >= -5.01, "Expected X to be larger " + point);
+            assertTrue(point.getY() >= -5.01, "Expected Y to be larger " + point);
+            assertTrue(point.getY() <= 5.01, "Expected Y to be smaller " + point);
+            assertTrue(point.getZ() >= -5.01, "Expected Z to be larger " + point);
+            assertTrue(point.getZ() <= 5.01, "Expected Z to be smaller " + point);
         });
     }
 }
