@@ -111,14 +111,13 @@ public class TextExtrude {
      */
     @SuppressWarnings("restriction")
     public static List<CSG> text(double dir, String text, Font font) {
-
         TextExtrude te = new TextExtrude(text, font, dir);
-
         return te.sections;
     }
 
     private void loadPoints() {
-        if (points.size() >= 3) {
+        if (points.size() > 4) {
+            points.remove(points.size() - 1);
             boolean hole = !Extrude.isCCW(Polygon.fromPoints(points));
             CSG newLetter = Extrude.points(new Vector3d(0, 0, dir), points);
 
