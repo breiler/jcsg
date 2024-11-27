@@ -9,49 +9,42 @@ import java.util.List;
 
 import java.util.stream.IntStream;
 
-
-// TODO: Auto-generated Javadoc
+import static com.neuronrobotics.javacad.JavaCadBuildInfo.isMac;
 
 /**
  * The Class Text.
  */
-
 @SuppressWarnings("restriction")
 public class TextExtrude {
-    private static final String default_font = "FreeSerif";
-    private final static int POINTS_CURVE = 10;
-
-    private final String text;
+    private static final int CURVE_SEGMENTS = 3;
+    private final double dir;
+    private List<CSG> sections = new ArrayList<>();
+    private List<CSG> holes = new ArrayList<>();
     private List<Vector3d> points;
-    private Vector3d p0;
-    ArrayList<CSG> sections = new ArrayList<CSG>();
-    ArrayList<CSG> holes = new ArrayList<CSG>();
-    private double dir;
-
 
     private TextExtrude(String text, Font font, double dir) {
         if (dir <= 0)
             throw new NumberFormatException("length can not be negative");
         this.dir = dir;
         points = new ArrayList<>();
-        this.text = text;
 
         BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = img.createGraphics();
         GlyphVector glyphVector = font.createGlyphVector(g2.getFontRenderContext(), text);
-        Shape shape = glyphVector.getOutline(0, 0);
+        Shape shape = glyphVector.getOutline();
 
 
         double[] coords = new double[8];
-
         PathIterator pathIterator = shape.getPathIterator(null);
+        Vector3d startPoint;
         while (!pathIterator.isDone()) {
 
             int i = pathIterator.currentSegment(coords);
+
             switch (i) {
                 case PathIterator.SEG_MOVETO:
-                    p0 = new Vector3d(coords[0], coords[1], 0);
-                    points.add(p0);
+                    startPoint = new Vector3d(round(coords[0]), round(coords[1]), 0);
+                    points.add(startPoint);
                     break;
 
                 case PathIterator.SEG_LINETO:
@@ -63,7 +56,7 @@ public class TextExtrude {
                     break;
 
                 case PathIterator.SEG_CUBICTO:
-                    expandCubicBezier(coords);
+                    expandCubicBezier(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
                     break;
 
                 case PathIterator.SEG_CLOSE:
@@ -90,14 +83,8 @@ public class TextExtrude {
         }
     }
 
-    private void expandCubicBezier(double[] coords) {
-        Vector3d ini1 = (points.size() > 0 ? points.get(points.size() - 1) : p0);
-        IntStream.rangeClosed(1, POINTS_CURVE).forEach(index -> points.add(evalCubicBezier(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5], ini1, ((double) index) / POINTS_CURVE)));
-    }
-
-    private void expandQuadBezier(double x1, double y1, double x2, double y2) {
-        final Vector3d start = (points.size() > 0 ? points.get(points.size() - 1) : p0);
-        IntStream.rangeClosed(1, POINTS_CURVE).forEach(index -> points.add(evalQuadBezier(start, x1, y1, x2, y2, ((double) index) / POINTS_CURVE)));
+    private static double round(double value) {
+        return Math.round(value * 100000.0) / 100000.0;
     }
 
     /**
@@ -115,16 +102,29 @@ public class TextExtrude {
         return te.sections;
     }
 
+    private void expandCubicBezier(double x1, double x2, double x3, double y1, double y2, double y3) {
+        Vector3d ini1 = points.get(points.size() - 1);
+        IntStream.rangeClosed(1, CURVE_SEGMENTS).forEach(index -> points.add(evalCubicBezier(x1, x2, x3, y1, y2, y3, ini1, ((double) index) / CURVE_SEGMENTS)));
+    }
+
+    private void expandQuadBezier(double x1, double y1, double x2, double y2) {
+        final Vector3d start = points.get(points.size() - 1);
+        IntStream.rangeClosed(1, CURVE_SEGMENTS).forEach(index -> points.add(evalQuadBezier(start, x1, y1, x2, y2, ((double) index) / CURVE_SEGMENTS)));
+    }
+
     private void loadPoints() {
-        if (points.size() > 4) {
-            points.remove(points.size() - 1);
-            boolean hole = !Extrude.isCCW(Polygon.fromPoints(points));
+        if (points.size() > 3) {
+            if (!isMac()) {
+                points.remove(points.size() - 1);
+            }
+            boolean isHole = !Extrude.isCCW(Polygon.fromPoints(points));
             CSG newLetter = Extrude.points(new Vector3d(0, 0, dir), points);
 
-            if (!hole)
+            if (!isHole) {
                 sections.add(newLetter);
-            else
+            } else {
                 holes.add(newLetter);
+            }
         }
         points = new ArrayList<>();
     }

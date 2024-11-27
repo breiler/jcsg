@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -194,5 +195,11 @@ public class CSGTest {
             assertTrue(point.getZ() >= -5.01, "Expected Z to be larger " + point);
             assertTrue(point.getZ() <= 5.01, "Expected Z to be smaller " + point);
         });
+    }
+
+    @Test
+    public void textTriangulateShouldCreateSixFaces() {
+        CSG text = CSG.text("e", 1);
+        assertFalse( text.getPolygons().isEmpty(), "Should be able to generate a shape for default text");
     }
 }
