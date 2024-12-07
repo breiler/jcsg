@@ -2573,6 +2573,9 @@ public class CSG implements IuserAPI {
 		regenerate = function;
 		return this;
 	}
+	public IRegenerate getRegenerate() {
+		return regenerate ;
+	}
 
 	public CSG regenerate() {
 		this.markForRegeneration = false;
