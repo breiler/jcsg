@@ -3154,6 +3154,7 @@ public class CSG implements IuserAPI {
 
 	public CSG syncProperties(CSG dying) {
 		getStorage().syncProperties(dying.getStorage());
+		regenerate=dying.regenerate;
 		return this;
 	}
 
