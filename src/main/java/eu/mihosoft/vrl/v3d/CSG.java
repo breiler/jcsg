@@ -1257,7 +1257,7 @@ public class CSG implements IuserAPI {
 	 * @return the csg
 	 */
 	private CSG _differenceCSGBoundsOpt(CSG csg) {
-		CSG a1 = this._differenceNoOpt(csg.getBounds().toCSG());
+		CSG a1 = this._differenceNoOpt(csg.getBounds().toCSG().setColor(csg.getColor()));
 		CSG a2 = this.intersect(csg.getBounds().toCSG());
 		CSG result = a2._differenceNoOpt(csg)._unionIntersectOpt(a1).optimization(getOptType());
 		if (getName().length() != 0 && csg.getName().length() != 0) {
